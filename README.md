@@ -3,9 +3,9 @@
 ## Overview
 Potion Blender is a small mod to merge potion effect into 1 items, allowing for interesting combinations.
 
-<details>
+<details open>
 <summary>Gif overview</summary>
-
+<img src="https://github.com/motivational-dragon/Potion-Blender/blob/b889de864c5940b860df42366c82e25ca3d16908/img/potion_craft.gif" />
 </details>
 
 ## How to use
