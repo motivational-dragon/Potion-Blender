@@ -3,6 +3,11 @@
 ## Overview
 Potion Blender is a small mod to merge potion effect into 1 items, allowing for interesting combinations.
 
+<details>
+<summary>Gif overview</summary>
+
+</details>
+
 ## How to use
 
 ### 1 - Cauldron
