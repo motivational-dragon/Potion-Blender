@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "potionblender",
+  "version": "${version}",
+
+  "name": "Potion Blender",
+  "description": "Small mod to combine potion effects",
+  "authors": [
+    "Motivational_dragon"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": "https://github.com/happy44300/Potion-Blender"
+  },
+
+  "license": "GPLv3",
+  "icon": "assets/potionblender/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "mod.motivationaldragon.potionblender.PotionBlender"
+    ],
+    "client": ["mod.motivationaldragon.potionblender.ClientPotionMixer"],
+    "server": ["mod.motivationaldragon.potionblender.ServerPotionMixer"]
+  },
+  "mixins": [
+    "potionmixer.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.9",
+    "fabric-api": "*",
+    "minecraft": "~1.19",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
