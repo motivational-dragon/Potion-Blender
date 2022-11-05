@@ -39,9 +39,5 @@ The configuration file is located in your .minecraft folder at potion_blender/po
 The configurable options are:
 - max_effects: The maximum number of potions in a cauldron. Be careful when updating this value in an already existing world as it may cause desync on already placed cauldron.
 
-## Support
-Main focus is fabric 1.19.2 for now. There is a Forge port planned when the mod become stable enough.
-If you hav a a suggestion or wish to report a bug, please open a ticket on [GitHub issue tracker](https://github.com/motivational-dragon/Potion-Blender/issues).
-
 ## License
 This mod is available under the GNU3 licence.
