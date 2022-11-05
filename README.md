@@ -40,4 +40,4 @@ The configurable options are:
 - max_effects: The maximum number of potions in a cauldron. Be careful when updating this value in an already existing world as it may cause desync on already placed cauldron.
 
 ## License
-This mod is available under the GNU3 licence.
+This mod is available under the GPLv3 licence.
