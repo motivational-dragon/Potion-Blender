@@ -34,7 +34,7 @@ The combined potions can be used with arrows using the vanilla craft to add the 
 You can reset the cauldron at any time by right clicking on the special cauldron to get back your ingredients.
 
 ## Configuration
-The configuration file is located in your .minecraft folder at potion_blender/potion_blender_config.json
+The configuration file is located in your .minecraft folder at potionblender/potion_blender_config.json
 
 The configurable options are:
 - max_effects: The maximum number of potions in a cauldron. Be careful when updating this value in an already existing world as it may cause desync on already placed cauldron.
