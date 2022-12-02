@@ -129,7 +129,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
 
     private void craftCombinedPotion(ItemStack recipeItemStack, World world, @NotNull BlockPos pos){
         if(world.isClient()) {return;}
-        List<StatusEffectInstance> finalPotionStatusEffects = getContentStatusEffectsInstance();
+        List<StatusEffectInstance> finalPotionStatusEffects = getInventoryStatusEffectsInstances();
 
         mergeCombinableEffects(finalPotionStatusEffects);
 
@@ -165,7 +165,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
      */
     private static List<StatusEffectInstance> mergeCombinableEffects(List<StatusEffectInstance> finalPotionStatusEffects) {
 
-        Collection<StatusEffect> seenStatusEffect = new HashSet<>();
+        Collection<StatusEffect> mergedStatusEffects = new HashSet<>();
 
         // The tricky part here is that a potion type share 1 statusEffectInstance, making it impossible to differentiate them
         // Therefore to test effectInstance1 == effectInstance2 we need range based for loop
@@ -175,20 +175,26 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
 
             List<StatusEffectInstance> combinableEffects = new ArrayList<>();
 
-            //Effect are always combinable with themselves
             int totalDuration = effectInstance1.getDuration();
+            //Effect are always combinable with themselves
             combinableEffects.add(effectInstance1);
+
+            //This is the inversely proportional gain. First added potion has 1/2 the duration, 2nd 1/3, 3rd 1/4
+            int potionDecay = 2;
 
             for(int j=0; j<finalPotionStatusEffects.size(); j++ ){
                 StatusEffectInstance effectInstance2 = finalPotionStatusEffects.get(j);
 
-                if(i!=j && !seenStatusEffect.contains(effectInstance1.getEffectType()) && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
-                    totalDuration += effectInstance2.getDuration();
+                if(i!=j && !mergedStatusEffects.contains(effectInstance1.getEffectType())
+                        && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
+                    totalDuration += (1.0d / potionDecay) * effectInstance2.getDuration();
+                    potionDecay++;
+
                     combinableEffects.add(effectInstance2);
                 }
             }
 
-            seenStatusEffect.add(effectInstance1.getEffectType());
+            mergedStatusEffects.add(effectInstance1.getEffectType());
 
             if(combinableEffects.size() > 1){
                 StatusEffectInstance combinedEffect = ModUtils.copyEffectWithNewDuration(combinableEffects.get(0), totalDuration);
@@ -286,16 +292,14 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
 
         updateListeners();
     }
-
     private void addItem(@NotNull ItemEntity itemEntity) {
         assert world != null;
         //Check for incoherent state if inventory has changed since last world load
-        if(numberOfPotion > inventory.size()){countNumberOfPotion(inventory);}
+        if(numberOfPotion > inventory.size()){
+            countPotion(inventory);}
         inventory.set(numberOfPotion, itemEntity.getStack());
         numberOfPotion++;
     }
-
-
 
     /**
      * Force a chunk rerender by toggling a block state back and forth
@@ -340,11 +344,11 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
 
     @Override
     public @Nullable Object getRenderAttachmentData() {
-            return PotionUtil.getColor(getContentStatusEffectsInstance());
+            return PotionUtil.getColor(getInventoryStatusEffectsInstances());
     }
 
     @NotNull
-    private List<StatusEffectInstance> getContentStatusEffectsInstance() {
+    private List<StatusEffectInstance> getInventoryStatusEffectsInstances() {
         List<StatusEffectInstance> effects = new ArrayList<>();
 
         //Check for incoherent state if inventory has changed since last world load
@@ -362,10 +366,10 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
     public void setInventory(DefaultedList<ItemStack> newInventory) {
         this.numberOfPotion = 0;
         this.inventory = newInventory;
-        countNumberOfPotion(newInventory);
+        countPotion(newInventory);
     }
 
-    private void countNumberOfPotion(DefaultedList<ItemStack> newInventory) {
+    private void countPotion(DefaultedList<ItemStack> newInventory) {
         for (ItemStack stack : newInventory) {
             if(!stack.isOf(Items.AIR)){
                 numberOfPotion++;
