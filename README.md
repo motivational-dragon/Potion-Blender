@@ -5,7 +5,7 @@ Potion Blender is a small mod to merge potion effects into one item, allowing fo
 
 <details open>
 <summary>Gif overview</summary>
-<img src="https://github.com/motivational-dragon/Potion-Blender/blob/b889de864c5940b860df42366c82e25ca3d16908/img/potion_craft.gif" />
+<img src="https://github.com/motivational-dragon/Potion-Blender/blob/b889de864c5940b860df42366c82e25ca3d16908/img/potion_craft.gif"  alt=""/>
 </details>
 
 ## How to use
@@ -34,6 +34,11 @@ The combined potions can be used with arrows using the vanilla craft to add the 
 ### 5 - Cancelling the blend
 
 You can reset the cauldron anytime by right-clicking on the cauldron to get back your ingredients.
+
+### Effect stacking
+Adding the same effect to a potion multiple times results in effects adding. It, however, comes with a price as with each stacked effect gain decay. The first stacked effect adds 50% of its duration, and the 2nd one 25%.
+
+Instant Effects does not stack as duplicated effects are lost.
 
 ## Configuration
 The configuration file is in your .minecraft folder at potionblender/potion_blender_config.json
