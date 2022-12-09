@@ -3,7 +3,6 @@ package mod.motivationaldragon.potionblender.recipes;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import net.minecraft.resources.ResourceLocation;
-
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;

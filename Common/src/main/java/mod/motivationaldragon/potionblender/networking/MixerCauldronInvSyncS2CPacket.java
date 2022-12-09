@@ -1,15 +1,9 @@
 package mod.motivationaldragon.potionblender.networking;
 
-import mod.motivationaldragon.potionblender.block.BrewingCauldronBlockEntity;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
+import com.mojang.authlib.minecraft.client.MinecraftClient;
+import mod.motivationaldragon.potionblender.block.blockentities.BrewingCauldronBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 
 public class MixerCauldronInvSyncS2CPacket {
 

@@ -2,7 +2,10 @@ package mod.motivationaldragon.potionblender.item;
 
 
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SplashPotionItem;
 import org.jetbrains.annotations.NotNull;
 
 public class SplashCombinedPotion extends SplashPotionItem {
