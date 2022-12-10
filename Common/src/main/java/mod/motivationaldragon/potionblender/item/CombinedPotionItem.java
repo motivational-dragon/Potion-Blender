@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Class used to represent a potion with multiple Effects.
- * Since it is as special potion, it inherits all potions behaviour.
+ * Since it is as special potion, it inherits all potions' behaviour.
  * Inventory and translation uses default items behaviour
  */
 public class CombinedPotionItem extends PotionItem {
@@ -26,6 +26,8 @@ public class CombinedPotionItem extends PotionItem {
             stacks.add(new ItemStack(this));
         }
     }
+
+
 
     @Override
     public @NotNull String getDescriptionId(@NotNull ItemStack stack) {

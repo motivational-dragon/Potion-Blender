@@ -3,7 +3,7 @@ package mod.motivationaldragon.potionblender.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import mod.motivationaldragon.potionblender.PotionBlender;
+import mod.motivationaldragon.potionblender.Constants;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +14,7 @@ public class ModConfig {
     private ModConfig(){}
 
     private static final String CONFIG_FILE_NAME = "potion_blender_config.json";
-    private static final Path CONFIG_PATH = Path.of(PotionBlender.MODID, CONFIG_FILE_NAME);
+    private static final Path CONFIG_PATH = Path.of(Constants.MOD_ID, CONFIG_FILE_NAME);
     private static final Gson JSON_PARSER = new GsonBuilder().setPrettyPrinting().create();
 
     private static ConfigInstance config;
@@ -37,13 +37,13 @@ public class ModConfig {
         try {
             String jsonString = Files.readString(CONFIG_PATH);
             ModConfig.config = deserializeConfig(jsonString);
-            PotionBlender.LOGGER.info("Loaded config");
+            Constants.LOG.info("Loaded config");
         } catch (IOException e) {
-            PotionBlender.LOGGER.error("Could not read config file");
+            Constants.LOG.error("Could not read config file");
             e.printStackTrace();
         }
 
-        PotionBlender.LOGGER.warn("Unable to read config, using a default one as fallback");
+        Constants.LOG.warn("Unable to read config, using a default one as fallback");
         ModConfig.config = new  ConfigInstance();
     }
 
@@ -52,11 +52,11 @@ public class ModConfig {
         if(isReady){return;}
         isReady = true;
 
-        Path configPath = Path.of(PotionBlender.MODID, CONFIG_FILE_NAME);
+        Path configPath = Path.of(Constants.MOD_ID, CONFIG_FILE_NAME);
         if(!Files.exists(configPath)){
             try {
-                Path path = Path.of(PotionBlender.MODID);
-                PotionBlender.LOGGER.info("No config file found, creating a new one at: "+ path + "...");
+                Path path = Path.of(Constants.MOD_ID);
+                Constants.LOG.info("No config file found, creating a new one at: "+ path + "...");
                 Files.createDirectories(path);
 
 
@@ -67,7 +67,7 @@ public class ModConfig {
                 Files.writeString(configPath, jsonString);
 
             }catch (IOException e){
-                PotionBlender.LOGGER.error("Could not access config file");
+                Constants.LOG.error("Could not access config file");
                 e.printStackTrace();
             }
         }
@@ -78,10 +78,10 @@ public class ModConfig {
         try {
             return JSON_PARSER.fromJson(configAsJson, ConfigInstance.class);
         }catch (JsonSyntaxException e){
-            PotionBlender.LOGGER.error("Could not parse config JSON. Make sure syntax is correct");
+            Constants.LOG.error("Could not parse config JSON. Make sure syntax is correct");
             e.printStackTrace();
         }
-        PotionBlender.LOGGER.warn("Unable to deserialize config, using a default one as fallback");
+        Constants.LOG.warn("Unable to deserialize config, using a default one as fallback");
         return new ConfigInstance();
     }
 

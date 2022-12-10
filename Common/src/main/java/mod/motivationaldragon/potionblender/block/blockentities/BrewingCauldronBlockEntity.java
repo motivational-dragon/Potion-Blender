@@ -6,11 +6,13 @@ import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
 import mod.motivationaldragon.potionblender.config.ModConfig;
 import mod.motivationaldragon.potionblender.item.ModItem;
-import mod.motivationaldragon.potionblender.networking.ModNetworkRegisterer;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -32,10 +34,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.text.html.BlockView;
 import java.util.*;
 
-public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAttachmentBlockEntity {
+public class BrewingCauldronBlockEntity extends BlockEntity {
 
     private static final String POTION_MIXER_KEY = Constants.MOD_ID+".PotionBlender";
 
@@ -84,43 +85,49 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
 
     private void updateListeners() {
         this.setChanged();
-        syncInventoryWithClient();
+        //syncInventoryWithClient();
         assert this.getLevel() != null;
         this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), Block.UPDATE_NEIGHBORS);
     }
 
-    /**
-     * Send a packet to sync this block entity inventory with the client
-     */
-    private void syncInventoryWithClient() {
-        assert level != null;
-        if(level.isClientSide()) {return;}
-
-        PacketByteBuf data = PacketByteBufs.create();
-        data.writeInt(inventory.size());
-        for (ItemStack stack : inventory) {
-            data.writeItemStack(stack);
-        }
-
-        data.writeBlockPos(getPos());
-
-        for (ServerPlayerEntity player : PlayerLookup.tracking((ServerLevel) Level, getPos())) {
-            ServerPlayNetworking.send(player, ModNetworkRegisterer.BREWING_CAULDRON_INV_SYNC, data);
-        }
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
+
+//    /**
+//     * Send a packet to sync this block entity inventory with the client
+//     */
+//    private void syncInventoryWithClient() {
+//        assert level != null;
+//        if(level.isClientSide()) {return;}
+//
+//        PacketByteBuf data = PacketByteBufs.create();
+//        data.writeInt(inventory.size());
+//        for (ItemStack stack : inventory) {
+//            data.writeItemStack(stack);
+//        }
+//
+//        data.writeBlockPos(getPos());
+//
+//        for (ServerPlayerEntity player : PlayerLookup.tracking((ServerLevel) Level, getPos())) {
+//            ServerPlayNetworking.send(player, ModNetworkRegisterer.BREWING_CAULDRON_INV_SYNC, data);
+//        }
+//    }
 
     /**
      * Delegation from the onEntityLand method in the {@link net.minecraft.world.level.block.Block} class
      * Useful to access data such as inventory attached to the block entity from {@link net.minecraft.world.level.block.Block} callback
      *
      */
-    public void onUseDelegate(BlockState state, Level Level, BlockPos pos, Player player) {
+    public void onUseDelegate(BlockState state, Level level, BlockPos pos, Player player) {
         if ( numberOfPotion >= 1) {
-            dropInventoryContent(Level, pos);
+            dropInventoryContent(level, pos);
         }
         ItemStack itemStackInMainHand = player.getMainHandItem();
         if(itemStackInMainHand.is(Items.ARROW) && itemStackInMainHand.getCount() >=16){
-            craftCombinedPotion(itemStackInMainHand,Level, pos);
+            craftCombinedPotion(itemStackInMainHand,level, pos);
         }
     }
 
@@ -142,12 +149,13 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
 
         //create and drop the potion contained all the effect of the previous potion
         ItemStack potionItemStack = PotionUtils.setCustomEffects(potionToCraft, finalPotionStatusEffects);
+        var test= PotionUtils.getCustomEffects(potionItemStack);
         assert potionItemStack.getTag() != null;
 
         int color = PotionUtils.getColor(finalPotionStatusEffects);
 
         //Used to force tipped arrow color with the help of mixins
-        potionItemStack.getTag().putInt(PotionUtils.CUSTOM_POTION_COLOR_KEY, color);
+        potionItemStack.getTag().putInt(PotionUtils.TAG_CUSTOM_POTION_EFFECTS, color);
 
         Containers.dropItemStack(level, pos.getX(),pos.getY(), pos.getZ(), potionItemStack);
 
@@ -159,9 +167,9 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
     }
 
     /**
-        Merge same effects in a potion. For instance poison 30sec and poison 40sec merge both effect into poison 70sec instead
+     * Merge same effects in a potion. For instance poison 30sec and poison 40sec merge both effect into poison 70sec instead
      */
-    private static List<MobEffectInstance> mergeCombinableEffects(List<MobEffectInstance> finalPotionStatusEffects) {
+    private static void mergeCombinableEffects(List<MobEffectInstance> finalPotionStatusEffects) {
 
         Collection<MobEffect> mergedStatusEffects = new HashSet<>();
 
@@ -200,7 +208,6 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
                 finalPotionStatusEffects.add(combinedEffect);
             }
         }
-        return finalPotionStatusEffects;
     }
 
 
@@ -252,20 +259,16 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
         if(level.isClientSide()) {return;}
 
         if (entity instanceof ItemEntity itemEntity){
-
             ItemStack itemStack = itemEntity.getItem();
             if(itemStack.is(Items.POTION) && numberOfPotion < inventory.size()){
                 addItemToCauldron(entity, itemEntity);
-
             }
             if(recipes.containsKey(itemStack.getItem()) && numberOfPotion > 0) {
-                craftCombinedPotion(itemStack,level, pos);
+                craftCombinedPotion(itemStack,level, this.getBlockPos());
                 entity.remove(Entity.RemovalReason.DISCARDED);
             }
         }
-
     }
-
 
     private void addItemToCauldron(@NotNull Entity entity, @NotNull ItemEntity itemEntity) {
 
@@ -313,6 +316,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
         level.setBlockAndUpdate(this.getBlockPos(), newRedraw);
     }
 
+    //TODO: This will probably make the cauldron color desync when reloading a world
 //    @Override
 //    public CompoundTag toInitialChunkDataNbt() {
 //        CompoundTag CompoundTag = new CompoundTag();
@@ -320,13 +324,11 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
 //        CompoundTag.putInt(POTION_MIXER_KEY, numberOfPotion);
 //        return CompoundTag;
 //    }
-    @Override
-    public BlockEntityUpdateS2CPacket toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
+
+
 
     @Override
-    public void load(CompoundTag nbt) {
+    public void load(@NotNull CompoundTag nbt) {
         this.inventory = NonNullList.withSize(this.size(), ItemStack.EMPTY);
         ContainerHelper.loadAllItems(nbt, this.inventory);
         numberOfPotion = nbt.getInt(POTION_MIXER_KEY);
@@ -340,7 +342,10 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements RenderAtt
         super.saveAdditional(nbt);
     }
 
-    @Override
+    /**
+     * Fabric specific code used to by the render thread to get block entity data for rendering
+     * @return An Integer representing the water color of the cauldron
+     */
     public @Nullable Object getRenderAttachmentData() {
             return PotionUtils.getColor(getInventoryStatusEffectsInstances());
     }

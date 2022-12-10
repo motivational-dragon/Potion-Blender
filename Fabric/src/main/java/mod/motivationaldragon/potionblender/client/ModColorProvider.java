@@ -1,4 +1,4 @@
-package mod.motivationaldragon.potionblender.block.client;
+package mod.motivationaldragon.potionblender.client;
 
 import mod.motivationaldragon.potionblender.block.ModBlock;
 import mod.motivationaldragon.potionblender.item.ModItem;
@@ -6,7 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
-import net.minecraft.potion.PotionUtil;
+import net.minecraft.world.item.alchemy.PotionUtils;
 
 
 @Environment(EnvType.CLIENT)
@@ -31,9 +31,9 @@ public class ModColorProvider {
 
             }, ModBlock.BREWING_CAULDRON_BLOCK);
 
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtil.getColor(PotionUtil.getCustomPotionEffects(stack)), ModItem.COMBINED_POTION);
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtil.getColor(PotionUtil.getCustomPotionEffects(stack)), ModItem.SPLASH_COMBINED_POTION);
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtil.getColor(PotionUtil.getCustomPotionEffects(stack)), ModItem.COMBINED_LINGERING_POTION);
+        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.COMBINED_POTION);
+        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.SPLASH_COMBINED_POTION);
+        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.COMBINED_LINGERING_POTION);
 
     }
 }
