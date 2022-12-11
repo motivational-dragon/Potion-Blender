@@ -57,7 +57,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     private int numberOfPotion = 0;
 
-
     protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
         super(PlatformSpecific.INSTANCE.getBrewingCauldron(), pos, state);
     }
@@ -65,7 +64,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     public NonNullList<ItemStack> getInventory() {
         return inventory;
     }
-
 
     public int size() {
         return this.inventory.size();
@@ -80,7 +78,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         updateListeners();
     }
-
 
     private void updateListeners() {
         this.setChanged();
@@ -124,8 +121,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         //read recipe
         ItemStack potionToCraft = new ItemStack(recipes.get(recipeItemStack.getItem()));
-
-
 
         if(potionToCraft.is(ModItem.COMBINED_LINGERING_POTION)){
             finalPotionStatusEffects = handleLingeringEffect(finalPotionStatusEffects);
@@ -314,7 +309,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         super.saveAdditional(nbt);
     }
 
-
+    @Override
+    public CompoundTag getUpdateTag() {
+        return this.saveWithoutMetadata();
+    }
 
     @NotNull
     protected List<MobEffectInstance> getInventoryStatusEffectsInstances() {
