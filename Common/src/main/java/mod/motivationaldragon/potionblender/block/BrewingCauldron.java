@@ -1,6 +1,7 @@
 package mod.motivationaldragon.potionblender.block;
 
-import mod.motivationaldragon.potionblender.block.blockentities.BrewingCauldronBlockEntity;
+import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
+import mod.motivationaldragon.potionblender.compabibilitylayer.PlatformSpecific;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -71,7 +72,6 @@ public class BrewingCauldron extends Block implements EntityBlock {
             world.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.5f + random.nextFloat(), random.nextFloat() * 0.7f + 0.6f);
         }
 
-
         createDisplayParticles(world, pos, random, state.getValue(FACING));
         createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite());
 
@@ -111,18 +111,8 @@ public class BrewingCauldron extends Block implements EntityBlock {
     public void fallOn(@NotNull Level world, @NotNull BlockState blockState, @NotNull BlockPos pos, Entity entity, float speed) {
 
         BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(entity.getLevel(),entity.blockPosition().below());
-        if(brewingCauldronBlockEntity != null) {
-            brewingCauldronBlockEntity.setChanged();
-            brewingCauldronBlockEntity.getRenderAttachmentData();
-        }
-
-
-        if (!entity.getLevel().isClientSide()) {
-            //TODO: useless assignment?
-            // brewingCauldronBlockEntity = tryGetBlockEntity(entity.getLevel(),entity.blockPosition().below());
-            if(brewingCauldronBlockEntity != null) {
+        if(brewingCauldronBlockEntity != null && !entity.getLevel().isClientSide()) {
                 brewingCauldronBlockEntity.onEntityLandDelegate(entity);
-            }
         }
         super.fallOn(world, blockState, pos, entity, speed);
     }
@@ -144,7 +134,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
-        return new BrewingCauldronBlockEntity(pos,state);
+        return PlatformSpecific.INSTANCE.createBrewingCauldronBlockEntity(pos,state);
     }
 
 }

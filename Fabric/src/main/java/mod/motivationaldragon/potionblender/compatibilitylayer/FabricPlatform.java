@@ -1,9 +1,8 @@
 package mod.motivationaldragon.potionblender.compatibilitylayer;
 
+import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
 import mod.motivationaldragon.potionblender.compabibilitylayer.PlatformSpecific;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -11,6 +10,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.function.BiFunction;
 
 public class FabricPlatform extends PlatformSpecific {
+
+    public FabricPlatform(BlockEntityType<? extends BrewingCauldronBlockEntity> brewingCauldron, BiFunction<BlockPos, BlockState, BlockEntity> brewingCauldronConstructor) {
+        super(brewingCauldron, brewingCauldronConstructor);
+    }
 
     @Override
     public boolean isFabric() {
@@ -22,8 +25,4 @@ public class FabricPlatform extends PlatformSpecific {
         return false;
     }
 
-    @Override
-    public <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(BiFunction<BlockPos, BlockState, T> blockEntityConstructor, Block... blocks) {
-        return FabricBlockEntityTypeBuilder.create(blockEntityConstructor::apply, blocks).build();
-    }
 }

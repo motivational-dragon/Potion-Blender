@@ -1,18 +1,21 @@
 package mod.motivationaldragon.potionblender.networking;
 
-import mod.motivationaldragon.potionblender.Constants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.resources.ResourceLocation;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.FriendlyByteBuf;
 
 
 public class ModNetworkRegisterer {
-    public static final ResourceLocation BREWING_CAULDRON_INV_SYNC = new ResourceLocation(Constants.MOD_ID, "brewing_cauldron_inv_sync");
 
-//    @Environment(EnvType.CLIENT)
-//    public static void registerS2CPackets(){
-//        ClientPlayNetworking.registerGlobalReceiver(BREWING_CAULDRON_INV_SYNC, MixerCauldronInvSyncS2CPacket::execute);
-//    }
+    @Environment(EnvType.CLIENT)
+    public static void registerS2CPackets(){
+        ClientPlayNetworking.registerGlobalReceiver(BrewingCauldronInvSyncS2CPacket.fabricChannel,
+                (Minecraft minecraft, ClientPacketListener clientPacketListener, FriendlyByteBuf friendlyByteBuf,
+                 PacketSender sender) -> BrewingCauldronInvSyncS2CPacket.handle(friendlyByteBuf));
+    }
 
 }

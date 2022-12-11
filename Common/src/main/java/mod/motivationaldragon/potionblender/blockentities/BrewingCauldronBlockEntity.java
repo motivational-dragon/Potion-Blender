@@ -1,9 +1,10 @@
-package mod.motivationaldragon.potionblender.block.blockentities;
+package mod.motivationaldragon.potionblender.blockentities;
 
 
 
 import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
+import mod.motivationaldragon.potionblender.compabibilitylayer.PlatformSpecific;
 import mod.motivationaldragon.potionblender.config.ModConfig;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
@@ -13,7 +14,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class BrewingCauldronBlockEntity extends BlockEntity {
+public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     private static final String POTION_MIXER_KEY = Constants.MOD_ID+".PotionBlender";
 
@@ -58,11 +58,11 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
     private int numberOfPotion = 0;
 
 
-    public BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.BREWING_CAULDRON_BLOCK_ENTITY, pos, state);
+    protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
+        super(PlatformSpecific.INSTANCE.getBrewingCauldron(), pos, state);
     }
 
-    public NonNullList<ItemStack> getItems() {
+    public NonNullList<ItemStack> getInventory() {
         return inventory;
     }
 
@@ -71,12 +71,11 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
         return this.inventory.size();
     }
 
-    private void emptyCauldron(@NotNull Level Level){
+    private void emptyCauldron(@NotNull Level level){
         inventory.clear();
         numberOfPotion = 0;
 
-        BlockState hasFluid = Level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, false);
-        assert level != null;
+        BlockState hasFluid = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, false);
         level.setBlockAndUpdate(this.getBlockPos(), hasFluid);
 
         updateListeners();
@@ -85,7 +84,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 
     private void updateListeners() {
         this.setChanged();
-        //syncInventoryWithClient();
+        syncInventoryWithClient();
         assert this.getLevel() != null;
         this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), Block.UPDATE_NEIGHBORS);
     }
@@ -96,25 +95,10 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-//    /**
-//     * Send a packet to sync this block entity inventory with the client
-//     */
-//    private void syncInventoryWithClient() {
-//        assert level != null;
-//        if(level.isClientSide()) {return;}
-//
-//        PacketByteBuf data = PacketByteBufs.create();
-//        data.writeInt(inventory.size());
-//        for (ItemStack stack : inventory) {
-//            data.writeItemStack(stack);
-//        }
-//
-//        data.writeBlockPos(getPos());
-//
-//        for (ServerPlayerEntity player : PlayerLookup.tracking((ServerLevel) Level, getPos())) {
-//            ServerPlayNetworking.send(player, ModNetworkRegisterer.BREWING_CAULDRON_INV_SYNC, data);
-//        }
-//    }
+    /**
+     * Send a packet to sync this block entity inventory with the client
+     */
+    protected abstract void syncInventoryWithClient();
 
     /**
      * Delegation from the onEntityLand method in the {@link net.minecraft.world.level.block.Block} class
@@ -149,13 +133,12 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 
         //create and drop the potion contained all the effect of the previous potion
         ItemStack potionItemStack = PotionUtils.setCustomEffects(potionToCraft, finalPotionStatusEffects);
-        var test= PotionUtils.getCustomEffects(potionItemStack);
         assert potionItemStack.getTag() != null;
 
         int color = PotionUtils.getColor(finalPotionStatusEffects);
 
         //Used to force tipped arrow color with the help of mixins
-        potionItemStack.getTag().putInt(PotionUtils.TAG_CUSTOM_POTION_EFFECTS, color);
+        potionItemStack.getTag().putInt(PotionUtils.TAG_CUSTOM_POTION_COLOR, color);
 
         Containers.dropItemStack(level, pos.getX(),pos.getY(), pos.getZ(), potionItemStack);
 
@@ -240,11 +223,11 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
     }
 
 
-    private void dropInventoryContent(@NotNull Level Level, BlockPos pos) {
-        if(Level.isClientSide()) {return;}
-        Level.playSound(null, pos, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0f, 1.0f);
-        Containers.dropContents(Level, pos, getItems());
-        emptyCauldron(Level);
+    private void dropInventoryContent(@NotNull Level level, BlockPos pos) {
+        if(level.isClientSide()) {return;}
+        level.playSound(null, pos, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0f, 1.0f);
+        Containers.dropContents(level, pos, getInventory());
+        emptyCauldron(level);
     }
 
     /**
@@ -316,17 +299,6 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
         level.setBlockAndUpdate(this.getBlockPos(), newRedraw);
     }
 
-    //TODO: This will probably make the cauldron color desync when reloading a world
-//    @Override
-//    public CompoundTag toInitialChunkDataNbt() {
-//        CompoundTag CompoundTag = new CompoundTag();
-//        Inventories.writeNbt(CompoundTag, this.inventory, true);
-//        CompoundTag.putInt(POTION_MIXER_KEY, numberOfPotion);
-//        return CompoundTag;
-//    }
-
-
-
     @Override
     public void load(@NotNull CompoundTag nbt) {
         this.inventory = NonNullList.withSize(this.size(), ItemStack.EMPTY);
@@ -342,16 +314,10 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
         super.saveAdditional(nbt);
     }
 
-    /**
-     * Fabric specific code used to by the render thread to get block entity data for rendering
-     * @return An Integer representing the water color of the cauldron
-     */
-    public @Nullable Object getRenderAttachmentData() {
-            return PotionUtils.getColor(getInventoryStatusEffectsInstances());
-    }
+
 
     @NotNull
-    private List<MobEffectInstance> getInventoryStatusEffectsInstances() {
+    protected List<MobEffectInstance> getInventoryStatusEffectsInstances() {
         List<MobEffectInstance> effects = new ArrayList<>();
 
         //Check for incoherent state if inventory has changed since last Level load

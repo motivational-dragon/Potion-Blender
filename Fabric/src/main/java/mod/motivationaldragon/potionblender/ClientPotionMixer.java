@@ -9,6 +9,6 @@ public class ClientPotionMixer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ModColorProvider.registerColorProvider();
-        //ModNetworkRegisterer.registerS2CPackets();
+        ModNetworkRegisterer.registerS2CPackets();
     }
 }
