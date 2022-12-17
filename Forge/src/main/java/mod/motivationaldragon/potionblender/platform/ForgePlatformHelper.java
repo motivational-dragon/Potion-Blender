@@ -1,26 +1,22 @@
 package mod.motivationaldragon.potionblender.platform;
 
-import mod.motivationaldragon.potionblender.platform.services.IPlatformHelper;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLLoader;
+import mod.motivationaldragon.potionblender.blockentity.ForgeBlockEntities;
+import mod.motivationaldragon.potionblender.blockentity.ForgeBrewingCauldron;
+import mod.motivationaldragon.potionblender.platform.service.PlatformSpecificHelper;
 
-public class ForgePlatformHelper implements IPlatformHelper {
+public class ForgePlatformHelper extends PlatformSpecificHelper {
 
-    @Override
-    public String getPlatformName() {
-
-        return "Forge";
+    public ForgePlatformHelper() {
+        super(ForgeBlockEntities.BREWING_CAULDRON_BLOCK_ENTITY.get(), ForgeBrewingCauldron::new);
     }
 
     @Override
-    public boolean isModLoaded(String modId) {
-
-        return ModList.get().isLoaded(modId);
+    public boolean isFabric() {
+        return false;
     }
 
     @Override
-    public boolean isDevelopmentEnvironment() {
-
-        return !FMLLoader.isProduction();
+    public boolean isForge() {
+        return true;
     }
 }

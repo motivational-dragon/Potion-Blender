@@ -17,6 +17,7 @@ public class ModColorProvider {
     }
     public static void registerColorProvider(){
 
+        //Cauldron water color
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) ->{
             assert view != null;
             if(view instanceof RenderAttachedBlockView renderAttachedBlockView){
@@ -26,11 +27,10 @@ public class ModColorProvider {
                     return (int) data;
                 }
             }
-
             return 3694022;
-
             }, ModBlock.BREWING_CAULDRON_BLOCK);
 
+        //Potion colors
         ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.COMBINED_POTION);
         ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.SPLASH_COMBINED_POTION);
         ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.COMBINED_LINGERING_POTION);

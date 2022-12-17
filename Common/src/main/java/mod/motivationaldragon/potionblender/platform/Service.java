@@ -1,15 +1,14 @@
 package mod.motivationaldragon.potionblender.platform;
 
 import mod.motivationaldragon.potionblender.Constants;
-import mod.motivationaldragon.potionblender.platform.services.IPlatformHelper;
+import mod.motivationaldragon.potionblender.platform.service.PlatformSpecificHelper;
 
 import java.util.ServiceLoader;
 
-public class Services {
+public class Service {
+    public static final PlatformSpecificHelper PLATFORM = load(PlatformSpecificHelper.class);
 
-    public static final IPlatformHelper PLATFORM = load(IPlatformHelper.class);
-
-    public static <T> T load(Class<T> clazz) {
+    public static <T extends PlatformSpecificHelper> T load(Class<T> clazz) {
 
         final T loadedService = ServiceLoader.load(clazz)
                 .findFirst()

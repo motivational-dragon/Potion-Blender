@@ -4,7 +4,7 @@ package mod.motivationaldragon.potionblender.blockentities;
 
 import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
-import mod.motivationaldragon.potionblender.compabibilitylayer.PlatformSpecific;
+import mod.motivationaldragon.potionblender.platform.Service;
 import mod.motivationaldragon.potionblender.config.ModConfig;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
@@ -58,7 +58,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     private int numberOfPotion = 0;
 
     protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
-        super(PlatformSpecific.INSTANCE.getBrewingCauldron(), pos, state);
+        super(Service.PLATFORM.getPlatformBrewingCauldron(), pos, state);
     }
 
     public NonNullList<ItemStack> getInventory() {
@@ -102,7 +102,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      * Useful to access data such as inventory attached to the block entity from {@link net.minecraft.world.level.block.Block} callback
      *
      */
-    public void onUseDelegate(BlockState state, Level level, BlockPos pos, Player player) {
+    public void onUseDelegate(BlockState _state, Level level, BlockPos pos, Player player) {
         if ( numberOfPotion >= 1) {
             dropInventoryContent(level, pos);
         }
@@ -303,14 +303,18 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag nbt) {
+    protected void saveAdditional(@NotNull CompoundTag nbt) {
         ContainerHelper.saveAllItems(nbt,inventory);
         nbt.putInt(POTION_MIXER_KEY, numberOfPotion);
         super.saveAdditional(nbt);
     }
 
+    public int getWaterColor(){
+        return PotionUtils.getColor(getInventoryStatusEffectsInstances());
+    }
+
     @Override
-    public CompoundTag getUpdateTag() {
+    public @NotNull CompoundTag getUpdateTag() {
         return this.saveWithoutMetadata();
     }
 

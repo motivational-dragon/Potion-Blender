@@ -23,7 +23,7 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean matches(CraftingContainer craftingInventory, Level world) {
+    public boolean matches(CraftingContainer craftingInventory, @NotNull Level world) {
         if (craftingInventory.getWidth() != 3 || craftingInventory.getHeight() != 3) {
             return false;
         }
@@ -44,7 +44,7 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer craftingInventory) {
+    public @NotNull ItemStack assemble(CraftingContainer craftingInventory) {
         ItemStack potionItemStack = craftingInventory.getItem(1 + craftingInventory.getWidth());
         if (!potionItemStack.is(ModItem.COMBINED_LINGERING_POTION)) {
             return ItemStack.EMPTY;

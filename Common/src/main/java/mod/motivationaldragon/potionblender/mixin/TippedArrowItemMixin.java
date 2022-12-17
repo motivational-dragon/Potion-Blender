@@ -13,10 +13,12 @@ public class TippedArrowItemMixin {
 
     @Inject(method = "getDescriptionId", at = @At("RETURN"), cancellable = true)
     private void getTranslationKey(ItemStack stack, CallbackInfoReturnable<String> cir){
-            if (stack.hasTag()
-                    && stack.getTag().contains(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY)
-                    && stack.getTag().getBoolean(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY)) {
-                cir.setReturnValue("Combined Arrow");
+            if (stack.hasTag()) {
+                assert stack.getTag() != null;
+                if (stack.getTag().contains(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY)
+                        && stack.getTag().getBoolean(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY)) {
+                    cir.setReturnValue("Combined Arrow");
+                }
             }
     }
 

@@ -5,7 +5,7 @@
 "name": "Potion Blender",
 "description": "Small mod to combine potion effects",
 "authors": [
-"Motivational_dragon"
+"Motivational_Dragon"
 ],
 "contact": {
 "homepage": "https://github.com/motivational-dragon",
@@ -18,13 +18,13 @@
 "environment": "*",
 "entrypoints": {
 "main": [
-"mod.motivationaldragon.potionblender.PotionBlender"
+  "mod.motivationaldragon.potionblender.FabricPotionBlender"
 ],
 "client": ["mod.motivationaldragon.potionblender.ClientPotionMixer"],
 "server": ["mod.motivationaldragon.potionblender.ServerPotionMixer"]
 },
 "mixins": [
-"potionmixer.mixins.json"
+"potionblender.mixins.json"
 ],
 
 "depends": {

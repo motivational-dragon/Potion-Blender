@@ -32,22 +32,23 @@ public class ModConfig {
 
     private static void readConfig(){
 
-            if(!isReady){initConfig();}
+        if(!isReady){init();}
 
         try {
             String jsonString = Files.readString(CONFIG_PATH);
             ModConfig.config = deserializeConfig(jsonString);
             Constants.LOG.info("Loaded config");
+            return;
         } catch (IOException e) {
             Constants.LOG.error("Could not read config file");
             e.printStackTrace();
         }
 
         Constants.LOG.warn("Unable to read config, using a default one as fallback");
-        ModConfig.config = new  ConfigInstance();
+        ModConfig.config = new ConfigInstance();
     }
 
-    public static void initConfig() {
+    public static void init() {
 
         if(isReady){return;}
         isReady = true;
@@ -56,9 +57,8 @@ public class ModConfig {
         if(!Files.exists(configPath)){
             try {
                 Path path = Path.of(Constants.MOD_ID);
-                Constants.LOG.info("No config file found, creating a new one at: "+ path + "...");
+                Constants.LOG.info("No config file found, creating a new one at: %s...".formatted(path));
                 Files.createDirectories(path);
-
 
                 ConfigInstance configInstance = new ConfigInstance();
 

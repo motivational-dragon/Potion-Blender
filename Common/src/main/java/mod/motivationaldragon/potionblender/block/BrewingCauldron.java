@@ -1,7 +1,7 @@
 package mod.motivationaldragon.potionblender.block;
 
 import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
-import mod.motivationaldragon.potionblender.compabibilitylayer.PlatformSpecific;
+import mod.motivationaldragon.potionblender.platform.Service;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -134,7 +134,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
-        return PlatformSpecific.INSTANCE.createBrewingCauldronBlockEntity(pos,state);
+        return Service.PLATFORM.createPlateformBrewingCauldronBlockEntity(pos,state);
     }
 
 }

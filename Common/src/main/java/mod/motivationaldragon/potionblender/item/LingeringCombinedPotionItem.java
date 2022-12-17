@@ -25,10 +25,11 @@ public class LingeringCombinedPotionItem extends LingeringPotionItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> effects, TooltipFlag tooltipFlag) {
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> effects, @NotNull TooltipFlag tooltipFlag) {
         PotionUtils.addPotionTooltip(stack, effects, 1);
     }
 
+    @Override
     public @NotNull String getDescriptionId(@NotNull ItemStack stack) {
         return this.getDescriptionId();
     }
