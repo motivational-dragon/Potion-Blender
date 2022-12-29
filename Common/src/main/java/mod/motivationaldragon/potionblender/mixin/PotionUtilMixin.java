@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PotionUtils.class)
 public abstract class PotionUtilMixin {
 
+    //Color a normal tipped arrow if used as a combined arrow
     @Inject(method = "getColor*", at = @At("RETURN"), cancellable = true)
     private static int getColor(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         CompoundTag nbtCompound = stack.getTag();

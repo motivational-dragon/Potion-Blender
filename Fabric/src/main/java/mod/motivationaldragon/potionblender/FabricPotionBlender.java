@@ -2,9 +2,7 @@ package mod.motivationaldragon.potionblender;
 
 import mod.motivationaldragon.potionblender.block.ModBlock;
 import mod.motivationaldragon.potionblender.blockentity.FabricBlockEntities;
-import mod.motivationaldragon.potionblender.platform.FabricPlatformHelper;
-import mod.motivationaldragon.potionblender.platform.service.PlatformSpecificHelper;
-import mod.motivationaldragon.potionblender.platform.Service;
+import mod.motivationaldragon.potionblender.event.OnUseBlockFabric;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.recipes.ModSpecialRecipeSerializer;
 import net.fabricmc.api.ModInitializer;
@@ -25,6 +23,7 @@ public class FabricPotionBlender implements ModInitializer {
 		ModBlock.registerBlockItem(bind(Registry.ITEM));
 		ModSpecialRecipeSerializer.register(bind(Registry.RECIPE_SERIALIZER));
 		FabricBlockEntities.init();
+		OnUseBlockFabric.registerHandler();
 
 	}
 

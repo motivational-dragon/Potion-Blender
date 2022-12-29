@@ -11,7 +11,8 @@ import java.util.function.BiFunction;
 
 public abstract class PlatformSpecificHelper {
 
-    //Ugly way to specify brewing cauldron block entity implementation by making it a global variable
+    //Ugly way to specify brewing cauldron block entity implementation by making it a global variable rather than
+    //providing a proper hook. Since there is only 1 block entity it is easier.
     private final BlockEntityType<? extends BrewingCauldronBlockEntity> brewingCauldron;
 
     private final BiFunction<BlockPos, BlockState, BlockEntity> brewingCauldronConstructor;
