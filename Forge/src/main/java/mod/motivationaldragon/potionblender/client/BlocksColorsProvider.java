@@ -4,14 +4,14 @@ import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.block.ModBlock;
 import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
 import mod.motivationaldragon.potionblender.item.ModItem;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class BlocksColors {
+public class BlocksColorsProvider {
     @SubscribeEvent
     public static void registerBlockColors(RegisterColorHandlersEvent.Block event){
         event.register((blockState, blockAndTintGetter, pos, tintIndex) ->{
@@ -28,8 +28,8 @@ public class BlocksColors {
 
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event){
-        event.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.COMBINED_POTION);
-        event.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.SPLASH_COMBINED_POTION);
-        event.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.COMBINED_LINGERING_POTION);
+        event.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_POTION);
+        event.register(CommonItemColors::handlePotionColor, ModItem.SPLASH_COMBINED_POTION);
+        event.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_LINGERING_POTION);
     }
 }

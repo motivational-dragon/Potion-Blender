@@ -6,7 +6,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
-import net.minecraft.world.item.alchemy.PotionUtils;
 
 
 @Environment(EnvType.CLIENT)
@@ -27,13 +26,12 @@ public class ModColorProvider {
                     return (int) data;
                 }
             }
-            return 3694022;
+            return 3694022; // hex color code for water
             }, ModBlock.BREWING_CAULDRON_BLOCK);
 
         //Potion colors
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.COMBINED_POTION);
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.SPLASH_COMBINED_POTION);
-        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 1 ? 0xFFFFFFFF : PotionUtils.getColor(PotionUtils.getCustomEffects(stack)), ModItem.COMBINED_LINGERING_POTION);
-
+        ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_POTION);
+        ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.SPLASH_COMBINED_POTION);
+        ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_LINGERING_POTION);
     }
 }
