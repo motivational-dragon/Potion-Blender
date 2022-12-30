@@ -62,8 +62,6 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
 
         PotionUtils.setCustomEffects(craftedItemStack,statusEffectInstances);
 
-
-
         assert craftedItemStack.getTag() != null;
 
         craftedItemStack.getTag().putBoolean(ModNBTKey.FORCE_COLOR_RENDERING_KEY,true);

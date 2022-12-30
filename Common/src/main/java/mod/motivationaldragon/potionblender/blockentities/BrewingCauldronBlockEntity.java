@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
+import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -264,6 +265,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             }
         }
     }
+
 
     private static boolean isACombinedPotion(ItemStack itemStack){
         boolean isTippedArrow = false;
