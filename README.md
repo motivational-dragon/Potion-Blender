@@ -18,6 +18,8 @@ First, you need to make a special cauldron. Do so by right-clicking a campfire w
 
 Then, throw a potion into the cauldron. It can be any vanilla potion that is not Splash or Lingering. The potion effects will be the base of your combined brew. You can then add up to two more potions (neither splash nor lingering) to add their effects to the final product.
 
+*Note that throwing any combined potion into the cauldron is strongly discouraged*
+
 ### 3 - The final ingredient
 
 Now it is time to finish the brewing and choose the type of potion you desire. You may choose one of three of these ingredients :
@@ -33,7 +35,7 @@ The combined potions can be used with arrows using the vanilla craft to add the 
 
 ### 5 - Cancelling the blend
 
-You can reset the cauldron anytime by right-clicking on the cauldron to get back your ingredients.
+Reset the cauldron anytime by right-clicking on the cauldron to get back the ingredients.
 
 ### Effect stacking
 Adding the same effect to a potion multiple times results in effects adding. It, however, comes with a price as with each stacked effect gain decay. The first stacked effect adds 50% of its duration, and the 2nd one 25%.
