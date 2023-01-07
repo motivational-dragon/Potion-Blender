@@ -21,6 +21,6 @@ description="Potion Blender is a small mod to merge potion effects into one item
 [[dependencies.potionblender]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.2]"
+    versionRange="[1.19.3]"
     ordering="NONE"
     side="BOTH"

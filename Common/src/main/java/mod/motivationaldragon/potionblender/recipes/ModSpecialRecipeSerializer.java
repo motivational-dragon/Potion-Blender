@@ -3,13 +3,14 @@ package mod.motivationaldragon.potionblender.recipes;
 import mod.motivationaldragon.potionblender.Constants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
+
 
 import java.util.function.BiConsumer;
 
 public class ModSpecialRecipeSerializer {
 
-    public static final SimpleRecipeSerializer<CombinedTippedArrowRecipe> COMBINED_TIPPED_ARROW = new SimpleRecipeSerializer<>(CombinedTippedArrowRecipe::new);
+    public static final SimpleCraftingRecipeSerializer<CombinedTippedArrowRecipe> COMBINED_TIPPED_ARROW = new SimpleCraftingRecipeSerializer<>(CombinedTippedArrowRecipe::new);
 
 
 

@@ -29,7 +29,7 @@ public class BlocksColorsProvider {
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event){
         event.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_POTION);
-        event.register(CommonItemColors::handlePotionColor, ModItem.SPLASH_COMBINED_POTION);
+        event.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_SPLASH_POTION);
         event.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_LINGERING_POTION);
     }
 }

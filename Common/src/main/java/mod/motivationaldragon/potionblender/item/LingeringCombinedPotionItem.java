@@ -1,6 +1,5 @@
 package mod.motivationaldragon.potionblender.item;
 
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -16,13 +15,6 @@ public class LingeringCombinedPotionItem extends LingeringPotionItem {
         super(settings);
     }
 
-
-    @Override
-    public void fillItemCategory(@NotNull CreativeModeTab group, @NotNull NonNullList<ItemStack> stacks) {
-        if (this.allowedIn(group)) {
-            stacks.add(new ItemStack(this));
-        }
-    }
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> effects, @NotNull TooltipFlag tooltipFlag) {

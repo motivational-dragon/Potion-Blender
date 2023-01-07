@@ -25,7 +25,7 @@ public abstract class PlatformSpecificHelper {
         this.brewingCauldronConstructor = brewingCauldronConstructor;
     }
 
-    public BlockEntity createPlateformBrewingCauldronBlockEntity(BlockPos pos, @NotNull BlockState state){
+    public BlockEntity createPlatformBrewingCauldronBlockEntity(BlockPos pos, @NotNull BlockState state){
         return brewingCauldronConstructor.apply(pos,state);
     }
 

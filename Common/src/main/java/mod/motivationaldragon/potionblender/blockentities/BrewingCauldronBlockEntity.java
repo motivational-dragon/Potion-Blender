@@ -19,7 +19,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
-import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -29,7 +28,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -52,7 +50,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     static {
         recipes.put(Items.NETHER_WART, ModItem.COMBINED_POTION);
-        recipes.put(Items.GUNPOWDER, ModItem.SPLASH_COMBINED_POTION);
+        recipes.put(Items.GUNPOWDER, ModItem.COMBINED_SPLASH_POTION);
         recipes.put(Items.DRAGON_BREATH, ModItem.COMBINED_LINGERING_POTION);
     }
 
@@ -251,7 +249,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             if(isACombinedPotion(itemStack)) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 BlockPos pos = this.getBlockPos();
-                this.level.explode(entity,pos.getX(), pos.getY(), pos.getZ(), 1.5F, Explosion.BlockInteraction.BREAK);
+                this.level.explode(entity,pos.getX(), pos.getY(), pos.getZ(), 1.5F, Level.ExplosionInteraction.BLOCK);
             }
 
             //Add item
@@ -274,7 +272,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             isTippedArrow = itemStack.getTag().contains(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY);
         }
         return itemStack.is(ModItem.COMBINED_POTION) ||
-                itemStack.is(ModItem.SPLASH_COMBINED_POTION) ||
+                itemStack.is(ModItem.COMBINED_SPLASH_POTION) ||
                 itemStack.is(ModItem.COMBINED_LINGERING_POTION) ||
                 isTippedArrow;
 

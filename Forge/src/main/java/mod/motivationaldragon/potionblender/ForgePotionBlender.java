@@ -5,11 +5,13 @@ import mod.motivationaldragon.potionblender.blockentity.ForgeBlockEntities;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.networking.NetworkRegister;
 import mod.motivationaldragon.potionblender.recipes.ModSpecialRecipeSerializer;
-import mod.motivationaldragon.potionblender.platform.service.PlatformSpecificHelper;
-import mod.motivationaldragon.potionblender.platform.Service;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.RegisterEvent;
@@ -18,6 +20,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Mod(Constants.MOD_ID)
+@Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ForgePotionBlender {
 
 
@@ -26,11 +29,19 @@ public class ForgePotionBlender {
         PotionBlenderCommon.init();
 
         NetworkRegister.register();
-        bind(Registry.BLOCK_REGISTRY, ModBlock::registerBlock);
-        bind(Registry.ITEM_REGISTRY, ModItem::register);
-        bind(Registry.ITEM_REGISTRY, ModBlock::registerBlockItem);
-        bind(Registry.RECIPE_SERIALIZER_REGISTRY, ModSpecialRecipeSerializer::register);
+        bind(Registries.BLOCK, ModBlock::registerBlock);
+        bind(Registries.ITEM, ModBlock::registerBlockItem);
+        bind(Registries.ITEM, ModItem::register);
+        bind(Registries.RECIPE_SERIALIZER, ModSpecialRecipeSerializer::register);
         ForgeBlockEntities.register();
+
+    }
+
+    @SubscribeEvent
+    public static void buildContents(CreativeModeTabEvent.BuildContents event) {
+        if(event.getTab() == CreativeModeTabs.FUNCTIONAL_BLOCKS){
+            ModItem.registerFunctionalBlocksItems(itemStack -> event.registerSimple(CreativeModeTabs.FUNCTIONAL_BLOCKS,itemStack));
+        }
     }
 
     private static <T> void bind(ResourceKey<Registry<T>> registry, Consumer<BiConsumer<T, ResourceLocation>> source) {

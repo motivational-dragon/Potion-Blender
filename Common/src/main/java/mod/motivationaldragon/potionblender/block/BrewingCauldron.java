@@ -134,7 +134,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
-        return Service.PLATFORM.createPlateformBrewingCauldronBlockEntity(pos,state);
+        return Service.PLATFORM.createPlatformBrewingCauldronBlockEntity(pos,state);
     }
 
 }
