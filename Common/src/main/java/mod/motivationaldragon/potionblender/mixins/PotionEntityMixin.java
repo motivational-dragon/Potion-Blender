@@ -1,4 +1,4 @@
-package mod.motivationaldragon.potionblender.mixin;
+package mod.motivationaldragon.potionblender.mixins;
 
 import mod.motivationaldragon.potionblender.item.ModItem;
 import net.minecraft.world.entity.projectile.ThrownPotion;

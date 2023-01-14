@@ -40,7 +40,7 @@ public class ForgePotionBlender {
     @SubscribeEvent
     public static void buildContents(CreativeModeTabEvent.BuildContents event) {
         if(event.getTab() == CreativeModeTabs.FUNCTIONAL_BLOCKS){
-            ModItem.registerFunctionalBlocksItems(itemStack -> event.registerSimple(CreativeModeTabs.FUNCTIONAL_BLOCKS,itemStack));
+            ModItem.registerFunctionalBlocksItems(event::accept);
         }
     }
 
@@ -51,4 +51,5 @@ public class ForgePotionBlender {
             }
         });
     }
+
 }

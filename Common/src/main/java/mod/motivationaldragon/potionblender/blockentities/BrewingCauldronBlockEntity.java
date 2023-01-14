@@ -48,6 +48,12 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     //TODO: might be a good idea to make recipes modifiable without recompiling the mod
     private static final Map<Item,Item> recipes = new HashMap<>(3);
 
+    /**
+     * How high should dropped item spawn relative to the block position.
+     * Useful to avoid having item spawn by cauldron being thrown horizontally
+     */
+    private static final double ITEM_DROP_OFFSET = 0.3;
+
     static {
         recipes.put(Items.NETHER_WART, ModItem.COMBINED_POTION);
         recipes.put(Items.GUNPOWDER, ModItem.COMBINED_SPLASH_POTION);
@@ -113,7 +119,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      */
     public void onUseDelegate(BlockState _state, Level level, BlockPos pos, Player player) {
         if ( numberOfPotion >= 1) {
-            dropInventoryContent(level, pos);
+            dropInventoryContent(level);
         }
     }
 
@@ -138,10 +144,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         //Used to force tipped arrow color with the help of mixins
         potionItemStack.getTag().putInt(PotionUtils.TAG_CUSTOM_POTION_COLOR, color);
 
-        Containers.dropItemStack(level, pos.getX(),pos.getY(), pos.getZ(), potionItemStack);
+        Containers.dropItemStack(level, pos.getX(),pos.getY()+ ITEM_DROP_OFFSET, pos.getZ(), potionItemStack);
 
         //Drop all old potion bottle minus the one used for the new potion.
-        Containers.dropItemStack(level, pos.getX(),pos.getY(), pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, numberOfPotion -1));
+        Containers.dropItemStack(level, pos.getX(),pos.getY()+ ITEM_DROP_OFFSET, pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, numberOfPotion -1));
 
         level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0f, 1.0f);
         emptyCauldron(level);
@@ -222,10 +228,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     }
 
 
-    private void dropInventoryContent(@NotNull Level level, BlockPos pos) {
+    private void dropInventoryContent(@NotNull Level level) {
         if(level.isClientSide()) {return;}
-        level.playSound(null, pos, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0f, 1.0f);
-        Containers.dropContents(level, pos, this.getInventory());
+        level.playSound(null, this.getBlockPos(), SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0f, 1.0f);
+        Containers.dropContents(level, this.getBlockPos().offset(0, ITEM_DROP_OFFSET,0), this.getInventory());
         emptyCauldron(level);
     }
 
