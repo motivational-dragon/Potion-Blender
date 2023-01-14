@@ -24,7 +24,7 @@
 "server": ["mod.motivationaldragon.potionblender.ServerPotionMixer"]
 },
 "mixins": [
-"potionblender_fabric.mixins.json"
+"potionblender.mixins.json"
 ],
 
 "depends": {
