@@ -22,7 +22,7 @@ public class CombinedPotionItem extends PotionItem {
 
     @Override
     public void fillItemCategory(@NotNull CreativeModeTab group, @NotNull NonNullList<ItemStack> stacks) {
-        if (this.allowedIn(group)) {
+        if (this.allowdedIn(group)) {
             stacks.add(new ItemStack(this));
         }
     }

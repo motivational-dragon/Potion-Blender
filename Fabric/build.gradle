@@ -4,11 +4,10 @@ plugins {
     id 'idea'
 }
 
-archivesBaseName = "${mod_name}-${minecraft_version}-${version}-FABRIC"
+archivesBaseName = "${mod_name}-${minecraft_version}-FABRIC"
 if (System.getenv().RELEASE_MODE == null) {
     archivesBaseName += '-SNAPSHOT'
 }
-
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
@@ -20,6 +19,9 @@ dependencies {
 }
 
 loom {
+
+    mixin.defaultRefmapName = "potionblender.refmap.json"
+
     runs {
         client {
             client()
@@ -48,29 +50,4 @@ processResources {
 
 tasks.withType(JavaCompile) {
     source(project(":Common").sourceSets.main.allSource)
-}
-
-jar {
-    archiveName = archivesBaseName
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}"}
-    }
-}
-
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
-            from components.java
-        }
-    }
-
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
-    }
 }

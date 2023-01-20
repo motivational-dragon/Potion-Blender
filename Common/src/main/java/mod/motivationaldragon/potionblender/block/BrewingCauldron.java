@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -24,6 +23,8 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Random;
 
 @SuppressWarnings("deprecation")
 public class BrewingCauldron extends Block implements EntityBlock {
@@ -66,7 +67,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
     }
 
     @Override
-    public void animateTick(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, RandomSource random) {
+    public void animateTick(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, Random random) {
 
         if (random.nextInt(10) == 0) {
             world.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.5f + random.nextFloat(), random.nextFloat() * 0.7f + 0.6f);
@@ -78,7 +79,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
 
     }
 
-    private static void createDisplayParticles(Level world, BlockPos pos, RandomSource random, Direction direction) {
+    private static void createDisplayParticles(Level world, BlockPos pos, Random random, Direction direction) {
         Direction.Axis axis = direction.getAxis();
 
         double xPos = pos.getX() + 0.5;

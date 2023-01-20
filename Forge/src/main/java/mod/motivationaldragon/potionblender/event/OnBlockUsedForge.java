@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 public class OnBlockUsedForge {
 	@SubscribeEvent
 	public static void onBlockRightClick(PlayerInteractEvent.RightClickBlock rightClickBlock){
-		InteractionResult result = OnUseBlock.onBlockRightClick(rightClickBlock.getEntity(), rightClickBlock.getLevel(),
+		InteractionResult result = OnUseBlock.onBlockRightClick(rightClickBlock.getPlayer(), rightClickBlock.getWorld(),
 				rightClickBlock.getHitVec().getBlockPos());
 
 		if(result == InteractionResult.CONSUME){

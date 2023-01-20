@@ -19,7 +19,7 @@ public class LingeringCombinedPotionItem extends LingeringPotionItem {
 
     @Override
     public void fillItemCategory(@NotNull CreativeModeTab group, @NotNull NonNullList<ItemStack> stacks) {
-        if (this.allowedIn(group)) {
+        if (this.category == group) {
             stacks.add(new ItemStack(this));
         }
     }

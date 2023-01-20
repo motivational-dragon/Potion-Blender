@@ -1,6 +1,6 @@
 
 modLoader="javafml"
-loaderVersion="[43,)"
+loaderVersion="[40,)"
 license="GPLv3"
 issueTrackerURL="https://github.com/motivational-dragon/Potion-Blender/issues"
 [[mods]]
@@ -14,13 +14,13 @@ description="Potion Blender is a small mod to merge potion effects into one item
 [[dependencies.potionblender]]
     modId="forge"
     mandatory=true
-    versionRange="[43,)"
+    versionRange="[40,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.potionblender]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.2]"
+    versionRange="[1.18.2]"
     ordering="NONE"
     side="BOTH"

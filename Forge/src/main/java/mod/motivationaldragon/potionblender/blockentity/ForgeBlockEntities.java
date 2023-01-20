@@ -11,7 +11,7 @@ import net.minecraftforge.registries.RegistryObject;
 public class ForgeBlockEntities {
 
 	private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
-			DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Constants.MOD_ID);
+			DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, Constants.MOD_ID);
 
 	public static final RegistryObject<BlockEntityType<ForgeBrewingCauldron>> BREWING_CAULDRON_BLOCK_ENTITY =
 			BLOCK_ENTITIES.register("potion_mixer", () ->
