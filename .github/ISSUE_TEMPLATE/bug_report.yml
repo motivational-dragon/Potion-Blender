@@ -15,7 +15,7 @@ body:
       options:
         - Forge
         - Fabric
-  -	type: input
+  - type: input
     id: modloader-version
     attributes:
          label: Mod-loader version
