@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report an issue with a supported version of Potion-Blender
+labels: ["bug"]
+body:
+  - type: input
+    id: mc-version
+    attributes:
+      label: Minecraft Version
+      placeholder: eg. 1.19.2
+  - type: dropdown
+    id: mod-loader
+    attributes:
+      label: On which mod-loaders does it happen?
+      multiple: true
+      options:
+        - Forge
+        - Fabric
+  -	type: input
+    id: modloader-version
+    attributes:
+         label: Mod-loader version
+         description: |
+           List the version of the mod loader you are using.
+           If on Fabric, post the versions of both Fabric Loader and Fabric API.
+         placeholder: "eg. Forge: 36.2.9 / Fabric: Loader 0.10.6 + API 0.42.1"
+    validations:
+         required: true
+  - type: input
+    id: mod-version
+    attributes:
+      label: Potion-Blender Version
+      placeholder: eg. 1.19.2-1.0.2
+  - type: input
+    id: modpack
+    attributes:
+      label: Modpack info
+      description: |
+        If playing a modpack, post the link to it!
+  - type: input
+    attributes:
+      label: "The latest.log file"
+      description: "Please use a paste site such as [gist](https://gist.github.com/) / [pastebin](https://pastebin.com/) / etc."
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+        label: Describe the bug
+        description: |
+          Please describe as best as possible.
+    validations:
+        required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce the bug
+      description: |
+        1. First step
+        2. Second step
+        3. etc...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Other information
+      description: Any other relevant information that is related to this issue.
