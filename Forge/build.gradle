@@ -8,23 +8,28 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
-apply plugin: 'java'
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+}
+
 apply plugin: 'org.spongepowered.mixin'
 
-archivesBaseName = "${mod_name}-${minecraft_version}-${version}-FORGE"
+
+archivesBaseName = "${mod_name}-${minecraft_version}-FORGE"
 if (System.getenv().RELEASE_MODE == null) {
     archivesBaseName += '-SNAPSHOT'
 }
 
+
 mixin{
- add sourceSets.main, "potionblender.refmap.json"
+    add sourceSets.main, "potionblender.refmap.json"
     config 'potionblender.mixins.json'
 
     if (System.getenv().RELEASE_MODE != null) {
@@ -35,7 +40,7 @@ mixin{
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
-    
+
     if (project.hasProperty('forge_ats_enabled') && project.findProperty('forge_ats_enabled').toBoolean()) {
         // This location is hardcoded in Forge and can not be changed.
         // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
@@ -106,7 +111,6 @@ processResources {
 }
 
 jar{
-    archiveFileName = "${archivesBaseName}.jar"
     manifest {
         attributes([
                 "Specification-Title": "${mod_name}",
@@ -114,25 +118,11 @@ jar{
                 "Specification-Version": "1", // We are version 1 of ourselves
                 "Implementation-Title": "${mod_name}",
                 "Implementation-Version": "${version}",
-                "Implementation-Vendor" :"motivational_dragon"
+                "Implementation-Vendor" :"motivational_dragon",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
     finalizedBy('reobfJar')
 }
 
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
-    }
-}

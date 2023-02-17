@@ -19,7 +19,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
-import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -52,7 +51,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     static {
         recipes.put(Items.NETHER_WART, ModItem.COMBINED_POTION);
-        recipes.put(Items.GUNPOWDER, ModItem.SPLASH_COMBINED_POTION);
+        recipes.put(Items.GUNPOWDER, ModItem.COMBINED_SPLASH_POTION);
         recipes.put(Items.DRAGON_BREATH, ModItem.COMBINED_LINGERING_POTION);
     }
 
@@ -122,15 +121,13 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     private void craftCombinedPotion(ItemStack recipeItemStack, Level level, @NotNull BlockPos pos){
         if(level.isClientSide()) {return;}
-        List<MobEffectInstance> finalPotionStatusEffects = getInventoryStatusEffectsInstances();
-
-        mergeCombinableEffects(finalPotionStatusEffects);
+        List<MobEffectInstance> finalPotionStatusEffects = mergeCombinableEffects(this.getInventoryStatusEffectsInstances());
 
         //read recipe
         ItemStack potionToCraft = new ItemStack(recipes.get(recipeItemStack.getItem()));
 
-        if(potionToCraft.is(ModItem.COMBINED_LINGERING_POTION)){
-            finalPotionStatusEffects = handleLingeringEffect(finalPotionStatusEffects);
+        if(potionToCraft.is(ModItem.COMBINED_LINGERING_POTION)) {
+            finalPotionStatusEffects = handleLingeringPotions(finalPotionStatusEffects);
         }
 
         //create and drop the potion contained all the effect of the previous potion
@@ -151,15 +148,17 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         emptyCauldron(level);
     }
 
+
     /**
      * Merge same effects in a potion. For instance poison 30sec and poison 40sec merge both effect into poison 70sec instead
      */
-    private static void mergeCombinableEffects(List<MobEffectInstance> finalPotionStatusEffects) {
+    private static List<MobEffectInstance>  mergeCombinableEffects(List<MobEffectInstance> effectInstances) {
 
         Collection<MobEffect> mergedStatusEffects = new HashSet<>();
+        List<MobEffectInstance> finalPotionStatusEffects = new ArrayList<>(effectInstances);
 
-        // The tricky part here is that a potion type share 1 MobEffectInstance, making it impossible to differentiate them
-        // Therefore to test effectInstance1 == effectInstance2 we use a range based for loop and test indices
+        // The tricky part here is that a potion type share 1 MobEffectInstance, making it impossible to differentiate them using ==
+        // Therefore to test if effectInstance1 == effectInstance2 we use a range based for loop and test indices
         // This is otherwise a simple double iteration where we remember if we have already seen an effect type
         for(int i=0; i<finalPotionStatusEffects.size(); i++ ){
             MobEffectInstance effectInstance1 = finalPotionStatusEffects.get(i);
@@ -177,11 +176,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             for(int j=0; j<finalPotionStatusEffects.size(); j++ ){
                 MobEffectInstance effectInstance2 = finalPotionStatusEffects.get(j);
 
-                if(i!=j && !mergedStatusEffects.contains(effectInstance1.getEffect())
-                        && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
+                if(i!=j && !mergedStatusEffects.contains(effectInstance1.getEffect()) && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
                     totalDuration += (1.0d / potionDecay) * effectInstance2.getDuration();
                     potionDecay++;
-
                     combinableEffects.add(effectInstance2);
                 }
             }
@@ -194,16 +191,17 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
                 finalPotionStatusEffects.add(combinedEffect);
             }
         }
+        return finalPotionStatusEffects;
     }
 
 
-    /** Handle lingering potion lesser duration and potency
+    /** Handle lingering potion lesser duration and potency combination
      Quoting <a href="https://minecraft.fandom.com/wiki/Lingering_Potion">https://minecraft.fandom.com/wiki/Lingering_Potion</a>:
      "For finalPotionStatusEffects with duration, the duration applied by the cloud is 1⁄4 that of the corresponding potion."
      "For finalPotionStatusEffects without duration such as healing or harming, the potency of the effect is 1⁄2 that of the corresponding potion"
      **/
     @NotNull
-    private static List<MobEffectInstance> handleLingeringEffect(List<MobEffectInstance> finalPotionStatusEffects) {
+    private static List<MobEffectInstance> handleLingeringPotions(List<MobEffectInstance> finalPotionStatusEffects) {
         List<MobEffectInstance> lingeringEffects = new ArrayList<>(finalPotionStatusEffects.size());
         for (MobEffectInstance effectInstance : finalPotionStatusEffects){
             if(effectInstance.getEffect().isInstantenous()){
@@ -216,8 +214,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             }
 
         }
-        finalPotionStatusEffects = lingeringEffects;
-        return finalPotionStatusEffects;
+        return lingeringEffects;
     }
 
     private static boolean areEffectsDurationsAddable(MobEffectInstance effectInstance1, MobEffectInstance effectInstance2) {
@@ -229,7 +226,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     private void dropInventoryContent(@NotNull Level level, BlockPos pos) {
         if(level.isClientSide()) {return;}
         level.playSound(null, pos, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0f, 1.0f);
-        Containers.dropContents(level, pos, getInventory());
+        Containers.dropContents(level, pos, this.getInventory());
         emptyCauldron(level);
     }
 
@@ -247,15 +244,17 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         if (entity instanceof ItemEntity itemEntity){
             ItemStack itemStack = itemEntity.getItem();
 
-            //Handle overload mechanic where a cauldron explode if 2 combined potion are thrown into it
+            //Handle overload mechanic where a cauldron explode if a combined potion is thrown into it
             if(isACombinedPotion(itemStack)) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 BlockPos pos = this.getBlockPos();
                 this.level.explode(entity,pos.getX(), pos.getY(), pos.getZ(), 1.5F, Explosion.BlockInteraction.BREAK);
             }
 
+
             //Add item
             if(itemStack.is(Items.POTION) && numberOfPotion < inventory.size()){
+                if (wouldIgnoreInstantPotion(itemStack)) return;
                 addItemToCauldron(itemEntity);
             }
             //Craft potion
@@ -266,6 +265,16 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         }
     }
 
+    private boolean wouldIgnoreInstantPotion(ItemStack itemStack) {
+        List<MobEffectInstance> effectInstances = PotionUtils.getMobEffects(itemStack);
+        effectInstances = effectInstances
+                .stream()
+                .filter(e->e.getEffect().isInstantenous()).toList();
+        return this.getInventoryStatusEffectsInstances()
+                .stream()
+                .anyMatch(effectInstances::contains);
+    }
+
 
     private static boolean isACombinedPotion(ItemStack itemStack){
         boolean isTippedArrow = false;
@@ -274,7 +283,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             isTippedArrow = itemStack.getTag().contains(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY);
         }
         return itemStack.is(ModItem.COMBINED_POTION) ||
-                itemStack.is(ModItem.SPLASH_COMBINED_POTION) ||
+                itemStack.is(ModItem.COMBINED_SPLASH_POTION) ||
                 itemStack.is(ModItem.COMBINED_LINGERING_POTION) ||
                 isTippedArrow;
 
@@ -375,7 +384,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         this.numberOfPotion = 0;
         this.inventory = newInventory;
         countPotion(newInventory);
-        
+
     }
 
     private void countPotion(NonNullList<ItemStack> newInventory) {

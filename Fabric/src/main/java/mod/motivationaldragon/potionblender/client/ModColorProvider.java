@@ -31,7 +31,7 @@ public class ModColorProvider {
 
         //Potion colors
         ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_POTION);
-        ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.SPLASH_COMBINED_POTION);
+        ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_SPLASH_POTION);
         ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_LINGERING_POTION);
     }
 }

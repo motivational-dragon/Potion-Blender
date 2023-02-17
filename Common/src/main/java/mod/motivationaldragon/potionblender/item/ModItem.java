@@ -2,7 +2,6 @@ package mod.motivationaldragon.potionblender.item;
 
 import mod.motivationaldragon.potionblender.Constants;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 
 import java.util.function.BiConsumer;
@@ -16,18 +15,18 @@ public class ModItem {
     /* Potions Item */
 
     public static final Item COMBINED_POTION = new CombinedPotionItem(
-            new Item.Properties().tab(CreativeModeTab.TAB_BREWING).stacksTo(1));
+            new Item.Properties().stacksTo(1));
 
-    public static final Item SPLASH_COMBINED_POTION = new SplashCombinedPotion(
-            new Item.Properties().tab(CreativeModeTab.TAB_BREWING).stacksTo(1));
+    public static final Item COMBINED_SPLASH_POTION = new SplashCombinedPotion(
+            new Item.Properties().stacksTo(1));
 
     public static final Item COMBINED_LINGERING_POTION = new LingeringCombinedPotionItem(
-            new Item.Properties().tab(CreativeModeTab.TAB_BREWING).stacksTo(1));
+            new Item.Properties().stacksTo(1));
 
 
     public static void register(BiConsumer<Item, ResourceLocation> r){
         r.accept(COMBINED_POTION, new ResourceLocation(Constants.MOD_ID, "combined_potion"));
-        r.accept(SPLASH_COMBINED_POTION, new ResourceLocation(Constants.MOD_ID, "splash_combined_potion"));
+        r.accept(COMBINED_SPLASH_POTION, new ResourceLocation(Constants.MOD_ID, "splash_combined_potion"));
         r.accept(COMBINED_LINGERING_POTION, new ResourceLocation(Constants.MOD_ID, "lingering_combined_potion"));
         Constants.LOG.debug("Registered Items!");
     }
