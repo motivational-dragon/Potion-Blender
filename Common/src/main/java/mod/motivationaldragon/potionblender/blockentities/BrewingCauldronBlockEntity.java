@@ -52,7 +52,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      * How high should dropped item spawn relative to the block position.
      * Useful to avoid having item spawn by cauldron being thrown horizontally
      */
-    private static final double ITEM_DROP_OFFSET = 0.3;
+    private static final int ITEM_DROP_OFFSET = 1;
 
     static {
         recipes.put(Items.NETHER_WART, ModItem.COMBINED_POTION);
