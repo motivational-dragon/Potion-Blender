@@ -1,7 +1,8 @@
 package mod.motivationaldragon.potionblender.item;
 
 import mod.motivationaldragon.potionblender.Constants;
-import mod.motivationaldragon.potionblender.block.ModBlock;
+import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
+import mod.motivationaldragon.potionblender.config.PotionBlender;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
@@ -34,7 +35,7 @@ public class ModItem {
     }
 
     public static void registerFunctionalBlocksItems(Consumer<Item> r){
-        r.accept(ModBlock.BREWING_CAULDRON_ITEM);
+        r.accept(PotionBlenderBlock.BREWING_CAULDRON_ITEM);
     }
 
 

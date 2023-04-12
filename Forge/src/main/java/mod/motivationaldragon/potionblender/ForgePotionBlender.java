@@ -1,10 +1,10 @@
 package mod.motivationaldragon.potionblender;
 
-import mod.motivationaldragon.potionblender.block.ModBlock;
+import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.blockentity.ForgeBlockEntities;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.networking.NetworkRegister;
-import mod.motivationaldragon.potionblender.recipes.ModSpecialRecipeSerializer;
+import mod.motivationaldragon.potionblender.recipes.PotionBlenderSpecialRecipeSerializer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -29,10 +29,10 @@ public class ForgePotionBlender {
         PotionBlenderCommon.init();
 
         NetworkRegister.register();
-        bind(Registries.BLOCK, ModBlock::registerBlock);
-        bind(Registries.ITEM, ModBlock::registerBlockItem);
+        bind(Registries.BLOCK, PotionBlenderBlock::registerBlock);
+        bind(Registries.ITEM, PotionBlenderBlock::registerBlockItem);
         bind(Registries.ITEM, ModItem::register);
-        bind(Registries.RECIPE_SERIALIZER, ModSpecialRecipeSerializer::register);
+        bind(Registries.RECIPE_SERIALIZER, PotionBlenderSpecialRecipeSerializer::register);
         ForgeBlockEntities.register();
 
     }
@@ -51,5 +51,4 @@ public class ForgePotionBlender {
             }
         });
     }
-
 }

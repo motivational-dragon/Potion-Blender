@@ -1,10 +1,10 @@
 package mod.motivationaldragon.potionblender;
 
-import mod.motivationaldragon.potionblender.block.ModBlock;
+import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.blockentity.FabricBlockEntities;
 import mod.motivationaldragon.potionblender.event.OnUseBlockFabric;
 import mod.motivationaldragon.potionblender.item.ModItem;
-import mod.motivationaldragon.potionblender.recipes.ModSpecialRecipeSerializer;
+import mod.motivationaldragon.potionblender.recipes.PotionBlenderSpecialRecipeSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
@@ -22,19 +22,17 @@ public class FabricPotionBlender implements ModInitializer {
 		PotionBlenderCommon.init();
 
 		ModItem.register(bind(BuiltInRegistries.ITEM));
-		ModBlock.registerBlock(bind(BuiltInRegistries.BLOCK));
-		ModBlock.registerBlockItem(bind(BuiltInRegistries.ITEM));
+		PotionBlenderBlock.registerBlock(bind(BuiltInRegistries.BLOCK));
+		PotionBlenderBlock.registerBlockItem(bind(BuiltInRegistries.ITEM));
+		PotionBlenderSpecialRecipeSerializer.register(bind(BuiltInRegistries.RECIPE_SERIALIZER));
 
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> ModItem.registerFunctionalBlocksItems(entries::accept));
 
-		ModSpecialRecipeSerializer.register(bind(BuiltInRegistries.RECIPE_SERIALIZER));
 		FabricBlockEntities.init();
 		OnUseBlockFabric.registerHandler();
-
 	}
 
 	private static <T> BiConsumer<T, ResourceLocation> bind(Registry<? super T> registry) {
 		return (t, id) -> Registry.register(registry, id, t);
 	}
-
 }

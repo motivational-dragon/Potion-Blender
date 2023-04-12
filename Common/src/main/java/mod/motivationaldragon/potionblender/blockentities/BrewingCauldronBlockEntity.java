@@ -3,9 +3,10 @@ package mod.motivationaldragon.potionblender.blockentities;
 
 
 import mod.motivationaldragon.potionblender.Constants;
+import mod.motivationaldragon.potionblender.advancements.CauldronExplosionTrigger;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
 import mod.motivationaldragon.potionblender.platform.Service;
-import mod.motivationaldragon.potionblender.config.ModConfig;
+import mod.motivationaldragon.potionblender.config.PotionBlender;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
@@ -15,6 +16,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
@@ -32,6 +35,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,7 +77,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
         super(Service.PLATFORM.getPlatformBrewingCauldron(), pos, state);
-        this.inventory = NonNullList.withSize(ModConfig.getConfig().max_effects, ItemStack.EMPTY);
+        this.inventory = NonNullList.withSize(PotionBlender.getConfig().max_effects, ItemStack.EMPTY);
         this.numberOfPotion = 0;
     }
 
@@ -117,7 +121,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      * Delegation from the onEntityLand method in the {@link net.minecraft.world.level.block.Block} class
      * Useful to access data such as inventory attached to the block entity from {@link net.minecraft.world.level.block.Block} callback
      */
-    public void onUseDelegate(BlockState _state, Level level, BlockPos pos, Player player) {
+    public void onUseDelegate(BlockState state, Level level, BlockPos pos, Player player) {
         if ( numberOfPotion >= 1) {
             dropInventoryContent(level);
         }
@@ -137,12 +141,12 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         //create and drop the potion contained all the effect of the previous potion
         ItemStack potionItemStack = PotionUtils.setCustomEffects(potionToCraft, finalPotionStatusEffects);
-        assert potionItemStack.getTag() != null;
+
 
         int color = PotionUtils.getColor(finalPotionStatusEffects);
 
         //Used to force tipped arrow color with the help of mixins
-        potionItemStack.getTag().putInt(PotionUtils.TAG_CUSTOM_POTION_COLOR, color);
+        potionItemStack.getOrCreateTag().putInt(PotionUtils.TAG_CUSTOM_POTION_COLOR, color);
 
         Containers.dropItemStack(level, pos.getX(),pos.getY()+ ITEM_DROP_OFFSET, pos.getZ(), potionItemStack);
 
@@ -252,8 +256,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             //Handle overload mechanic where a cauldron explode if a combined potion is thrown into it
             if(isACombinedPotion(itemStack)) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
-                BlockPos pos = this.getBlockPos();
-                this.level.explode(entity,pos.getX(), pos.getY(), pos.getZ(), 1.5F, Level.ExplosionInteraction.BLOCK);
+                explode(entity);
             }
 
 
@@ -268,6 +271,19 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
                 entity.remove(Entity.RemovalReason.DISCARDED);
             }
         }
+    }
+
+    private void explode(Entity entity) {
+        assert level != null;
+        assert !level.isClientSide();
+
+        BlockPos pos = this.getBlockPos();
+
+        List<ServerPlayer> nearbyPlayers = this.getLevel().getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(5));
+        for (ServerPlayer player : nearbyPlayers){
+            CauldronExplosionTrigger.INSTANCE.trigger(player,pos, (ServerLevel) this.getLevel());
+        }
+        this.level.explode(entity,pos.getX(), pos.getY(), pos.getZ(), 1.5F, Level.ExplosionInteraction.BLOCK);
     }
 
     private boolean wouldIgnoreInstantPotion(ItemStack itemStack) {
@@ -389,7 +405,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         this.numberOfPotion = 0;
         this.inventory = newInventory;
         countPotion(newInventory);
-        
+
     }
 
     private void countPotion(NonNullList<ItemStack> newInventory) {

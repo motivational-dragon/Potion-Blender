@@ -8,15 +8,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ThrownPotion.class)
-public abstract class  PotionEntityMixin {
+public abstract class PotionEntityMixin {
 
     /**
      * Make the is lingering method return true for combined lingering potion
      */
     @Inject(method = "isLingering", at = @At("RETURN"), cancellable = true)
     private void isLingering(CallbackInfoReturnable<Boolean> cir){
-        boolean isCustomLingering = ((ThrownPotion) (Object) this).getItem().is(ModItem.COMBINED_LINGERING_POTION);
-        if(isCustomLingering){cir.setReturnValue(true);}
+        boolean isCombinedPotion = ((ThrownPotion) (Object) this).getItem().is(ModItem.COMBINED_LINGERING_POTION);
+        if(isCombinedPotion) {
+            cir.setReturnValue(true);
+        }
     }
 
 }

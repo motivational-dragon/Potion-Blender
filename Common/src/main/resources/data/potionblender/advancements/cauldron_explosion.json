@@ -1,0 +1,19 @@
+{
+  "display": {
+    "icon": {
+      "item": "potionblender:brewing_cauldron"
+    },
+    "title": "Surprise!",
+    "description": "Throw a combined potion back into the cauldron",
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "parent": "minecraft:nether/brew_potion",
+  "criteria": {
+    "cauldron_explosion": {
+      "trigger": "potionblender:cauldron_explosion"
+    }
+  }
+}
