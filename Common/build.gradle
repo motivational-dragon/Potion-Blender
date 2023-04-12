@@ -8,7 +8,7 @@ archivesBaseName = "${mod_name}-common-${minecraft_version}"
 
 minecraft {
     version(minecraft_version)
-    runs {   
+    runs {
         if (project.hasProperty('common_runs_enabled') ? project.findProperty('common_runs_enabled').toBoolean() : true) {
         
             server(project.hasProperty('common_server_run_name') ? project.findProperty('common_server_run_name') : 'vanilla_server') {
@@ -21,19 +21,24 @@ minecraft {
     }
 }
 
+
 dependencies {
      compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'
      implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 }
 
 processResources {
+    inputs.properties(
+            "mod_name": mod_name
+    )
 
-    def buildProps = project.properties.clone()
-
-    filesMatching(['pack.mcmeta']) {
-
-        expand buildProps
+    filesMatching('pack.mcmeta') {
+        expand("mod_name": mod_name)
     }
+}
+
+tasks.withType(JavaExec) {
+    enableAssertions = true
 }
 
 javadoc {

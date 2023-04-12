@@ -1,9 +1,12 @@
 package mod.motivationaldragon.potionblender.block;
 
+import com.mojang.math.Vector3f;
 import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
 import mod.motivationaldragon.potionblender.platform.Service;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -13,6 +16,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -22,6 +26,11 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +40,10 @@ public class BrewingCauldron extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty HAS_FLUID = BooleanProperty.create("has_fluid");
     public static final BooleanProperty REDRAW_DUMMY = BooleanProperty.create("redraw");
+
+    private static final VoxelShape INSIDE = box(2.0, 8.0, 2.0, 14.0, 16.0, 14.0);
+    protected static final VoxelShape SHAPE = Shapes.join(Shapes.block(), Shapes.or(box(0.0, 0.0, 4.0, 16.0, 3.0, 12.0),
+            box(4.0, 0.0, 0.0, 12.0, 3.0, 16.0), box(2.0, 0.0, 2.0, 14.0, 3.0, 14.0), INSIDE), BooleanOp.ONLY_FIRST);
 
     public BrewingCauldron(BlockBehaviour.Properties settings) {
         super(settings);
@@ -45,6 +58,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
         builder.add(HAS_FLUID,FACING);
         builder.add(REDRAW_DUMMY);
     }
+
 
 
     @Override
@@ -75,6 +89,18 @@ public class BrewingCauldron extends Block implements EntityBlock {
         createDisplayParticles(world, pos, random, state.getValue(FACING));
         createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite());
 
+        if (state.getValue(HAS_FLUID)){
+            BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world, pos);
+            if(brewingCauldronBlockEntity != null) {
+                int color = brewingCauldronBlockEntity.getWaterColor();
+                ParticleOptions particle = new DustParticleOptions(new Vector3f(Vec3.fromRGB24(color)),1.0f);
+                float x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
+                float z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
+                world.addParticle(particle, x, pos.getY() +1d, z,
+                        0, 0 ,0);
+            }
+        }
+
 
     }
 
@@ -90,6 +116,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
         double j = random.nextDouble() * 6.0 / 16.0;
         double zOffset = axis == Direction.Axis.Z ? direction.getStepZ() * 0.52 : h;
         world.addParticle(ParticleTypes.SMOKE, xPos + xOffset, yPos + j, zPos + zOffset, 0.0, 0.0, 0.0);
+
     }
 
     @Override
@@ -108,9 +135,18 @@ public class BrewingCauldron extends Block implements EntityBlock {
     }
 
     @Override
+    public @NotNull VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+        return SHAPE;
+    }
+    @Override
+    public @NotNull VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return INSIDE;
+    }
+
+    @Override
     public void fallOn(@NotNull Level world, @NotNull BlockState blockState, @NotNull BlockPos pos, Entity entity, float speed) {
 
-        BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(entity.getLevel(),entity.blockPosition().below());
+        BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(entity.getLevel(),entity.blockPosition());
         if(brewingCauldronBlockEntity != null && !entity.getLevel().isClientSide()) {
                 brewingCauldronBlockEntity.onEntityLandDelegate(entity);
         }

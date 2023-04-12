@@ -19,6 +19,7 @@ dependencies {
     implementation project(":Common")
 }
 
+
 loom {
 
     mixin.defaultRefmapName = "potionblender.refmap.json"
@@ -39,13 +40,50 @@ loom {
     }
 }
 
+tasks.withType(JavaExec) {
+    enableAssertions = true
+}
 
 processResources {
     from project(":Common").sourceSets.main.resources
-    inputs.property "version", project.version
+
+    inputs.properties(
+            "mod_id" : mod_id,
+            "version": project.version,
+            "mod_name": mod_name,
+            "mod_description" : mod_description,
+            "fabric_loader_version": fabric_loader_version,
+            "mod_author": mod_author
+    )
+
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand (
+                "mod_id": mod_id,
+                "version": project.version,
+                "mod_name" : mod_name,
+                "mod_description" : mod_description,
+                "mod_author" : mod_author,
+                "fabric_loader_version": fabric_loader_version
+        )
+    }
+
+    filesMatching('pack.mcmeta') {
+        expand("mod_name": mod_name)
+    }
+}
+
+jar{
+    manifest {
+        attributes([
+                "Specification-Title": mod_name,
+                "Specification-Vendor": mod_author,
+                "Specification-Version": "1", // We are version 1 of ourselves
+                "Implementation-Title": mod_name,
+                "Implementation-Version": version,
+                "Implementation-Vendor" : mod_author,
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
 }
 

@@ -4,6 +4,7 @@
   "package": "mod.motivationaldragon.potionblender.mixins",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "CriteriaTriggersAccessor",
     "PotionEntityMixin",
     "PotionUtilMixin",
     "TippedArrowItemMixin"

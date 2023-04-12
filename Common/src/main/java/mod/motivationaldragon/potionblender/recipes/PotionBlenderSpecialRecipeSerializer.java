@@ -7,7 +7,7 @@ import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 
 import java.util.function.BiConsumer;
 
-public class ModSpecialRecipeSerializer {
+public class PotionBlenderSpecialRecipeSerializer {
 
     public static final SimpleRecipeSerializer<CombinedTippedArrowRecipe> COMBINED_TIPPED_ARROW = new SimpleRecipeSerializer<>(CombinedTippedArrowRecipe::new);
 

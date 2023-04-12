@@ -1,26 +1,27 @@
 
 modLoader="javafml"
-loaderVersion="[43,)"
+loaderVersion="[${minimum_forge_version},)"
 license="GPLv3"
 issueTrackerURL="https://github.com/motivational-dragon/Potion-Blender/issues"
 [[mods]]
-modId="potionblender"
-version="${file.jarVersion}"
-displayName="Potion Blender"
+modId="${mod_id}"
+version="${version}"
+displayName="${mod_name}"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/potion-blender"
-authors="Motivational_Dragon"
-description="Potion Blender is a small mod to merge potion effects into one item, allowing for interesting combinations. More info on the mod homepage"
+logoFile = "logo.png"
+authors="${mod_author}"
+description="${mod_description}"
 
 [[dependencies.potionblender]]
     modId="forge"
     mandatory=true
-    versionRange="[43,)"
+    versionRange="[${minimum_forge_version},)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.potionblender]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.2]"
+    versionRange="[${minecraft_version}]"
     ordering="NONE"
     side="BOTH"
