@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "X",
+    "Y"
+  ],
+  "key": {
+    "X": {
+      "item": "minecraft:cauldron"
+    },
+    "Y": {
+      "item": "minecraft:campfire"
+    }
+  },
+  "result": {
+    "item": "potionblender:brewing_cauldron",
+    "count": 1
+  }
+}

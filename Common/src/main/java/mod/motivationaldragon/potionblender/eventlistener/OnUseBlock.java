@@ -1,6 +1,6 @@
 package mod.motivationaldragon.potionblender.eventlistener;
 
-import mod.motivationaldragon.potionblender.block.ModBlock;
+import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -24,7 +24,7 @@ public class OnUseBlock {
                 if(!player.isCreative()) {itemStack.shrink(1);}
 
                 world.removeBlock(hitLocation, false);
-                Block.updateOrDestroy(blockState, ModBlock.BREWING_CAULDRON_BLOCK.defaultBlockState(), world, hitLocation,0);
+                Block.updateOrDestroy(blockState, PotionBlenderBlock.BREWING_CAULDRON_BLOCK.defaultBlockState(), world, hitLocation,0);
                 return InteractionResult.CONSUME;
             }
         }

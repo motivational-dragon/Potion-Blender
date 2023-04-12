@@ -1,11 +1,11 @@
 {"schemaVersion": 1,
-"id": "potionblender",
+"id": "${mod_id}",
 "version": "${version}",
 
-"name": "Potion Blender",
-"description": "Small mod to combine potion effects",
+"name": "${mod_name}",
+"description": "${mod_description}",
 "authors": [
-"Motivational_Dragon"
+"${mod_author}"
 ],
 "contact": {
 "homepage": "https://github.com/motivational-dragon",
@@ -13,7 +13,7 @@
 },
 
 "license": "GPLv3",
-"icon": "assets/potionblender/icon.png",
+"icon": "assets/potionblender/logo.png",
 
 "environment": "*",
 "entrypoints": {
@@ -28,7 +28,7 @@
 ],
 
 "depends": {
-"fabricloader": ">=0.14.17",
+"fabricloader": ">=${fabric_loader_version}",
 "fabric-api": "*",
 "minecraft": "1.19.4",
 "java": ">=17"

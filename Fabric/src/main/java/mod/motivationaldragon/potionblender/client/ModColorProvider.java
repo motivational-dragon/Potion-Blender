@@ -1,6 +1,6 @@
 package mod.motivationaldragon.potionblender.client;
 
-import mod.motivationaldragon.potionblender.block.ModBlock;
+import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,8 +26,8 @@ public class ModColorProvider {
                     return (int) data;
                 }
             }
-            return 3694022; // hex color code for water
-            }, ModBlock.BREWING_CAULDRON_BLOCK);
+            return 3694022; // mc color code for water
+            }, PotionBlenderBlock.BREWING_CAULDRON_BLOCK);
 
         //Potion colors
         ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_POTION);

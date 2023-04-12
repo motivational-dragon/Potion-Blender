@@ -77,5 +77,5 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
         return width >= 2 && height >= 2;
     }
     @Override
-    public @NotNull RecipeSerializer<?> getSerializer() {return ModSpecialRecipeSerializer.COMBINED_TIPPED_ARROW;}
+    public @NotNull RecipeSerializer<?> getSerializer() {return PotionBlenderSpecialRecipeSerializer.COMBINED_TIPPED_ARROW;}
 }

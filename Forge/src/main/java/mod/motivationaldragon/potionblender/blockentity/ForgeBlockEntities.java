@@ -1,7 +1,7 @@
 package mod.motivationaldragon.potionblender.blockentity;
 
 import mod.motivationaldragon.potionblender.Constants;
-import mod.motivationaldragon.potionblender.block.ModBlock;
+import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -15,7 +15,7 @@ public class ForgeBlockEntities {
 
 	public static final RegistryObject<BlockEntityType<ForgeBrewingCauldron>> BREWING_CAULDRON_BLOCK_ENTITY =
 			BLOCK_ENTITIES.register("potion_mixer", () ->
-					BlockEntityType.Builder.of(ForgeBrewingCauldron::new, ModBlock.BREWING_CAULDRON_BLOCK).build(null));
+					BlockEntityType.Builder.of(ForgeBrewingCauldron::new, PotionBlenderBlock.BREWING_CAULDRON_BLOCK).build(null));
 
 	public static void register(){
 		BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());

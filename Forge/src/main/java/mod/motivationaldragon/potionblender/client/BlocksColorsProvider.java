@@ -1,7 +1,7 @@
 package mod.motivationaldragon.potionblender.client;
 
 import mod.motivationaldragon.potionblender.Constants;
-import mod.motivationaldragon.potionblender.block.ModBlock;
+import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,7 +22,7 @@ public class BlocksColorsProvider {
                 return brewingCauldron.getWaterColor();
             }
             return 3694022;
-        }, ModBlock.BREWING_CAULDRON_BLOCK);
+        }, PotionBlenderBlock.BREWING_CAULDRON_BLOCK);
 
     }
 

@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ModConfig {
+public class PotionBlender {
 
-    private ModConfig(){}
+    private PotionBlender(){}
 
     private static final String CONFIG_FILE_NAME = "potion_blender_config.json";
     private static final Path CONFIG_PATH = Path.of(Constants.MOD_ID, CONFIG_FILE_NAME);
@@ -36,7 +36,7 @@ public class ModConfig {
 
         try {
             String jsonString = Files.readString(CONFIG_PATH);
-            ModConfig.config = deserializeConfig(jsonString);
+            PotionBlender.config = deserializeConfig(jsonString);
             Constants.LOG.info("Loaded config");
             return;
         } catch (IOException e) {
@@ -45,7 +45,7 @@ public class ModConfig {
         }
 
         Constants.LOG.warn("Unable to read config, using a default one as fallback");
-        ModConfig.config = new ConfigInstance();
+        PotionBlender.config = new ConfigInstance();
     }
 
     public static void init() {

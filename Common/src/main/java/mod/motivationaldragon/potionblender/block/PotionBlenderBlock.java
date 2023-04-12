@@ -11,8 +11,8 @@ import net.minecraft.world.level.material.MaterialColor;
 
 import java.util.function.BiConsumer;
 
-public class ModBlock {
-    ModBlock(){throw new IllegalStateException("Utility class");}
+public class PotionBlenderBlock {
+    PotionBlenderBlock(){throw new IllegalStateException("Utility class");}
     public static final Block BREWING_CAULDRON_BLOCK = new BrewingCauldron(
             BlockBehaviour.Properties.of(Material.METAL, MaterialColor.STONE).strength(2f).requiresCorrectToolForDrops()
                     .noOcclusion().lightLevel(x->15));
