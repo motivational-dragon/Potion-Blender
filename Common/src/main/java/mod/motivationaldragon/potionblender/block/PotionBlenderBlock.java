@@ -6,16 +6,20 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 
 import java.util.function.BiConsumer;
 
 public class PotionBlenderBlock {
     PotionBlenderBlock(){throw new IllegalStateException("Utility class");}
     public static final Block BREWING_CAULDRON_BLOCK = new BrewingCauldron(
-            BlockBehaviour.Properties.of(Material.METAL, MaterialColor.STONE).strength(2f).requiresCorrectToolForDrops()
-                    .noOcclusion().lightLevel(x->15));
+            (BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE)
+                    .requiresCorrectToolForDrops()
+                    .strength(2.0F)
+                    .noOcclusion()
+                    .lightLevel(x->15)
+            ));
 
     public static final BlockItem BREWING_CAULDRON_ITEM = new BlockItem(BREWING_CAULDRON_BLOCK, new Item.Properties());
 

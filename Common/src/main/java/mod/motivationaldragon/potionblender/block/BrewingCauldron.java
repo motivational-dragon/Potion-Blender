@@ -146,8 +146,8 @@ public class BrewingCauldron extends Block implements EntityBlock {
     @Override
     public void fallOn(@NotNull Level world, @NotNull BlockState blockState, @NotNull BlockPos pos, Entity entity, float speed) {
 
-        BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(entity.getLevel(),entity.blockPosition());
-        if(brewingCauldronBlockEntity != null && !entity.getLevel().isClientSide()) {
+        BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(entity.level(),entity.blockPosition());
+        if(brewingCauldronBlockEntity != null && !entity.level().isClientSide()) {
                 brewingCauldronBlockEntity.onEntityLandDelegate(entity);
         }
         super.fallOn(world, blockState, pos, entity, speed);

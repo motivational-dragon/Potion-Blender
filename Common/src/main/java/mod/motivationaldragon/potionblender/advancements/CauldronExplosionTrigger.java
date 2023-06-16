@@ -15,13 +15,14 @@ public class CauldronExplosionTrigger extends SimpleCriterionTrigger<CauldronExp
 	public static final CauldronExplosionTrigger INSTANCE = new CauldronExplosionTrigger();
 
 	@Override
-	public ResourceLocation getId() {return ID;}
+	public @NotNull ResourceLocation getId() {return ID;}
 
 	@Override
-	protected TriggerInstance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context) {
+	public TriggerInstance createInstance(JsonObject json, ContextAwarePredicate context, DeserializationContext deserializationContext) {
 		LocationPredicate locationPredicate = LocationPredicate.fromJson(json.get("cauldron_location"));
-		return new TriggerInstance(player, locationPredicate);
+		return new TriggerInstance(context, locationPredicate);
 	}
+
 
 	public void trigger(ServerPlayer player, BlockPos pos, ServerLevel level){
 		this.trigger(player, triggerInstance -> triggerInstance.matches(level, pos));
@@ -37,8 +38,8 @@ public class CauldronExplosionTrigger extends SimpleCriterionTrigger<CauldronExp
 			return ID;
 		}
 
-		public TriggerInstance(EntityPredicate.Composite playerPredicate, LocationPredicate cauldronLocation) {
-			super(ID, playerPredicate);
+		public TriggerInstance(ContextAwarePredicate context, LocationPredicate cauldronLocation) {
+			super(ID, context);
 			this.pos = cauldronLocation;
 		}
 

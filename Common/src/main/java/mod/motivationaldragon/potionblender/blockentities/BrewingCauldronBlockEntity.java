@@ -320,7 +320,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         assert level != null;
         if(level.isClientSide()) {return;}
 
-        Level level = itemEntity.getLevel();
+        Level level = itemEntity.level();
 
         level.playSound(null, this.getBlockPos(), SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0f, 1.0f);
 
