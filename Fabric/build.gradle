@@ -50,6 +50,7 @@ processResources {
     inputs.properties(
             "mod_id" : mod_id,
             "version": project.version,
+            "minecraft_version": minecraft_version,
             "mod_name": mod_name,
             "mod_description" : mod_description,
             "fabric_loader_version": fabric_loader_version,
@@ -61,10 +62,11 @@ processResources {
         expand (
                 "mod_id": mod_id,
                 "version": project.version,
+                "minecraft_version": minecraft_version,
                 "mod_name" : mod_name,
                 "mod_description" : mod_description,
                 "mod_author" : mod_author,
-                "fabric_loader_version": fabric_loader_version
+                "fabric_loader_version": fabric_loader_version,
         )
     }
 
