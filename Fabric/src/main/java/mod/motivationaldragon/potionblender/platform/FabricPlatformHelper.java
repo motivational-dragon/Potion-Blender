@@ -8,7 +8,7 @@ public class FabricPlatformHelper extends PlatformSpecificHelper {
 
     public FabricPlatformHelper() {
         super(FabricBlockEntities.BREWING_CAULDRON_BLOCK_ENTITY,
-                FabricBrewingCauldronBlockEntity::new);
+                FabricBrewingCauldronBlockEntity::new, null);
     }
 
     @Override

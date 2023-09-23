@@ -36,9 +36,8 @@ mixin{
  add sourceSets.main, "potionblender.refmap.json"
     config 'potionblender.mixins.json'
 
-    if (System.getenv().RELEASE_MODE != null) {
-        debug.verbose = true
-        debug.export = true
+    if (System.getenv().RELEASE_MODE == null) {
+        archivesBaseName += '-SNAPSHOT'
     }
 }
 
@@ -143,6 +142,8 @@ processResources {
         expand("mod_name": mod_name)
     }
 }
+
+
 
 jar{
     manifest {

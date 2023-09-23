@@ -7,7 +7,6 @@ import mod.motivationaldragon.potionblender.advancements.CauldronExplosionTrigge
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
 import mod.motivationaldragon.potionblender.platform.Service;
 import mod.motivationaldragon.potionblender.config.PotionBlender;
-import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.core.BlockPos;
@@ -341,7 +340,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         if(numberOfPotion == inventory.size()){
             level.playSound(null, this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
-            mixerCauldronBlockState.setValue(BrewingCauldron.IS_FULL,true);
+            mixerCauldronBlockState = mixerCauldronBlockState.setValue(BrewingCauldron.IS_FULL,true);
         }
 
         level.setBlockAndUpdate(this.getBlockPos(),mixerCauldronBlockState);

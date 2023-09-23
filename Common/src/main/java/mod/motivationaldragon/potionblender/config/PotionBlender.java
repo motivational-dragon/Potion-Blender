@@ -13,6 +13,7 @@ public class PotionBlender {
 
     private PotionBlender(){}
 
+
     private static final String CONFIG_FILE_NAME = "potion_blender_config.json";
     private static final Path CONFIG_PATH = Path.of(Constants.MOD_ID, CONFIG_FILE_NAME);
     private static final Gson JSON_PARSER = new GsonBuilder().setPrettyPrinting().create();

@@ -7,7 +7,7 @@ import mod.motivationaldragon.potionblender.platform.service.PlatformSpecificHel
 public class ForgePlatformHelper extends PlatformSpecificHelper {
 
     public ForgePlatformHelper() {
-        super(ForgeBlockEntities.BREWING_CAULDRON_BLOCK_ENTITY.get(), ForgeBrewingCauldron::new);
+        super(ForgeBlockEntities.BREWING_CAULDRON_BLOCK_ENTITY.get(), ForgeBrewingCauldron::new, null);
     }
 
     @Override

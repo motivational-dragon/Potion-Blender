@@ -19,13 +19,9 @@ public class ModColorProvider {
         //Cauldron water color
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) ->{
             assert view != null;
-            if(view instanceof RenderAttachedBlockView renderAttachedBlockView){
-                Object data =  renderAttachedBlockView.getBlockEntityRenderAttachment(pos);
+                Object data =  ((RenderAttachedBlockView)view).getBlockEntityRenderAttachment(pos);
 
-                if(data != null){
-                    return (int) data;
-                }
-            }
+                if(data != null){return (int) data;}
             return 3694022; // mc color code for water
             }, PotionBlenderBlock.BREWING_CAULDRON_BLOCK);
 

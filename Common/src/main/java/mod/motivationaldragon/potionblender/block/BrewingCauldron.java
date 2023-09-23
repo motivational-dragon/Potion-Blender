@@ -32,7 +32,6 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 @SuppressWarnings("deprecation")
 public class BrewingCauldron extends Block implements EntityBlock {
@@ -83,14 +82,12 @@ public class BrewingCauldron extends Block implements EntityBlock {
     }
 
     @Override
-    public void animateTick(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, RandomSource random) {
+    public void animateTick(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull RandomSource random) {
 
-        if (random.nextInt(10) == 0) {
-            world.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.5f + random.nextFloat(), random.nextFloat() * 0.7f + 0.6f);
-        }
 
-        createDisplayParticles(world, pos, random, state.getValue(FACING));
-        createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite());
+
+        createDisplayParticles(world, pos, random, state.getValue(FACING), ParticleTypes.SMOKE);
+        createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(),ParticleTypes.SMOKE);
 
         if (state.getValue(HAS_FLUID)){
             BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world, pos);
@@ -105,10 +102,22 @@ public class BrewingCauldron extends Block implements EntityBlock {
                 if(state.getValue(IS_FULL)){
                      x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
                      z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
-                    world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, pos.getY() +1d, z,0,0,0);
-                    x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
-                    z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
-                    world.addParticle(ParticleTypes.BUBBLE, x, pos.getY() +1d, z,0,0,0);
+                    world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, pos.getY() +1d, z,0,0.07,0);
+
+                    createDisplayParticles(world, pos, random, state.getValue(FACING), ParticleTypes.FLAME);
+                    createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(),ParticleTypes.FLAME);
+
+                    for(int i = 0; i< 10; i++) {
+                        x = pos.getX() + random.nextIntBetweenInclusive(2, 8) / 10f;
+                        z = pos.getZ() + random.nextIntBetweenInclusive(2, 8) / 10f;
+                        world.addParticle(coloredSmoke, x, pos.getY() + 1d, z, 0, 0, 0);
+                    }
+
+                    if (random.nextInt(10) == 0) {
+                        //FIXME sound is not playing
+                        world.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                                SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.5f + random.nextFloat(), random.nextFloat() * 0.7f + 0.6f);
+                    }
                 }
             }
 
@@ -117,7 +126,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
 
     }
 
-    private static void createDisplayParticles(Level world, BlockPos pos, RandomSource random, Direction direction) {
+    private static void createDisplayParticles(Level world, BlockPos pos, RandomSource random, Direction direction, ParticleOptions particleTypes) {
         Direction.Axis axis = direction.getAxis();
 
         double xPos = pos.getX() + 0.5;
@@ -128,7 +137,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
         double xOffset = axis == Direction.Axis.X ? direction.getStepX() * 0.52 : h;
         double j = random.nextDouble() * 6.0 / 16.0;
         double zOffset = axis == Direction.Axis.Z ? direction.getStepZ() * 0.52 : h;
-        world.addParticle(ParticleTypes.SMOKE, xPos + xOffset, yPos + j, zPos + zOffset, 0.0, 0.0, 0.0);
+        world.addParticle(particleTypes, xPos + xOffset, yPos + j, zPos + zOffset, 0.0, 0.0, 0.0);
 
     }
 
