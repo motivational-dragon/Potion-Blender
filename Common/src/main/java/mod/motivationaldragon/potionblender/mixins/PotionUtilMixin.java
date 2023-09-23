@@ -2,6 +2,7 @@ package mod.motivationaldragon.potionblender.mixins;
 
 
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
+import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -15,11 +16,13 @@ public abstract class PotionUtilMixin {
 
     //Color a normal tipped arrow if used as a combined arrow
     @Inject(method = "getColor*", at = @At("RETURN"), cancellable = true)
-    private static int getColor(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+    private static void getColor(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         CompoundTag nbtCompound = stack.getTag();
-        if (nbtCompound != null && nbtCompound.contains(ModNBTKey.FORCE_COLOR_RENDERING_KEY) && nbtCompound.getBoolean(ModNBTKey.FORCE_COLOR_RENDERING_KEY)) {
-            cir.setReturnValue(PotionUtils.getColor(PotionUtils.getMobEffects(stack)));
+        if (nbtCompound != null){
+            if(ModUtils.isTagValueTrue(nbtCompound,ModNBTKey.FORCE_COLOR_RENDERING_KEY)){
+                cir.setReturnValue(PotionUtils.getColor(PotionUtils.getMobEffects(stack)));
+            }
         }
-        return cir.getReturnValue();
     }
+
 }

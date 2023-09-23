@@ -41,6 +41,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static mod.motivationaldragon.potionblender.utils.ModUtils.isACombinedPotion;
+
 public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     private static final String POTION_MIXER_KEY = Constants.MOD_ID+".PotionBlender";
@@ -49,7 +51,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      * Hard coded recipe for the cauldron.
      *
      */
-    //TODO: might be a good idea to make recipes modifiable without recompiling the mod
+
     private static final Map<Item,Item> recipes = new HashMap<>(3);
 
     /**
@@ -58,10 +60,11 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      */
     private static final int ITEM_DROP_OFFSET = 1;
 
+    //TODO: might be a good idea to make recipes modifiable without recompiling the mod
     static {
-        recipes.put(Items.NETHER_WART, ModItem.COMBINED_POTION);
-        recipes.put(Items.GUNPOWDER, ModItem.COMBINED_SPLASH_POTION);
-        recipes.put(Items.DRAGON_BREATH, ModItem.COMBINED_LINGERING_POTION);
+        recipes.put(Items.NETHER_WART, Items.POTION);
+        recipes.put(Items.GUNPOWDER, Items.SPLASH_POTION);
+        recipes.put(Items.DRAGON_BREATH, Items.LINGERING_POTION);
     }
 
 
@@ -94,7 +97,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         inventory.clear();
         numberOfPotion = 0;
 
-        BlockState hasFluid = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, false);
+        BlockState hasFluid = level.getBlockState(this.getBlockPos())
+                .setValue(BrewingCauldron.HAS_FLUID, false)
+                .setValue(BrewingCauldron.IS_FULL,false);
         level.setBlockAndUpdate(this.getBlockPos(), hasFluid);
         updateListeners();
     }
@@ -128,6 +133,12 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     }
 
 
+    /**
+     * Main method used to handle the brewing logic when merging the potion
+     * @param recipeItemStack the finisher item used (this dictate when kind of potion will be produced, normal, lingering, splash)
+     * @param level the level attached to this block entity
+     * @param pos the pos of this block entity
+     */
     private void craftCombinedPotion(ItemStack recipeItemStack, Level level, @NotNull BlockPos pos){
         if(level.isClientSide()) {return;}
         List<MobEffectInstance> finalPotionStatusEffects = mergeCombinableEffects(this.getInventoryStatusEffectsInstances());
@@ -135,8 +146,8 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         //read recipe
         ItemStack potionToCraft = new ItemStack(recipes.get(recipeItemStack.getItem()));
 
-        if(potionToCraft.is(ModItem.COMBINED_LINGERING_POTION)) {
-            finalPotionStatusEffects = handleLingeringPotions(finalPotionStatusEffects);
+        if(ModUtils.isCombinedLingeringPotion(potionToCraft)) {
+            finalPotionStatusEffects = handleLingeringPotionEffects(finalPotionStatusEffects);
         }
 
         //create and drop the potion contained all the effect of the previous potion
@@ -145,7 +156,16 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         int color = PotionUtils.getColor(finalPotionStatusEffects);
 
-        //Used to force tipped arrow color with the help of mixins
+        //This madness is to give the correct tag to the correct potion type. That way mixin can determinate how to name the potions
+        if(potionToCraft.is(Items.POTION)){
+            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_POTION,true);
+        } else if (potionToCraft.is(Items.SPLASH_POTION)) {
+            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_SPLASH_POTION, true);
+        } else if (potionToCraft.is(Items.LINGERING_POTION)) {
+            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION, true);
+        }
+
+        //Used to force potion color rendering with the help of mixins
         potionItemStack.getOrCreateTag().putInt(PotionUtils.TAG_CUSTOM_POTION_COLOR, color);
 
         Containers.dropItemStack(level, pos.getX(),pos.getY()+ ITEM_DROP_OFFSET, pos.getZ(), potionItemStack);
@@ -186,7 +206,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
                 MobEffectInstance effectInstance2 = finalPotionStatusEffects.get(j);
 
                 if(i!=j && !mergedStatusEffects.contains(effectInstance1.getEffect()) && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
-                    totalDuration += (1.0d / potionDecay) * effectInstance2.getDuration();
+                    totalDuration += (int) ((1.0d / potionDecay) * effectInstance2.getDuration());
                     potionDecay++;
                     combinableEffects.add(effectInstance2);
                 }
@@ -210,7 +230,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      "For finalPotionStatusEffects without duration such as healing or harming, the potency of the effect is 1⁄2 that of the corresponding potion"
      **/
     @NotNull
-    private static List<MobEffectInstance> handleLingeringPotions(List<MobEffectInstance> finalPotionStatusEffects) {
+    private static List<MobEffectInstance> handleLingeringPotionEffects(List<MobEffectInstance> finalPotionStatusEffects) {
         List<MobEffectInstance> lingeringEffects = new ArrayList<>(finalPotionStatusEffects.size());
         for (MobEffectInstance effectInstance : finalPotionStatusEffects){
             if(effectInstance.getEffect().isInstantenous()){
@@ -297,18 +317,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     }
 
 
-    private static boolean isACombinedPotion(ItemStack itemStack){
-        boolean isTippedArrow = false;
-        if(itemStack.hasTag()){
-            assert itemStack.getTag() != null;
-            isTippedArrow = itemStack.getTag().contains(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY);
-        }
-        return itemStack.is(ModItem.COMBINED_POTION) ||
-                itemStack.is(ModItem.COMBINED_SPLASH_POTION) ||
-                itemStack.is(ModItem.COMBINED_LINGERING_POTION) ||
-                isTippedArrow;
-
-    }
 
 
     /**
@@ -322,13 +330,20 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         Level level = itemEntity.level();
 
-        level.playSound(null, this.getBlockPos(), SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0f, 1.0f);
+        level.playSound(null, this.getBlockPos(), SoundEvents.BOAT_PADDLE_WATER, SoundSource.BLOCKS, 2 * level.random.nextFloat(), 1.0f);
 
         //add potion to cauldron inventory
         addItem(itemEntity.getItem());
 
+
         //Since we added a potion, the cauldron must now appear with fluid
         BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
+
+        if(numberOfPotion == inventory.size()){
+            level.playSound(null, this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
+            mixerCauldronBlockState.setValue(BrewingCauldron.IS_FULL,true);
+        }
+
         level.setBlockAndUpdate(this.getBlockPos(),mixerCauldronBlockState);
 
         //To force re-rendering of the block tint

@@ -39,6 +39,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty HAS_FLUID = BooleanProperty.create("has_fluid");
+    public static final BooleanProperty IS_FULL = BooleanProperty.create("is_full");
     public static final BooleanProperty REDRAW_DUMMY = BooleanProperty.create("redraw");
 
     private static final VoxelShape INSIDE = box(2.0, 8.0, 2.0, 14.0, 16.0, 14.0);
@@ -50,6 +51,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(HAS_FLUID, false)
                 .setValue(FACING, Direction.NORTH)
+                .setValue(IS_FULL,false)
                 .setValue(REDRAW_DUMMY, false));
     }
 
@@ -57,6 +59,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
     protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
         builder.add(HAS_FLUID,FACING);
         builder.add(REDRAW_DUMMY);
+        builder.add(IS_FULL);
     }
 
 
@@ -93,12 +96,22 @@ public class BrewingCauldron extends Block implements EntityBlock {
             BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world, pos);
             if(brewingCauldronBlockEntity != null) {
                 int color = brewingCauldronBlockEntity.getWaterColor();
-                ParticleOptions particle = new DustParticleOptions(Vec3.fromRGB24(color).toVector3f(),1.0f);
+                ParticleOptions coloredSmoke = new DustParticleOptions(Vec3.fromRGB24(color).toVector3f(),1.0f);
                 float x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
                 float z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
-                world.addParticle(particle, x, pos.getY() +1d, z,
+                world.addParticle(coloredSmoke, x, pos.getY() +1d, z,
                         0, 0 ,0);
+
+                if(state.getValue(IS_FULL)){
+                     x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
+                     z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
+                    world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, pos.getY() +1d, z,0,0,0);
+                    x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
+                    z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
+                    world.addParticle(ParticleTypes.BUBBLE, x, pos.getY() +1d, z,0,0,0);
+                }
             }
+
         }
 
 

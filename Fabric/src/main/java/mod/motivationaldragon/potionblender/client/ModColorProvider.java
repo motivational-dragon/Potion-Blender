@@ -29,9 +29,5 @@ public class ModColorProvider {
             return 3694022; // mc color code for water
             }, PotionBlenderBlock.BREWING_CAULDRON_BLOCK);
 
-        //Potion colors
-        ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_POTION);
-        ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_SPLASH_POTION);
-        ColorProviderRegistry.ITEM.register(CommonItemColors::handlePotionColor, ModItem.COMBINED_LINGERING_POTION);
     }
 }

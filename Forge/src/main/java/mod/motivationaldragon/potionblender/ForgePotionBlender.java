@@ -32,7 +32,6 @@ public class ForgePotionBlender {
         NetworkRegister.register();
         bind(Registries.BLOCK, PotionBlenderBlock::registerBlock);
         bind(Registries.ITEM, PotionBlenderBlock::registerBlockItem);
-        bind(Registries.ITEM, ModItem::register);
         bind(Registries.RECIPE_SERIALIZER, PotionBlenderSpecialRecipeSerializer::register);
         ForgeBlockEntities.register();
 

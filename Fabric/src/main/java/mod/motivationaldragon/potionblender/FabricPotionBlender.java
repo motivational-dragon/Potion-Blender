@@ -21,7 +21,6 @@ public class FabricPotionBlender implements ModInitializer {
 	public void onInitialize() {
 		PotionBlenderCommon.init();
 
-		ModItem.register(bind(BuiltInRegistries.ITEM));
 		PotionBlenderBlock.registerBlock(bind(BuiltInRegistries.BLOCK));
 		PotionBlenderBlock.registerBlockItem(bind(BuiltInRegistries.ITEM));
 		PotionBlenderSpecialRecipeSerializer.register(bind(BuiltInRegistries.RECIPE_SERIALIZER));

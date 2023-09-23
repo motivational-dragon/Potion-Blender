@@ -2,6 +2,7 @@ package mod.motivationaldragon.potionblender.recipes;
 
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
+import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -34,7 +35,7 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
                 ItemStack itemStack = craftingInventory.getItem(i + j * craftingInventory.getWidth());
 
                 if (i == 1 && j == 1) {
-                    if(!itemStack.is(ModItem.COMBINED_LINGERING_POTION)){
+                    if(!ModUtils.isCombinedLingeringPotion(itemStack)){
                         return false;
                     }
                 } else if (itemStack.isEmpty() || !itemStack.is(Items.ARROW)) {
@@ -48,7 +49,7 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
     @Override
     public @NotNull ItemStack assemble(CraftingContainer craftingInventory, RegistryAccess registryAccess) {
         ItemStack potionItemStack = craftingInventory.getItem(1 + craftingInventory.getWidth());
-        if (!potionItemStack.is(ModItem.COMBINED_LINGERING_POTION)) {
+        if (!ModUtils.isCombinedLingeringPotion(potionItemStack)) {
             return ItemStack.EMPTY;
         }
         ItemStack craftedItemStack = new ItemStack(Items.TIPPED_ARROW, 8);
