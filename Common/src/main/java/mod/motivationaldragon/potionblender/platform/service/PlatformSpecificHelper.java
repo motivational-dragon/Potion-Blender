@@ -1,7 +1,6 @@
 package mod.motivationaldragon.potionblender.platform.service;
 
 import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
-import mod.motivationaldragon.potionblender.config.ConfigAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -18,15 +17,13 @@ public abstract class PlatformSpecificHelper {
 
     private final BiFunction<BlockPos, BlockState, BlockEntity> brewingCauldronConstructor;
 
-    private final ConfigAccessor configAccessor;
 
     public abstract boolean isFabric();
     public abstract boolean isForge();
 
-    protected PlatformSpecificHelper(BlockEntityType<? extends BrewingCauldronBlockEntity> brewingCauldron, BiFunction<BlockPos, BlockState, BlockEntity> brewingCauldronConstructor, ConfigAccessor configAccessor) {
+    protected PlatformSpecificHelper(BlockEntityType<? extends BrewingCauldronBlockEntity> brewingCauldron, BiFunction<BlockPos, BlockState, BlockEntity> brewingCauldronConstructor) {
         this.brewingCauldron = brewingCauldron;
         this.brewingCauldronConstructor = brewingCauldronConstructor;
-        this.configAccessor = configAccessor;
     }
 
     public BlockEntity createPlatformBrewingCauldronBlockEntity(BlockPos pos, @NotNull BlockState state){
@@ -37,9 +34,6 @@ public abstract class PlatformSpecificHelper {
         return brewingCauldron;
     }
 
-    public ConfigAccessor getConfigAccessor() {
-        return configAccessor;
-    }
 
 
 

@@ -70,10 +70,13 @@ public class BrewingCauldron extends Block implements EntityBlock {
             BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world,pos);
             if(brewingCauldronBlockEntity != null) {
                 brewingCauldronBlockEntity.onUseDelegate(state, world, pos, player);
+
+
             }
         }
         return InteractionResult.SUCCESS;
     }
+
 
     @Override
     @NotNull
@@ -84,43 +87,38 @@ public class BrewingCauldron extends Block implements EntityBlock {
     @Override
     public void animateTick(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull RandomSource random) {
 
-
-
         createDisplayParticles(world, pos, random, state.getValue(FACING), ParticleTypes.SMOKE);
         createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(),ParticleTypes.SMOKE);
 
         if (state.getValue(HAS_FLUID)){
             BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world, pos);
-            if(brewingCauldronBlockEntity != null) {
-                int color = brewingCauldronBlockEntity.getWaterColor();
-                ParticleOptions coloredSmoke = new DustParticleOptions(Vec3.fromRGB24(color).toVector3f(),1.0f);
-                float x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
-                float z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
-                world.addParticle(coloredSmoke, x, pos.getY() +1d, z,
-                        0, 0 ,0);
+            if(brewingCauldronBlockEntity == null) {return;}
 
-                if(state.getValue(IS_FULL)){
-                     x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
-                     z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
-                    world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, pos.getY() +1d, z,0,0.07,0);
+            int color = brewingCauldronBlockEntity.getWaterColor();
+            ParticleOptions coloredSmoke = new DustParticleOptions(Vec3.fromRGB24(color).toVector3f(),1.0f);
+            float x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
+            float z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
+            world.addParticle(coloredSmoke, x, pos.getY() +1d, z, 0, 0 ,0);
 
-                    createDisplayParticles(world, pos, random, state.getValue(FACING), ParticleTypes.FLAME);
-                    createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(),ParticleTypes.FLAME);
+            if(state.getValue(IS_FULL)){
+                 x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
+                 z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
+                world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, pos.getY() +1d, z,0,0.07,0);
 
-                    for(int i = 0; i< 10; i++) {
-                        x = pos.getX() + random.nextIntBetweenInclusive(2, 8) / 10f;
-                        z = pos.getZ() + random.nextIntBetweenInclusive(2, 8) / 10f;
-                        world.addParticle(coloredSmoke, x, pos.getY() + 1d, z, 0, 0, 0);
-                    }
+                createDisplayParticles(world, pos, random, state.getValue(FACING), ParticleTypes.FLAME);
+                createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(),ParticleTypes.FLAME);
 
-                    if (random.nextInt(10) == 0) {
-                        //FIXME sound is not playing
-                        world.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                                SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.5f + random.nextFloat(), random.nextFloat() * 0.7f + 0.6f);
-                    }
+                for(int i = 0; i< 10; i++) {
+                    x = pos.getX() + random.nextIntBetweenInclusive(2, 8) / 10f;
+                    z = pos.getZ() + random.nextIntBetweenInclusive(2, 8) / 10f;
+                    world.addParticle(coloredSmoke, x, pos.getY() + 1d, z, 0, 0, 0);
+                }
+
+                if (random.nextInt(10) == 0) {
+                    world.playLocalSound( pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                            SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.5F + random.nextFloat(), random.nextFloat() * 0.7f + 0.6f, false);
                 }
             }
-
         }
 
 

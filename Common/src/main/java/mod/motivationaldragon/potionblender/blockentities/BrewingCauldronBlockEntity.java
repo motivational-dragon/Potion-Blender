@@ -5,8 +5,9 @@ package mod.motivationaldragon.potionblender.blockentities;
 import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.advancements.CauldronExplosionTrigger;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
+import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
+import mod.motivationaldragon.potionblender.config.ConfigController;
 import mod.motivationaldragon.potionblender.platform.Service;
-import mod.motivationaldragon.potionblender.config.PotionBlender;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.core.BlockPos;
@@ -44,7 +45,7 @@ import static mod.motivationaldragon.potionblender.utils.ModUtils.isACombinedPot
 
 public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
-    private static final String POTION_MIXER_KEY = Constants.MOD_ID+".PotionBlender";
+    private static final String POTION_MIXER_KEY = Constants.MOD_ID+".ConfigController";
 
     /**
      * Hard coded recipe for the cauldron.
@@ -59,11 +60,14 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      */
     private static final int ITEM_DROP_OFFSET = 1;
 
+    private static final PotionBlenderConfig config = ConfigController.getConfig();
+
     //TODO: might be a good idea to make recipes modifiable without recompiling the mod
+    //TODO: WIP
     static {
-        recipes.put(Items.NETHER_WART, Items.POTION);
-        recipes.put(Items.GUNPOWDER, Items.SPLASH_POTION);
-        recipes.put(Items.DRAGON_BREATH, Items.LINGERING_POTION);
+        recipes.put(config.getNormalPotionIngredient(), Items.POTION);
+        recipes.put(config.getSplashPotionIngredient(), Items.SPLASH_POTION);
+        recipes.put(config.getLingeringPotionIngredient(), Items.LINGERING_POTION);
     }
 
 
@@ -79,7 +83,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
         super(Service.PLATFORM.getPlatformBrewingCauldron(), pos, state);
-        this.inventory = NonNullList.withSize(PotionBlender.getConfig().max_effects, ItemStack.EMPTY);
+        this.inventory = NonNullList.withSize(config.getMaxNbOfEffects(), ItemStack.EMPTY);
         this.numberOfPotion = 0;
     }
 
@@ -274,21 +278,21 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
             //Handle overload mechanic where a cauldron explode if a combined potion is thrown into it
             if(isACombinedPotion(itemStack)) {
-                entity.remove(Entity.RemovalReason.DISCARDED);
                 explode(entity);
+                entity.remove(Entity.RemovalReason.DISCARDED);
+                return;
             }
-
-
             //Add item
             if(itemStack.is(Items.POTION) && numberOfPotion < inventory.size()){
                 if (wouldIgnoreInstantPotion(itemStack)) return;
                 addItemToCauldron(itemEntity);
+                return;
             }
             //Craft potion
-            if(recipes.containsKey(itemStack.getItem()) && numberOfPotion > 0) {
+             if(recipes.containsKey(itemStack.getItem()) && numberOfPotion > 0) {
                 craftCombinedPotion(itemStack,level, this.getBlockPos());
                 entity.remove(Entity.RemovalReason.DISCARDED);
-            }
+             }
         }
     }
 
@@ -327,8 +331,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         assert level != null;
         if(level.isClientSide()) {return;}
 
-        Level level = itemEntity.level();
-
         level.playSound(null, this.getBlockPos(), SoundEvents.BOAT_PADDLE_WATER, SoundSource.BLOCKS, 2 * level.random.nextFloat(), 1.0f);
 
         //add potion to cauldron inventory
@@ -338,8 +340,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         //Since we added a potion, the cauldron must now appear with fluid
         BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
 
-        if(numberOfPotion == inventory.size()){
-            level.playSound(null, this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
+        //When cauldron is full do an event with particle and sound
+        if(isFull()){
+            level.playSound(null,this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
             mixerCauldronBlockState = mixerCauldronBlockState.setValue(BrewingCauldron.IS_FULL,true);
         }
 
@@ -352,6 +355,11 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         updateListeners();
     }
+
+    public boolean isFull() {
+        return numberOfPotion == inventory.size();
+    }
+
     private void addItem(@NotNull ItemStack itemStack) {
         assert level != null;
         //Check for incoherent state if inventory has changed since last Level load
