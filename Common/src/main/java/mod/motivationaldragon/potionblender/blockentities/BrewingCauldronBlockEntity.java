@@ -62,14 +62,18 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     private static final PotionBlenderConfig config = ConfigController.getConfig();
 
-    //TODO: might be a good idea to make recipes modifiable without recompiling the mod
-    //TODO: WIP
     static {
         recipes.put(config.getNormalPotionIngredient(), Items.POTION);
         recipes.put(config.getSplashPotionIngredient(), Items.SPLASH_POTION);
         recipes.put(config.getLingeringPotionIngredient(), Items.LINGERING_POTION);
     }
 
+    private boolean isBrewing = false;
+    private boolean canBrew = false;
+    private int progress = 0;
+    private static final int MAX_PROGRESS = 500;
+
+    private ItemStack craftingIngredient;
 
 
     /**
@@ -102,7 +106,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         BlockState hasFluid = level.getBlockState(this.getBlockPos())
                 .setValue(BrewingCauldron.HAS_FLUID, false)
-                .setValue(BrewingCauldron.IS_FULL,false);
+                .setValue(BrewingCauldron.IS_BREWING,false);
         level.setBlockAndUpdate(this.getBlockPos(), hasFluid);
         updateListeners();
     }
@@ -137,17 +141,60 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 
     /**
+     * Delegation from the onEntityLand method in the {@link net.minecraft.world.level.block.Block} class
+     * Useful to access data such as inventory attached to the block entity from {@link net.minecraft.world.level.block.Block} callback
+     * @param entity the entity that landed on the attached block
+     * @see net.minecraft.world.level.block.Block#fallOn(Level, BlockState, BlockPos, Entity, float) for the full method documentation
+     * and ommited parameter
+     */
+    public void onEntityLandDelegate(Entity entity) {
+        assert level != null;
+        if(level.isClientSide() || isBrewing) {return;}
+
+        if (entity instanceof ItemEntity itemEntity){
+            ItemStack itemStack = itemEntity.getItem();
+
+            //Handle overload mechanic where a cauldron explode if a combined potion is thrown into it
+            if(isACombinedPotion(itemStack)) {
+                explode(entity);
+                entity.remove(Entity.RemovalReason.DISCARDED);
+                return;
+            }
+            //Add item
+            if(itemStack.is(Items.POTION) && numberOfPotion < inventory.size()){
+                if (wouldIgnoreInstantPotion(itemStack)) return;
+                addItemToCauldron(itemEntity);
+                return;
+            }
+            //Craft potion
+            if(recipes.containsKey(itemStack.getItem()) && numberOfPotion > 0) {
+                entity.remove(Entity.RemovalReason.DISCARDED);
+                canBrew = true;
+                craftingIngredient = itemStack;
+
+                assert getLevel() != null;
+                getLevel().setBlockAndUpdate(getBlockPos() , getLevel().getBlockState(this.getBlockPos()).setValue(BrewingCauldron.IS_BREWING,true));
+
+                this.setChanged();
+                level.playSound(null,this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS);
+            }
+        }
+    }
+
+
+    /**
      * Main method used to handle the brewing logic when merging the potion
-     * @param recipeItemStack the finisher item used (this dictate when kind of potion will be produced, normal, lingering, splash)
      * @param level the level attached to this block entity
      * @param pos the pos of this block entity
      */
-    private void craftCombinedPotion(ItemStack recipeItemStack, Level level, @NotNull BlockPos pos){
+    private void craftCombinedPotion(Level level, @NotNull BlockPos pos){
         if(level.isClientSide()) {return;}
+
         List<MobEffectInstance> finalPotionStatusEffects = mergeCombinableEffects(this.getInventoryStatusEffectsInstances());
 
         //read recipe
-        ItemStack potionToCraft = new ItemStack(recipes.get(recipeItemStack.getItem()));
+        assert craftingIngredient != null;
+        ItemStack potionToCraft = new ItemStack(recipes.get(this.craftingIngredient.getItem()));
 
         if(ModUtils.isCombinedLingeringPotion(potionToCraft)) {
             finalPotionStatusEffects = handleLingeringPotionEffects(finalPotionStatusEffects);
@@ -178,6 +225,30 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0f, 1.0f);
         emptyCauldron(level);
+    }
+
+
+    public static void tick(Level level, BlockPos pos, BlockState state, BrewingCauldronBlockEntity brewingCauldron ){
+            if(level.isClientSide()){return;}
+
+            if(brewingCauldron.canBrew){
+                brewingCauldron.isBrewing = true;
+                brewingCauldron.progress++;
+
+                if(brewingCauldron.progress >= MAX_PROGRESS){
+                    brewingCauldron.craftCombinedPotion(level,pos);
+                    brewingCauldron.isBrewing = false;
+                    brewingCauldron.canBrew = false;
+                    brewingCauldron.getBlockState().setValue(BrewingCauldron.IS_BREWING, false);
+                }
+                setChanged(level,pos,state);
+            }else {
+                brewingCauldron.resetProgress();
+            }
+    }
+
+    private void resetProgress(){
+        this.progress = 0;
     }
 
 
@@ -262,39 +333,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         emptyCauldron(level);
     }
 
-    /**
-     * Delegation from the onEntityLand method in the {@link net.minecraft.world.level.block.Block} class
-     * Useful to access data such as inventory attached to the block entity from {@link net.minecraft.world.level.block.Block} callback
-     * @param entity the entity that landed on the attached block
-     * @see net.minecraft.world.level.block.Block#fallOn(Level, BlockState, BlockPos, Entity, float) for the full method documentation
-     * and ommited parameter
-     */
-    public void onEntityLandDelegate(Entity entity) {
-        assert level != null;
-        if(level.isClientSide()) {return;}
 
-        if (entity instanceof ItemEntity itemEntity){
-            ItemStack itemStack = itemEntity.getItem();
-
-            //Handle overload mechanic where a cauldron explode if a combined potion is thrown into it
-            if(isACombinedPotion(itemStack)) {
-                explode(entity);
-                entity.remove(Entity.RemovalReason.DISCARDED);
-                return;
-            }
-            //Add item
-            if(itemStack.is(Items.POTION) && numberOfPotion < inventory.size()){
-                if (wouldIgnoreInstantPotion(itemStack)) return;
-                addItemToCauldron(itemEntity);
-                return;
-            }
-            //Craft potion
-             if(recipes.containsKey(itemStack.getItem()) && numberOfPotion > 0) {
-                craftCombinedPotion(itemStack,level, this.getBlockPos());
-                entity.remove(Entity.RemovalReason.DISCARDED);
-             }
-        }
-    }
 
     private void explode(Entity entity) {
         assert level != null;
@@ -339,12 +378,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         //Since we added a potion, the cauldron must now appear with fluid
         BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
-
-        //When cauldron is full do an event with particle and sound
-        if(isFull()){
-            level.playSound(null,this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
-            mixerCauldronBlockState = mixerCauldronBlockState.setValue(BrewingCauldron.IS_FULL,true);
-        }
 
         level.setBlockAndUpdate(this.getBlockPos(),mixerCauldronBlockState);
 

@@ -19,6 +19,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -34,11 +36,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("deprecation")
-public class BrewingCauldron extends Block implements EntityBlock {
+public class BrewingCauldron extends BaseEntityBlock {
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty HAS_FLUID = BooleanProperty.create("has_fluid");
-    public static final BooleanProperty IS_FULL = BooleanProperty.create("is_full");
+    public static final BooleanProperty IS_BREWING = BooleanProperty.create("is_brewing");
     public static final BooleanProperty REDRAW_DUMMY = BooleanProperty.create("redraw");
 
     private static final VoxelShape INSIDE = box(2.0, 8.0, 2.0, 14.0, 16.0, 14.0);
@@ -50,7 +52,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(HAS_FLUID, false)
                 .setValue(FACING, Direction.NORTH)
-                .setValue(IS_FULL,false)
+                .setValue(IS_BREWING,false)
                 .setValue(REDRAW_DUMMY, false));
     }
 
@@ -58,9 +60,14 @@ public class BrewingCauldron extends Block implements EntityBlock {
     protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
         builder.add(HAS_FLUID,FACING);
         builder.add(REDRAW_DUMMY);
-        builder.add(IS_FULL);
+        builder.add(IS_BREWING);
     }
 
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> type) {
+        return createTickerHelper(type, Service.PLATFORM.getPlatformBrewingCauldron(),BrewingCauldronBlockEntity::tick);
+    }
 
 
     @Override
@@ -70,8 +77,6 @@ public class BrewingCauldron extends Block implements EntityBlock {
             BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world,pos);
             if(brewingCauldronBlockEntity != null) {
                 brewingCauldronBlockEntity.onUseDelegate(state, world, pos, player);
-
-
             }
         }
         return InteractionResult.SUCCESS;
@@ -100,7 +105,7 @@ public class BrewingCauldron extends Block implements EntityBlock {
             float z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
             world.addParticle(coloredSmoke, x, pos.getY() +1d, z, 0, 0 ,0);
 
-            if(state.getValue(IS_FULL)){
+            if(state.getValue(IS_BREWING)){
                  x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
                  z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
                 world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, pos.getY() +1d, z,0,0.07,0);
