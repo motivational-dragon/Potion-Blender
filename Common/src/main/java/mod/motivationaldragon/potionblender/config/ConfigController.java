@@ -22,7 +22,8 @@ public class ConfigController {
 
     public static final int CONFIG_VERSION = 1;
 
-    private static final Path CONFIG_PATH = Path.of(Constants.MOD_ID, CONFIG_FILE_NAME);
+    private static final Path CONFIG_DIR_PATH = Path.of("config",Constants.MOD_ID );
+    private static final Path CONFIG_FILE_PATH = Path.of("config",Constants.MOD_ID, CONFIG_FILE_NAME);
     private static final Gson JSON_PARSER = new GsonBuilder().setPrettyPrinting()
             .registerTypeHierarchyAdapter(Item.class, new ItemSerializer())
             .create();
@@ -45,12 +46,12 @@ public class ConfigController {
         if(!isInitialized){init();}
 
         try {
-            String jsonString = Files.readString(CONFIG_PATH);
+            String jsonString = Files.readString(CONFIG_FILE_PATH);
             config = deserializeConfig(jsonString);
             Constants.LOG.info("Loaded config");
 
             if(config.getConfigVersion() < CONFIG_VERSION){
-                Constants.LOG.warn("Old config detected. Default value for missing entries will be generated");
+                Constants.LOG.warn("Old or missing config detected. Default value for missing entries will be generated");
                 config.setConfigVersion(CONFIG_VERSION);
                 saveConfig(config);
             }
@@ -70,22 +71,25 @@ public class ConfigController {
         if(isInitialized){return;}
         isInitialized = true;
 
-        Path configPath = Path.of(Constants.MOD_ID, CONFIG_FILE_NAME);
-        Path path = Path.of(Constants.MOD_ID);
-        if(Files.exists(configPath)){return;}
+        try {
+            Files.createDirectories(CONFIG_DIR_PATH);
+        } catch (IOException e) {
+            Constants.LOG.error("Failed to create config directory! Check log for error");
+            e.printStackTrace();
+        }
+        if(Files.exists(CONFIG_FILE_PATH)){return;}
 
-        Constants.LOG.info("No config file found, creating a new one at: %s...".formatted(path));
+        Constants.LOG.info("No config file found, creating a new one at: %s".formatted(CONFIG_FILE_PATH.toAbsolutePath()));
         saveConfig( new PotionBlenderConfig());
 
     }
 
     private static void saveConfig(PotionBlenderConfig config) {
-        Path configPath = Path.of(Constants.MOD_ID, CONFIG_FILE_NAME);
             try {
                 Path dirPath = Path.of(Constants.MOD_ID);
                 Files.createDirectories(dirPath);
 
-                try (var fileWriter = new FileWriter(configPath.toAbsolutePath().toString(),false)){
+                try (var fileWriter = new FileWriter(CONFIG_FILE_PATH.toFile(),false)){
                     String jsonString = serializeConfig(config);
                     fileWriter.write(jsonString);
                     Constants.LOG.info("Successfully wrote config to disk");

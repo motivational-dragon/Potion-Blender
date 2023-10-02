@@ -1,11 +1,8 @@
 package mod.motivationaldragon.potionblender.item;
 
-import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ModItem {

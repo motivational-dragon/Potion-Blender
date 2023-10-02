@@ -14,16 +14,27 @@ public class PotionBlenderConfig {
      */
     private int configVersion;
     private int maxNbOfEffects;
+    private int brewingTime;
     private Item normalPotionIngredient;
     private Item splashPotionIngredient;
     private Item lingeringPotionIngredient;
 
+
     public PotionBlenderConfig() {
           configVersion = -1;
           maxNbOfEffects = 3;
+          brewingTime = 140;
           normalPotionIngredient = Items.NETHER_WART;
           splashPotionIngredient = Items.GUNPOWDER;
           lingeringPotionIngredient = Items.DRAGON_BREATH;
+    }
+
+    public int getBrewingTime() {
+        return brewingTime;
+    }
+
+    public void setBrewingTime(int brewingTime) {
+        this.brewingTime = brewingTime;
     }
 
     public int getConfigVersion() {

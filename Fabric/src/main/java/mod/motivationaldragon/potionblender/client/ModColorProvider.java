@@ -1,7 +1,6 @@
 package mod.motivationaldragon.potionblender.client;
 
 import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
-import mod.motivationaldragon.potionblender.item.ModItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;

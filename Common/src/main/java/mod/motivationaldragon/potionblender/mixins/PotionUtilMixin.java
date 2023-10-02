@@ -18,10 +18,9 @@ public abstract class PotionUtilMixin {
     @Inject(method = "getColor*", at = @At("RETURN"), cancellable = true)
     private static void getColor(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         CompoundTag nbtCompound = stack.getTag();
-        if (nbtCompound != null){
-            if(ModUtils.isTagValueTrue(nbtCompound,ModNBTKey.FORCE_COLOR_RENDERING_KEY)){
+        if (nbtCompound != null && (ModUtils.isTagValueTrue(nbtCompound,ModNBTKey.FORCE_COLOR_RENDERING_KEY))){
                 cir.setReturnValue(PotionUtils.getColor(PotionUtils.getMobEffects(stack)));
-            }
+
         }
     }
 

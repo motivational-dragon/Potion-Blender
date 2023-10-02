@@ -1,21 +1,22 @@
 package mod.motivationaldragon.potionblender.blockentities;
 
 
-
 import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.advancements.CauldronExplosionTrigger;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
-import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
 import mod.motivationaldragon.potionblender.config.ConfigController;
+import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
 import mod.motivationaldragon.potionblender.platform.Service;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,9 +73,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     private boolean isBrewing = false;
     private boolean canBrew = false;
     private int progress = 0;
-    private static final int MAX_PROGRESS = 500;
+    private static final int MAX_PROGRESS = config.getBrewingTime();
 
-    private ItemStack craftingIngredient;
+    private Item craftingIngredient;
 
 
     /**
@@ -130,8 +132,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     protected abstract void syncInventoryWithClient();
 
     /**
-     * Delegation from the onEntityLand method in the {@link net.minecraft.world.level.block.Block} class
+     * Delegation from the onEntityLand method in the {@link net.minecraft.world.level.block.Block} class with the same signature
      * Useful to access data such as inventory attached to the block entity from {@link net.minecraft.world.level.block.Block} callback
+     * T
      */
     public void onUseDelegate(BlockState state, Level level, BlockPos pos, Player player) {
         if ( numberOfPotion >= 1) {
@@ -155,7 +158,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             ItemStack itemStack = itemEntity.getItem();
 
             //Handle overload mechanic where a cauldron explode if a combined potion is thrown into it
-            if(isACombinedPotion(itemStack)) {
+            if(isACombinedPotion(itemStack) && itemEntity.getOwner() != null) {
                 explode(entity);
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 return;
@@ -170,7 +173,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             if(recipes.containsKey(itemStack.getItem()) && numberOfPotion > 0) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 canBrew = true;
-                craftingIngredient = itemStack;
+                craftingIngredient = itemStack.getItem();
 
                 assert getLevel() != null;
                 getLevel().setBlockAndUpdate(getBlockPos() , getLevel().getBlockState(this.getBlockPos()).setValue(BrewingCauldron.IS_BREWING,true));
@@ -190,11 +193,14 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     private void craftCombinedPotion(Level level, @NotNull BlockPos pos){
         if(level.isClientSide()) {return;}
 
+        //This can be caused by de-sync with saved state, especially if the world is imported from older version.
+        //This force the cauldron to brew a potion to reach to reset to a known state
+        if(craftingIngredient == null){craftingIngredient = config.getNormalPotionIngredient();}
+
         List<MobEffectInstance> finalPotionStatusEffects = mergeCombinableEffects(this.getInventoryStatusEffectsInstances());
 
         //read recipe
-        assert craftingIngredient != null;
-        ItemStack potionToCraft = new ItemStack(recipes.get(this.craftingIngredient.getItem()));
+        ItemStack potionToCraft = new ItemStack(recipes.get(this.craftingIngredient));
 
         if(ModUtils.isCombinedLingeringPotion(potionToCraft)) {
             finalPotionStatusEffects = handleLingeringPotionEffects(finalPotionStatusEffects);
@@ -218,14 +224,22 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         //Used to force potion color rendering with the help of mixins
         potionItemStack.getOrCreateTag().putInt(PotionUtils.TAG_CUSTOM_POTION_COLOR, color);
 
-        Containers.dropItemStack(level, pos.getX(),pos.getY()+ ITEM_DROP_OFFSET, pos.getZ(), potionItemStack);
+        var potionEntity = new ItemEntity(level, pos.getX()+0.5, (double)pos.getY()+ITEM_DROP_OFFSET, pos.getZ()+0.5, potionItemStack);
+        //Combined potion need to float, otherwise it's hitting the cauldron and trigger the explosion mechanic
+        potionEntity.setNoGravity(true);
+        potionEntity.setDeltaMovement(Vec3.ZERO);
+        potionEntity.setThrower(null);
+        level.addFreshEntity(potionEntity);
+
 
         //Drop all old potion bottle minus the one used for the new potion.
-        Containers.dropItemStack(level, pos.getX(),pos.getY()+ ITEM_DROP_OFFSET, pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, numberOfPotion -1));
+        Containers.dropItemStack(level, pos.getX(), (double)pos.getY()+ ITEM_DROP_OFFSET, pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, numberOfPotion -1));
 
         level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0f, 1.0f);
         emptyCauldron(level);
     }
+
+
 
 
     public static void tick(Level level, BlockPos pos, BlockState state, BrewingCauldronBlockEntity brewingCauldron ){
@@ -236,6 +250,8 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
                 brewingCauldron.progress++;
 
                 if(brewingCauldron.progress >= MAX_PROGRESS){
+
+
                     brewingCauldron.craftCombinedPotion(level,pos);
                     brewingCauldron.isBrewing = false;
                     brewingCauldron.canBrew = false;
@@ -421,6 +437,11 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         this.inventory = NonNullList.withSize(this.size(), ItemStack.EMPTY);
         ContainerHelper.loadAllItems(nbt, this.inventory);
         numberOfPotion = nbt.getInt(POTION_MIXER_KEY);
+        this.isBrewing = nbt.getBoolean(POTION_MIXER_KEY + "_isBrewing");
+        this.canBrew = nbt.getBoolean(POTION_MIXER_KEY + "_canBrew");
+
+        ResourceLocation resourceLocation = new ResourceLocation(nbt.getString(POTION_MIXER_KEY + "_brewingItem"));
+        this.craftingIngredient = BuiltInRegistries.ITEM.get(resourceLocation);
         super.load(nbt);
     }
 
@@ -428,6 +449,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     protected void saveAdditional(@NotNull CompoundTag nbt) {
         ContainerHelper.saveAllItems(nbt,inventory);
         nbt.putInt(POTION_MIXER_KEY, numberOfPotion);
+        nbt.putBoolean(POTION_MIXER_KEY + "_isBrewing", isBrewing);
+        nbt.putString(POTION_MIXER_KEY + "_brewingItem", BuiltInRegistries.ITEM.getKey(craftingIngredient).toString());
+        nbt.putBoolean(POTION_MIXER_KEY + "_canBrew",canBrew);
         super.saveAdditional(nbt);
     }
 

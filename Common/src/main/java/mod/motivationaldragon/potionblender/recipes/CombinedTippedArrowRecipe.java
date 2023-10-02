@@ -1,6 +1,5 @@
 package mod.motivationaldragon.potionblender.recipes;
 
-import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.core.RegistryAccess;
