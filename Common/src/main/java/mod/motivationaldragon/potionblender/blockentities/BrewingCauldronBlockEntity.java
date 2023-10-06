@@ -205,10 +205,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         if(level.isClientSide()) {return;}
 
         //This can be caused by de-sync with saved state, especially if the world is imported from older version.
-        //This force the cauldron to brew a potion to reach to reset to a known state
+        //This force the cauldron to brew a potion to reach a known state
         if(craftingIngredient == Items.AIR){
             Constants.LOG.error("Trying to make a potion with no ingredient selected. " +
-                    "If you see this message, and you just migrated from an older version, you should break and replace the cauldron " +
+                    "If you see this message, and you just migrated from an older version, you should break and replace the cauldron. " +
                     "Otherwise, it mean something bad has happened in the mod logic. Please report this bug to" +
                     " https://github.com/motivational-dragon/Potion-Blender/issues");
             craftingIngredient = config.getNormalPotionIngredient();
