@@ -11,6 +11,8 @@ import net.minecraft.world.level.material.MapColor;
 import java.util.function.BiConsumer;
 
 public class PotionBlenderBlock {
+
+
     PotionBlenderBlock(){throw new IllegalStateException("Utility class");}
     public static final Block BREWING_CAULDRON_BLOCK = new BrewingCauldron(
             (BlockBehaviour.Properties.of()

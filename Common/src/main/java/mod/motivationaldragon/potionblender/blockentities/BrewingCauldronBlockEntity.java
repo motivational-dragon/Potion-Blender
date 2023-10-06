@@ -209,12 +209,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         if(craftingIngredient == Items.AIR){
             Constants.LOG.error("Trying to make a potion with no ingredient selected. " +
                     "If you see this message, and you just migrated from an older version, you should break and replace the cauldron " +
-                    "Otherwise, it mean something bad has happened in the mod logic. Please report this error to" +
+                    "Otherwise, it mean something bad has happened in the mod logic. Please report this bug to" +
                     " https://github.com/motivational-dragon/Potion-Blender/issues");
             craftingIngredient = config.getNormalPotionIngredient();
         }
-
-
 
         //read recipe
         Item potionType = Objects.requireNonNullElseGet(recipes.get(this.craftingIngredient), BrewingCauldronBlockEntity::getDefaultPotion);
@@ -468,14 +466,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         ResourceLocation resourceLocation = new ResourceLocation(nbt.getString(POTION_MIXER_KEY + "_brewingItem"));
         this.craftingIngredient = BuiltInRegistries.ITEM.get(resourceLocation);
-
-        if(!recipes.containsKey(craftingIngredient)){
-            Constants.LOG.warn(String.format("Ignoring invalid ingredient in cauldron at %s " +
-                            "%n ingredient name: %s ,did the config change?",
-                    this.getBlockPos().toString(),
-                    craftingIngredient.toString()));
-            craftingIngredient = config.getNormalPotionIngredient();
-        }
 
         super.load(nbt);
     }
