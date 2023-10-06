@@ -75,7 +75,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
     private int progress = 0;
     private static final int MAX_PROGRESS = config.getBrewingTime();
 
-    private Item craftingIngredient;
+    @NotNull private Item craftingIngredient = Items.AIR;
 
 
     /**
@@ -138,8 +138,19 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      */
     public void onUseDelegate(BlockState state, Level level, BlockPos pos, Player player) {
         if ( numberOfPotion >= 1) {
+            Containers.dropItemStack(level,this.getBlockPos().getX(),this.getBlockPos().getY(),this.getBlockPos().getZ(),craftingIngredient.getDefaultInstance());
+            stopBrewing();
             dropInventoryContent(level);
         }
+    }
+
+    private void stopBrewing(){
+        canBrew = false;
+        isBrewing = false;
+        this.craftingIngredient = Items.AIR;
+        this.resetProgress();
+        this.getBlockState().setValue(BrewingCauldron.IS_BREWING, false);
+        this.setChanged();
     }
 
 
@@ -195,12 +206,31 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         //This can be caused by de-sync with saved state, especially if the world is imported from older version.
         //This force the cauldron to brew a potion to reach to reset to a known state
-        if(craftingIngredient == null){craftingIngredient = config.getNormalPotionIngredient();}
+        if(craftingIngredient == Items.AIR){
+            Constants.LOG.error("Trying to make a potion with no ingredient selected. " +
+                    "If you see this message, and you just migrated from an older version, you should break and replace the " +
+                    "Otherwise, it mean something bad has happened in the mod logic please report this error to" +
+                    " https://github.com/motivational-dragon/Potion-Blender/issues");
+            craftingIngredient = config.getNormalPotionIngredient();
+        }
 
-        List<MobEffectInstance> finalPotionStatusEffects = mergeCombinableEffects(this.getInventoryStatusEffectsInstances());
+
 
         //read recipe
-        ItemStack potionToCraft = new ItemStack(recipes.get(this.craftingIngredient));
+        Item potionType = Objects.requireNonNullElseGet(recipes.get(this.craftingIngredient), BrewingCauldronBlockEntity::getDefaultPotion);
+        ItemStack potionToCraft = new ItemStack(potionType);
+
+
+        //This madness is to give the correct tag to the correct potion type. That way mixin can determinate how to name the potions
+        if(potionToCraft.is(Items.POTION)){
+            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_POTION,true);
+        } else if (potionToCraft.is(Items.SPLASH_POTION)) {
+            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_SPLASH_POTION, true);
+        } else if (potionToCraft.is(Items.LINGERING_POTION)) {
+            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION, true);
+        }
+
+        List<MobEffectInstance> finalPotionStatusEffects = mergeCombinableEffects(this.getInventoryStatusEffectsInstances());
 
         if(ModUtils.isCombinedLingeringPotion(potionToCraft)) {
             finalPotionStatusEffects = handleLingeringPotionEffects(finalPotionStatusEffects);
@@ -212,14 +242,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         int color = PotionUtils.getColor(finalPotionStatusEffects);
 
-        //This madness is to give the correct tag to the correct potion type. That way mixin can determinate how to name the potions
-        if(potionToCraft.is(Items.POTION)){
-            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_POTION,true);
-        } else if (potionToCraft.is(Items.SPLASH_POTION)) {
-            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_SPLASH_POTION, true);
-        } else if (potionToCraft.is(Items.LINGERING_POTION)) {
-            potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION, true);
-        }
 
         //Used to force potion color rendering with the help of mixins
         potionItemStack.getOrCreateTag().putInt(PotionUtils.TAG_CUSTOM_POTION_COLOR, color);
@@ -250,12 +272,8 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
                 brewingCauldron.progress++;
 
                 if(brewingCauldron.progress >= MAX_PROGRESS){
-
-
                     brewingCauldron.craftCombinedPotion(level,pos);
-                    brewingCauldron.isBrewing = false;
-                    brewingCauldron.canBrew = false;
-                    brewingCauldron.getBlockState().setValue(BrewingCauldron.IS_BREWING, false);
+                    brewingCauldron.stopBrewing();
                 }
                 setChanged(level,pos,state);
             }else {
@@ -265,6 +283,14 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     private void resetProgress(){
         this.progress = 0;
+    }
+
+    /**
+     * If no recipe is found, what potion should we return?
+     * @return the chose potion to use in case if a failure
+     */
+    private static Item getDefaultPotion(){
+        return Items.POTION;
     }
 
 
@@ -442,6 +468,15 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         ResourceLocation resourceLocation = new ResourceLocation(nbt.getString(POTION_MIXER_KEY + "_brewingItem"));
         this.craftingIngredient = BuiltInRegistries.ITEM.get(resourceLocation);
+
+        if(!recipes.containsKey(craftingIngredient)){
+            Constants.LOG.warn(String.format("Ignoring invalid ingredient in cauldron at %s " +
+                            "%n ingredient name: %s ,did the config change?",
+                    this.getBlockPos().toString(),
+                    craftingIngredient.toString()));
+            craftingIngredient = config.getNormalPotionIngredient();
+        }
+
         super.load(nbt);
     }
 
