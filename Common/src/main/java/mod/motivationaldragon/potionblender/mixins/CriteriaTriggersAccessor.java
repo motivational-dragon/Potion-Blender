@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(CriteriaTriggers.class)
 public interface CriteriaTriggersAccessor {
 		@Invoker("register")
-		static <T extends CriterionTrigger<?>> T potionblender_register(T thing) {
+		static <T extends CriterionTrigger<?>> T potionblender_register(String str,T thing) {
 			throw new IllegalStateException();
 		}
 }

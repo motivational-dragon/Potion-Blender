@@ -2,7 +2,7 @@ package mod.motivationaldragon.potionblender.blockentities;
 
 
 import mod.motivationaldragon.potionblender.Constants;
-import mod.motivationaldragon.potionblender.advancements.CauldronExplosionTrigger;
+import mod.motivationaldragon.potionblender.advancements.PotionBlenderCriterionTrigger;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
 import mod.motivationaldragon.potionblender.config.ConfigController;
 import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
@@ -383,7 +383,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         List<ServerPlayer> nearbyPlayers = this.getLevel().getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(5));
         for (ServerPlayer player : nearbyPlayers){
-            CauldronExplosionTrigger.INSTANCE.trigger(player,pos, (ServerLevel) this.getLevel());
+            PotionBlenderCriterionTrigger.INSTANCE.trigger(player,pos, (ServerLevel) this.getLevel());
         }
         this.level.explode(entity,pos.getX(), pos.getY(), pos.getZ(), 1.5F, Level.ExplosionInteraction.BLOCK);
     }

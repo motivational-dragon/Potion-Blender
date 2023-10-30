@@ -1,6 +1,5 @@
 package mod.motivationaldragon.potionblender.mixins;
 
-import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import org.spongepowered.asm.mixin.Mixin;
