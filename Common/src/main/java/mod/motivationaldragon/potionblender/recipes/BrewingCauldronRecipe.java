@@ -12,27 +12,28 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
-public class CauldronRecipe implements Recipe<Container> {
+public class BrewingCauldronRecipe implements Recipe<Container> {
 
 	private static final  ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "brewing_cauldron_recipe");
 	private final ItemStack output;
 	private final NonNullList<Ingredient> ingredients;
 	private final int brewingTime;
 
-	public CauldronRecipe(ItemStack output,Integer brewingTime, NonNullList<Ingredient> ingredients) {
+	public BrewingCauldronRecipe(ItemStack output, Integer brewingTime, NonNullList<Ingredient> ingredients) {
 		this.output = output;
 		this.ingredients = ingredients;
 		this.brewingTime = brewingTime;
 	}
 
 	@Override
-	public boolean matches(Container var1, Level var2) {
+	public boolean matches(@NotNull Container var1, @NotNull Level var2) {
 		return false;
 	}
 
 	@Override
-	public ItemStack assemble(Container var1, RegistryAccess var2) {
+	public @NotNull ItemStack assemble(@NotNull Container var1, @NotNull RegistryAccess var2) {
 		return output.copy();
 	}
 
@@ -42,71 +43,73 @@ public class CauldronRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess var1) {
+	public @NotNull ItemStack getResultItem(@NotNull RegistryAccess var1) {
 		return output;
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
-		return PotionBlenderRecipeSerializer.CAULDRON_RECIPE_SERIALIZER;
+	public @NotNull RecipeSerializer<?> getSerializer() {
+		return PotionBlenderRecipe.CAULDRON_RECIPE_SERIALIZER;
 	}
 
 
-	@Override
-	public RecipeType<?> getType() {
-		throw new RuntimeException("TODO: register this");
-		return Type.INSTANCE;
+	public int getBrewingTime() {
+		return brewingTime;
 	}
 
 	@Override
-	public NonNullList<Ingredient> getIngredients() {
+	public @NotNull RecipeType<?> getType() {
+		return PotionBlenderRecipe.CAULDORN_RECIPE_TYPE;
+	}
+
+	@Override
+	public @NotNull NonNullList<Ingredient> getIngredients() {
 		return this.ingredients;
 	}
 
-	public static class Type implements RecipeType<CauldronRecipe>{
-		public static final Type INSTANCE = new Type();
+	public static class Type implements RecipeType<BrewingCauldronRecipe>{
 	}
 
-	public static class CauldronRecipeSerializer implements RecipeSerializer<CauldronRecipe> {
+	public static class CauldronRecipeSerializer implements RecipeSerializer<BrewingCauldronRecipe> {
 
-		private static final Codec<CauldronRecipe> CODEC = RecordCodecBuilder.create(
+		private static final Codec<BrewingCauldronRecipe> CODEC = RecordCodecBuilder.create(
 				in -> in.group(
 						CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("output").forGetter(x->x.output),
 						Codec.INT.fieldOf("brewingTime").forGetter(x->x.brewingTime),
 
 						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients")
 								.flatXmap(ingredients -> {
-									Ingredient[] ingredientArr = ingredients.stream().filter(i -> !i.isEmpty()).toArray(i -> new Ingredient[i]);
+									Ingredient[] ingredientArr = ingredients.stream().filter(i -> !i.isEmpty()).toArray(Ingredient[]::new);
 									if (ingredientArr.length == 0) {
 										return DataResult.error(() -> "No ingredients for brewing cauldron recipe");
 									}
 									return DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredientArr));
 								}, DataResult::success).forGetter(x-> x.ingredients)
 
-				).apply(in, CauldronRecipe::new)
+				).apply(in, BrewingCauldronRecipe::new)
 		);
 
 		@Override
-		public Codec<CauldronRecipe> codec() {
+		public @NotNull Codec<BrewingCauldronRecipe> codec() {
 			return CODEC;
 		}
 
 		@Override
-		public CauldronRecipe fromNetwork(FriendlyByteBuf buff) {
+		public @NotNull BrewingCauldronRecipe fromNetwork(FriendlyByteBuf buff) {
 			ItemStack output = buff.readItem();
 			int brewingtime = buff.readInt();
 			NonNullList<Ingredient> ingredientsNonNullList = NonNullList.withSize(buff.readInt(), Ingredient.EMPTY);
 
 			ingredientsNonNullList.replaceAll(ignored -> Ingredient.fromNetwork(buff));
-			return new CauldronRecipe(output,brewingtime,ingredientsNonNullList);
+			return new BrewingCauldronRecipe(output,brewingtime,ingredientsNonNullList);
 		}
 
 		@Override
-		public void toNetwork(FriendlyByteBuf buff, CauldronRecipe cauldronRecipe) {
+		public void toNetwork(FriendlyByteBuf buff, BrewingCauldronRecipe brewingCauldronRecipe) {
 
-			buff.writeItem(cauldronRecipe.output);
-			buff.writeInt(cauldronRecipe.brewingTime);
-			for (Ingredient ingredient : cauldronRecipe.getIngredients()){
+			buff.writeItem(brewingCauldronRecipe.output);
+			buff.writeInt(brewingCauldronRecipe.brewingTime);
+			for (Ingredient ingredient : brewingCauldronRecipe.getIngredients()){
 				ingredient.toNetwork(buff);
 			}
 		}

@@ -7,6 +7,8 @@ import mod.motivationaldragon.potionblender.block.BrewingCauldron;
 import mod.motivationaldragon.potionblender.config.ConfigController;
 import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
 import mod.motivationaldragon.potionblender.platform.Service;
+import mod.motivationaldragon.potionblender.recipes.BrewingCauldronRecipe;
+import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipe;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.core.BlockPos;
@@ -21,8 +23,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -32,6 +36,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -41,6 +47,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 
 import static mod.motivationaldragon.potionblender.utils.ModUtils.isACombinedPotion;
@@ -49,32 +56,32 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     private static final String POTION_MIXER_KEY = Constants.MOD_ID+".ConfigController";
 
-    /**
-     * Hard coded recipe for the cauldron.
-     *
-     */
-
-    private static final Map<Item,Item> recipes = new HashMap<>(3);
 
     /**
-     * How high should dropped item spawn relative to the block position.
+     * How high dropped item spawn relative to the block position.
      * Useful to avoid having item spawn by cauldron being thrown horizontally
      */
     private static final int ITEM_DROP_OFFSET = 1;
 
     private static final PotionBlenderConfig config = ConfigController.getConfig();
 
-    static {
-        recipes.put(config.getNormalPotionIngredient(), Items.POTION);
-        recipes.put(config.getSplashPotionIngredient(), Items.SPLASH_POTION);
-        recipes.put(config.getLingeringPotionIngredient(), Items.LINGERING_POTION);
-    }
 
+    /**
+     * Is this cauldron counting brewing tick?
+     * A cauldron canBrew while not being actively brewing because the user is adding more item into it for instance
+     */
     private boolean isBrewing = false;
+
+    /**
+     * Can the cauldron brew a potion?*
+     * Aka are there potion in the cauldron and was an ingredient thrown into the cauldron?
+     */
     private boolean canBrew = false;
     private int progress = 0;
-    private static final int MAX_PROGRESS = config.getBrewingTime();
 
+    /**
+     * The crafting ingredient in used by this cauldron. This is only set when the cauldron is brewing
+     */
     @NotNull private Item craftingIngredient = Items.AIR;
 
 
@@ -87,10 +94,13 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      */
     private int numberOfPotion;
 
+    private final RecipeManager.CachedCheck<Container, BrewingCauldronRecipe> quickCheck;
+
     protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
         super(Service.PLATFORM.getPlatformBrewingCauldron(), pos, state);
         this.inventory = NonNullList.withSize(config.getMaxNbOfEffects(), ItemStack.EMPTY);
         this.numberOfPotion = 0;
+        this.quickCheck = RecipeManager.createCheck(PotionBlenderRecipe.CAULDORN_RECIPE_TYPE);
     }
 
     public NonNullList<ItemStack> getInventory() {
@@ -102,7 +112,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         return this.inventory.size();
     }
 
-    private void emptyCauldron(@NotNull Level level){
+    /**
+     * Empty this cauldron and reset it's state.
+     */
+    private void emptyCauldron(){
         inventory.clear();
         numberOfPotion = 0;
 
@@ -118,6 +131,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         syncInventoryWithClient();
         assert this.getLevel() != null;
         this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), Block.UPDATE_NEIGHBORS);
+    }
+
+    public Optional<RecipeHolder<BrewingCauldronRecipe>> getCauldronRecipe(ItemStack itemStack) {
+        return this.quickCheck.getRecipeFor(new SimpleContainer(itemStack), this.level);
     }
 
     @Nullable
@@ -181,12 +198,12 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
                 return;
             }
             //Craft potion
-            if(recipes.containsKey(itemStack.getItem()) && numberOfPotion > 0) {
+            var recipe =getCauldronRecipe(itemStack);
+            if(recipe.isPresent() && numberOfPotion > 0) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 canBrew = true;
                 craftingIngredient = itemStack.getItem();
 
-                assert getLevel() != null;
                 getLevel().setBlockAndUpdate(getBlockPos() , getLevel().getBlockState(this.getBlockPos()).setValue(BrewingCauldron.IS_BREWING,true));
 
                 this.setChanged();
@@ -201,7 +218,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      * @param level the level attached to this block entity
      * @param pos the pos of this block entity
      */
-    private void craftCombinedPotion(Level level, @NotNull BlockPos pos){
+    private void craftCombinedPotion(Level level, @NotNull BlockPos pos, BrewingCauldronRecipe recipe){
         if(level.isClientSide()) {return;}
 
         //This can be caused by de-sync with saved state, especially if the world is imported from older version.
@@ -215,7 +232,8 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         }
 
         //read recipe
-        Item potionType = Objects.requireNonNullElseGet(recipes.get(this.craftingIngredient), BrewingCauldronBlockEntity::getDefaultPotion);
+        Item potionType = Objects.requireNonNullElseGet(recipe.getResultItem(level.registryAccess()).getItem(),
+                BrewingCauldronBlockEntity::getDefaultPotion);
         ItemStack potionToCraft = new ItemStack(potionType);
 
 
@@ -226,6 +244,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_SPLASH_POTION, true);
         } else if (potionToCraft.is(Items.LINGERING_POTION)) {
             potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION, true);
+        }else {
+            throw new InvalidParameterException(potionToCraft +
+                    "Is not a valid potion. Valid potion are Potions, Splash Potions, Lingering Potion. Did you try to add an invalid recipe?");
         }
 
         List<MobEffectInstance> finalPotionStatusEffects = mergeCombinableEffects(this.getInventoryStatusEffectsInstances());
@@ -256,10 +277,8 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         Containers.dropItemStack(level, pos.getX(), (double)pos.getY()+ ITEM_DROP_OFFSET, pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, numberOfPotion -1));
 
         level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0f, 1.0f);
-        emptyCauldron(level);
+        emptyCauldron();
     }
-
-
 
 
     public static void tick(Level level, BlockPos pos, BlockState state, BrewingCauldronBlockEntity brewingCauldron ){
@@ -269,8 +288,12 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
                 brewingCauldron.isBrewing = true;
                 brewingCauldron.progress++;
 
-                if(brewingCauldron.progress >= MAX_PROGRESS){
-                    brewingCauldron.craftCombinedPotion(level,pos);
+                BrewingCauldronRecipe recipe = brewingCauldron.quickCheck.getRecipeFor(
+                        new SimpleContainer(new ItemStack(brewingCauldron.craftingIngredient)),level)
+                        .map(RecipeHolder::value).orElseThrow();
+
+                if(brewingCauldron.progress >= recipe.getBrewingTime()){
+                    brewingCauldron.craftCombinedPotion(level,pos, recipe);
                     brewingCauldron.stopBrewing();
                 }
                 setChanged(level,pos,state);
@@ -370,7 +393,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         if(level.isClientSide()) {return;}
         level.playSound(null, this.getBlockPos(), SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0f, 1.0f);
         Containers.dropContents(level, this.getBlockPos().offset(0, ITEM_DROP_OFFSET,0), this.getInventory());
-        emptyCauldron(level);
+        emptyCauldron();
     }
 
 
@@ -429,10 +452,11 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         updateListeners();
     }
 
-    public boolean isFull() {
-        return numberOfPotion == inventory.size();
-    }
 
+    /**
+     * Add an itemStack to the inventory of this cauldron
+     * @param itemStack the item to add
+     */
     private void addItem(@NotNull ItemStack itemStack) {
         assert level != null;
         //Check for incoherent state if inventory has changed since last Level load
@@ -479,6 +503,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         nbt.putBoolean(POTION_MIXER_KEY + "_canBrew",canBrew);
         super.saveAdditional(nbt);
     }
+
 
     public int getWaterColor(){
         return PotionUtils.getColor(getInventoryStatusEffectsInstances());
