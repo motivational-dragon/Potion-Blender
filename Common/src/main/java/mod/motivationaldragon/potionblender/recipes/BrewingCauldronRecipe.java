@@ -3,39 +3,52 @@ package mod.motivationaldragon.potionblender.recipes;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import mod.motivationaldragon.potionblender.Constants;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.stream.IntStream;
+
 public class BrewingCauldronRecipe implements Recipe<Container> {
 
-	private static final  ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "brewing_cauldron_recipe");
 	private final ItemStack output;
 	private final NonNullList<Ingredient> ingredients;
+
+	private final boolean requireAllIngredient;
 	private final int brewingTime;
 
-	public BrewingCauldronRecipe(ItemStack output, Integer brewingTime, NonNullList<Ingredient> ingredients) {
+	public BrewingCauldronRecipe(ItemStack output, int brewingTime, boolean requireAllIngredient, NonNullList<Ingredient> ingredients) {
 		this.output = output;
 		this.ingredients = ingredients;
 		this.brewingTime = brewingTime;
+		this.requireAllIngredient = requireAllIngredient;
 	}
 
 	@Override
-	public boolean matches(@NotNull Container var1, @NotNull Level var2) {
-		return false;
+	public boolean matches(@NotNull Container container, @NotNull Level level) {
+		if(level.isClientSide()) {return false;}
+
+		if(requireAllIngredient) {
+			return ingredients.stream().allMatch(ingredient ->
+					IntStream.range(0, container.getContainerSize())
+							.allMatch(i -> ingredient.test(container.getItem(i))));
+		}else {
+			return ingredients.stream().anyMatch(ingredient ->
+					IntStream.range(0, container.getContainerSize())
+							.anyMatch(i -> ingredient.test(container.getItem(i))));
+		}
 	}
 
 	@Override
 	public @NotNull ItemStack assemble(@NotNull Container var1, @NotNull RegistryAccess var2) {
 		return output.copy();
 	}
+
 
 	@Override
 	public boolean canCraftInDimensions(int var1, int var2) {
@@ -49,8 +62,9 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 	@Override
 	public @NotNull RecipeSerializer<?> getSerializer() {
-		return PotionBlenderRecipe.CAULDRON_RECIPE_SERIALIZER;
+		return PotionBlenderRecipe.POTION_BLENDING;
 	}
+
 
 
 	public int getBrewingTime() {
@@ -59,7 +73,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 	@Override
 	public @NotNull RecipeType<?> getType() {
-		return PotionBlenderRecipe.CAULDORN_RECIPE_TYPE;
+		return PotionBlenderRecipe.POTION_BLENDING_RECIPE_TYPE;
 	}
 
 	@Override
@@ -76,6 +90,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 				in -> in.group(
 						CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("output").forGetter(x->x.output),
 						Codec.INT.fieldOf("brewingTime").forGetter(x->x.brewingTime),
+						Codec.BOOL.fieldOf("requireAllIngredient").forGetter(x->x.requireAllIngredient),
 
 						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients")
 								.flatXmap(ingredients -> {
@@ -97,11 +112,12 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 		@Override
 		public @NotNull BrewingCauldronRecipe fromNetwork(FriendlyByteBuf buff) {
 			ItemStack output = buff.readItem();
-			int brewingtime = buff.readInt();
+			int brewingTime = buff.readInt();
+			boolean requireAllIngredient = buff.readBoolean();
 			NonNullList<Ingredient> ingredientsNonNullList = NonNullList.withSize(buff.readInt(), Ingredient.EMPTY);
 
 			ingredientsNonNullList.replaceAll(ignored -> Ingredient.fromNetwork(buff));
-			return new BrewingCauldronRecipe(output,brewingtime,ingredientsNonNullList);
+			return new BrewingCauldronRecipe(output,brewingTime,requireAllIngredient,ingredientsNonNullList);
 		}
 
 		@Override
@@ -109,7 +125,11 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 			buff.writeItem(brewingCauldronRecipe.output);
 			buff.writeInt(brewingCauldronRecipe.brewingTime);
-			for (Ingredient ingredient : brewingCauldronRecipe.getIngredients()){
+			buff.writeBoolean(brewingCauldronRecipe.requireAllIngredient);
+
+			NonNullList<Ingredient> recipeIngredients = brewingCauldronRecipe.getIngredients();
+			buff.writeInt(recipeIngredients.size());
+			for (Ingredient ingredient : recipeIngredients){
 				ingredient.toNetwork(buff);
 			}
 		}

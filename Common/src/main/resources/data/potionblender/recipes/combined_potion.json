@@ -1,0 +1,16 @@
+{
+ "type" : "potionblender:potion_blending",
+  "brewingTime" : 7,
+  "requireAllIngredient": true,
+  "ingredients": [
+    {
+      "item": "minecraft:nether_wart"
+    },
+    {
+      "item": "minecraft:gold_nugget"
+    }
+  ],
+  "output" : {
+    "item" : "minecraft:potion"
+  }
+}
