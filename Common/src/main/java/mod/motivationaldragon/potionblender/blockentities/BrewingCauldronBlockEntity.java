@@ -17,7 +17,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -383,7 +382,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         List<ServerPlayer> nearbyPlayers = this.getLevel().getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(5));
         for (ServerPlayer player : nearbyPlayers){
-            PotionBlenderCriterionTrigger.INSTANCE.trigger(player,pos, (ServerLevel) this.getLevel());
+            PotionBlenderCriterionTrigger.BLEW_CAULDRON.trigger(player);
         }
         this.level.explode(entity,pos.getX(), pos.getY(), pos.getZ(), 1.5F, Level.ExplosionInteraction.BLOCK);
     }

@@ -1,5 +1,6 @@
 package mod.motivationaldragon.potionblender.block;
 
+import com.mojang.serialization.MapCodec;
 import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
 import mod.motivationaldragon.potionblender.platform.Service;
 import net.minecraft.core.BlockPos;
