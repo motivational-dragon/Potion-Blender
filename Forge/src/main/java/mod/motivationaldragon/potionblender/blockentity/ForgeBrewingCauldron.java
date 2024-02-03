@@ -5,9 +5,10 @@ import mod.motivationaldragon.potionblender.networking.BrewingCauldronInvSyncS2C
 import mod.motivationaldragon.potionblender.networking.NetworkRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.Objects;
+
+import static net.minecraftforge.network.PacketDistributor.TRACKING_CHUNK;
 
 public class ForgeBrewingCauldron extends BrewingCauldronBlockEntity {
 
@@ -17,7 +18,7 @@ public class ForgeBrewingCauldron extends BrewingCauldronBlockEntity {
 
     @Override
     protected void syncInventoryWithClient() {
-        NetworkRegister.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(()-> Objects.requireNonNull(level).getChunkAt(worldPosition)
-        ), new BrewingCauldronInvSyncS2CPacket(this.getInventory(), this.getBlockPos()));
+        NetworkRegister.INSTANCE.send(new BrewingCauldronInvSyncS2CPacket(this.getInventory(), this.getBlockPos()),
+                TRACKING_CHUNK.with(Objects.requireNonNull(level).getChunkAt(worldPosition)));
     }
 }

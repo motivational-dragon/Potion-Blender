@@ -16,15 +16,15 @@ import java.util.List;
 
 @Mixin(LingeringPotionItem.class)
 
-
 public abstract class LingeringPotionMixin {
 	@Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
-	public void appendHoverText(ItemStack itemStack, Level $$1, List<Component> $$2, TooltipFlag $$3, CallbackInfo ci) {
+	public void appendHoverText(ItemStack itemStack, Level level, List<Component> list, TooltipFlag tooltipFlag, CallbackInfo ci) {
 		boolean isCombinedPotion = itemStack.getOrCreateTag().getBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION);
 		if(isCombinedPotion){
-			PotionUtils.addPotionTooltip(itemStack, $$2, 1F);
+			//Since the potion duration is precalculated, there is to reduce it here
+			PotionUtils.addPotionTooltip(itemStack, list,1f, level == null ? 20.0F : level.tickRateManager().tickrate());
 			ci.cancel();
-			return;
+			return; // Since we are in an inject method, we need to return here to avoid the original method from being executed.
 		}
 	}
 }

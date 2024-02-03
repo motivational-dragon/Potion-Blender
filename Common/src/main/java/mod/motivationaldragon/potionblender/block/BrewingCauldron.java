@@ -58,6 +58,12 @@ public class BrewingCauldron extends BaseEntityBlock {
     }
 
     @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        //TODO: Not used for now but will cause a bug in the future
+        return null;
+    }
+
+    @Override
     protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
         builder.add(HAS_FLUID,FACING);
         builder.add(REDRAW_DUMMY);
@@ -66,7 +72,7 @@ public class BrewingCauldron extends BaseEntityBlock {
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull  Level level,  @NotNull BlockState blockState,  @NotNull BlockEntityType<T> type) {
         return createTickerHelper(type, Service.PLATFORM.getPlatformBrewingCauldron(),BrewingCauldronBlockEntity::tick);
     }
 
@@ -96,7 +102,7 @@ public class BrewingCauldron extends BaseEntityBlock {
         createDisplayParticles(world, pos, random, state.getValue(FACING), ParticleTypes.SMOKE);
         createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(),ParticleTypes.SMOKE);
 
-        if (state.getValue(HAS_FLUID)){
+        if (Boolean.TRUE.equals(state.getValue(HAS_FLUID))){
             BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world, pos);
             if(brewingCauldronBlockEntity == null) {return;}
 
@@ -106,7 +112,7 @@ public class BrewingCauldron extends BaseEntityBlock {
             float z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
             world.addParticle(coloredSmoke, x, pos.getY() +1d, z, 0, 0 ,0);
 
-            if(state.getValue(IS_BREWING)){
+            if(Boolean.TRUE.equals(state.getValue(IS_BREWING))){
                  x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
                  z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
                 world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, pos.getY() +1d, z,0,0.07,0);
@@ -161,11 +167,11 @@ public class BrewingCauldron extends BaseEntityBlock {
     }
 
     @Override
-    public @NotNull VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+    public @NotNull VoxelShape getShape( @NotNull BlockState blockState,  @NotNull BlockGetter blockGetter,  @NotNull BlockPos blockPos,  @NotNull CollisionContext collisionContext) {
         return SHAPE;
     }
     @Override
-    public @NotNull VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+    public @NotNull VoxelShape getInteractionShape(@NotNull  BlockState blockState, @NotNull  BlockGetter blockGetter,  @NotNull BlockPos blockPos) {
         return INSIDE;
     }
 

@@ -45,7 +45,7 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(CraftingContainer craftingInventory, RegistryAccess registryAccess) {
+    public @NotNull ItemStack assemble(CraftingContainer craftingInventory, @NotNull RegistryAccess registryAccess) {
         ItemStack potionItemStack = craftingInventory.getItem(1 + craftingInventory.getWidth());
         if (!ModUtils.isCombinedLingeringPotion(potionItemStack)) {
             return ItemStack.EMPTY;

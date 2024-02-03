@@ -16,13 +16,13 @@ public class NetworkRegister {
 
     public static final SimpleChannel INSTANCE = ChannelBuilder.named(
             new ResourceLocation(Constants.MOD_ID, "main")
-    );
+    ).han;
 
 
     public static void register(){
-        int i = 0;
-        INSTANCE.registerMessage(i++, BrewingCauldronInvSyncS2CPacket.class, BrewingCauldronInvSyncS2CPacket::encode
-        , BrewingCauldronInvSyncS2CPacket::decode, makeClientHandler(BrewingCauldronInvSyncS2CPacket::handle));
+        INSTANCE.messageBuilder(BrewingCauldronInvSyncS2CPacket.class)
+                .encoder(BrewingCauldronInvSyncS2CPacket::encode)
+                .decoder(BrewingCauldronInvSyncS2CPacket::decode);
     }
 
     private static <T> BiConsumer<T, Supplier<NetworkEvent.Context>> makeClientHandler(Consumer<T> consumer) {

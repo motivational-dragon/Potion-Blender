@@ -247,7 +247,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         //Combined potion need to float, otherwise it's hitting the cauldron and trigger the explosion mechanic
         potionEntity.setNoGravity(true);
         potionEntity.setDeltaMovement(Vec3.ZERO);
-        potionEntity.setThrower(null);
         level.addFreshEntity(potionEntity);
 
 
@@ -380,7 +379,11 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
         BlockPos pos = this.getBlockPos();
 
+
+        //If we have a blockEntity but level is null, something has gone seriously wrong
+        @SuppressWarnings("ConstantConditions")
         List<ServerPlayer> nearbyPlayers = this.getLevel().getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(5));
+
         for (ServerPlayer player : nearbyPlayers){
             PotionBlenderCriterionTrigger.BLEW_CAULDRON.trigger(player);
         }
