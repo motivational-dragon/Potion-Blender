@@ -11,6 +11,7 @@ import mod.motivationaldragon.potionblender.recipes.BrewingCauldronRecipe;
 import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipe;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
+import mod.motivationaldragon.potionblender.utils.PotionEffectMerger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -27,7 +28,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -54,6 +54,7 @@ import static mod.motivationaldragon.potionblender.utils.ModUtils.isACombinedPot
 
 public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
+
     private static final String POTION_MIXER_KEY = Constants.MOD_ID+".ConfigController";
 
 
@@ -77,6 +78,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      * Aka are there potion in the cauldron and was an ingredient thrown into the cauldron?
      */
     private boolean canBrew = false;
+    /**
+     * The brewing progress of the cauldron. It is reset when the cauldron is not brewing or cannot craft anymore
+     */
     private int progress = 0;
 
     /**
@@ -84,11 +88,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
      */
     @NotNull private Item craftingIngredient = Items.AIR;
 
-
     /**
      * The cauldron inventory. It is mean to only contain potion
      */
-    private NonNullList<ItemStack> inventory;
+    private NonNullList<ItemStack> inventory =  NonNullList.withSize(8, ItemStack.EMPTY);;
     /**
      * The current amount of potion in the cauldron. Useful since the inventory size is constant
      */
@@ -98,9 +101,8 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
         super(Service.PLATFORM.getPlatformBrewingCauldron(), pos, state);
-        this.inventory = NonNullList.withSize(config.getMaxNbOfEffects(), ItemStack.EMPTY);
         this.numberOfPotion = 0;
-        this.quickCheck = RecipeManager.createCheck(PotionBlenderRecipe.CAULDORN_RECIPE_TYPE);
+        this.quickCheck = RecipeManager.createCheck(PotionBlenderRecipe.);
     }
 
     public NonNullList<ItemStack> getInventory() {
@@ -110,20 +112,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
     public int size() {
         return this.inventory.size();
-    }
-
-    /**
-     * Empty this cauldron and reset it's state.
-     */
-    private void emptyCauldron(){
-        inventory.clear();
-        numberOfPotion = 0;
-
-        BlockState hasFluid = level.getBlockState(this.getBlockPos())
-                .setValue(BrewingCauldron.HAS_FLUID, false)
-                .setValue(BrewingCauldron.IS_BREWING,false);
-        level.setBlockAndUpdate(this.getBlockPos(), hasFluid);
-        updateListeners();
     }
 
     private void updateListeners() {
@@ -193,7 +181,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
             }
             //Add item
             if(itemStack.is(Items.POTION) && numberOfPotion < inventory.size()){
-                if (wouldIgnoreInstantPotion(itemStack)) return;
+                if (PotionEffectMerger.wouldIgnoreInstantPotion(itemStack, this.getInventoryStatusEffectsInstances())) {
+                    return;
+                }
                 addItemToCauldron(itemEntity);
                 return;
             }
@@ -249,10 +239,11 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
                     "Is not a valid potion. Valid potion are Potions, Splash Potions, Lingering Potion. Did you try to add an invalid recipe?");
         }
 
-        List<MobEffectInstance> finalPotionStatusEffects = mergeCombinableEffects(this.getInventoryStatusEffectsInstances());
+        //TODO change decayRate to a config value
+        List<MobEffectInstance> finalPotionStatusEffects = PotionEffectMerger.mergeCombinableEffects(this.getInventoryStatusEffectsInstances(), 2);
 
         if(ModUtils.isCombinedLingeringPotion(potionToCraft)) {
-            finalPotionStatusEffects = handleLingeringPotionEffects(finalPotionStatusEffects);
+            finalPotionStatusEffects = PotionEffectMerger.mergeLingeringPotionEffects(finalPotionStatusEffects);
         }
 
         //create and drop the potion contained all the effect of the previous potion
@@ -314,81 +305,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         return Items.POTION;
     }
 
-
-    /**
-     * Merge same effects in a potion. For instance poison 30sec and poison 40sec merge both effect into poison 70sec instead
-     */
-    private static List<MobEffectInstance>  mergeCombinableEffects(List<MobEffectInstance> effectInstances) {
-
-        Collection<MobEffect> mergedStatusEffects = new HashSet<>();
-        List<MobEffectInstance> finalPotionStatusEffects = new ArrayList<>(effectInstances);
-
-        // The tricky part here is that a potion type share 1 MobEffectInstance, making it impossible to differentiate them using ==
-        // Therefore to test if effectInstance1 == effectInstance2 we use a range based for loop and test indices
-        // This is otherwise a simple double iteration where we remember if we have already seen an effect type
-        for(int i=0; i<finalPotionStatusEffects.size(); i++ ){
-            MobEffectInstance effectInstance1 = finalPotionStatusEffects.get(i);
-
-            List<MobEffectInstance> combinableEffects = new ArrayList<>();
-
-            int totalDuration = effectInstance1.getDuration();
-            //Effect are always combinable with themselves
-            combinableEffects.add(effectInstance1);
-
-            //This is the inversely proportional gain. First added potion has 1/2 the duration, 2nd 1/3, 3rd 1/4
-            //decay = 1/potionDecay
-            int potionDecay = 2;
-
-            for(int j=0; j<finalPotionStatusEffects.size(); j++ ){
-                MobEffectInstance effectInstance2 = finalPotionStatusEffects.get(j);
-
-                if(i!=j && !mergedStatusEffects.contains(effectInstance1.getEffect()) && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
-                    totalDuration += (int) ((1.0d / potionDecay) * effectInstance2.getDuration());
-                    potionDecay++;
-                    combinableEffects.add(effectInstance2);
-                }
-            }
-
-            mergedStatusEffects.add(effectInstance1.getEffect());
-
-            if(combinableEffects.size() > 1){
-                MobEffectInstance combinedEffect = ModUtils.copyEffectWithNewDuration(combinableEffects.get(0), totalDuration);
-                finalPotionStatusEffects.removeAll(combinableEffects);
-                finalPotionStatusEffects.add(combinedEffect);
-            }
-        }
-        return finalPotionStatusEffects;
-    }
-
-
-    /** Handle lingering potion lesser duration and potency combination
-     Quoting <a href="https://minecraft.fandom.com/wiki/Lingering_Potion">https://minecraft.fandom.com/wiki/Lingering_Potion</a>:
-     "For finalPotionStatusEffects with duration, the duration applied by the cloud is 1⁄4 that of the corresponding potion."
-     "For finalPotionStatusEffects without duration such as healing or harming, the potency of the effect is 1⁄2 that of the corresponding potion"
-     **/
-    @NotNull
-    private static List<MobEffectInstance> handleLingeringPotionEffects(List<MobEffectInstance> finalPotionStatusEffects) {
-        List<MobEffectInstance> lingeringEffects = new ArrayList<>(finalPotionStatusEffects.size());
-        for (MobEffectInstance effectInstance : finalPotionStatusEffects){
-            if(effectInstance.getEffect().isInstantenous()){
-                //We are using the full constructor to copy effect witch is why the call is so long
-                lingeringEffects.add(new MobEffectInstance(effectInstance.getEffect(), effectInstance.getDuration(),
-                        Math.round(effectInstance.getAmplifier()*0.5f),
-                        effectInstance.isAmbient(), effectInstance.isVisible(),effectInstance.showIcon()));
-            } else {
-                lingeringEffects.add(ModUtils.copyEffectWithNewDuration(effectInstance, Math.round(effectInstance.getDuration() * 0.25f)));
-            }
-
-        }
-        return lingeringEffects;
-    }
-
-    private static boolean areEffectsDurationsAddable(MobEffectInstance effectInstance1, MobEffectInstance effectInstance2) {
-        return effectInstance1.getEffect() == effectInstance2.getEffect() &&
-                effectInstance1.getAmplifier() == effectInstance2.getAmplifier();
-    }
-
-
     private void dropInventoryContent(@NotNull Level level) {
         if(level.isClientSide()) {return;}
         level.playSound(null, this.getBlockPos(), SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0f, 1.0f);
@@ -396,7 +312,16 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         emptyCauldron();
     }
 
+    private void emptyCauldron(){
+        inventory.clear();
+        numberOfPotion = 0;
 
+        BlockState hasFluid = level.getBlockState(this.getBlockPos())
+                .setValue(BrewingCauldron.HAS_FLUID, false)
+                .setValue(BrewingCauldron.IS_BREWING,false);
+        level.setBlockAndUpdate(this.getBlockPos(), hasFluid);
+        updateListeners();
+    }
 
     private void explode(Entity entity) {
         assert level != null;
@@ -411,44 +336,26 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
         this.level.explode(entity,pos.getX(), pos.getY(), pos.getZ(), 1.5F, Level.ExplosionInteraction.BLOCK);
     }
 
-    private boolean wouldIgnoreInstantPotion(ItemStack itemStack) {
-        List<MobEffectInstance> effectInstances = PotionUtils.getMobEffects(itemStack);
-        effectInstances = effectInstances
-                .stream()
-                .filter(e->e.getEffect().isInstantenous()).toList();
-        return this.getInventoryStatusEffectsInstances()
-                .stream()
-                .anyMatch(effectInstances::contains);
-    }
-
-
-
 
     /**
      * Add an item entity to the cauldron inventory
      * @param itemEntity the item entity
      */
     private void addItemToCauldron(@NotNull ItemEntity itemEntity) {
-
         assert level != null;
         if(level.isClientSide()) {return;}
-
         level.playSound(null, this.getBlockPos(), SoundEvents.BOAT_PADDLE_WATER, SoundSource.BLOCKS, 2 * level.random.nextFloat(), 1.0f);
 
         //add potion to cauldron inventory
         addItem(itemEntity.getItem());
 
-
         //Since we added a potion, the cauldron must now appear with fluid
         BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
-
         level.setBlockAndUpdate(this.getBlockPos(),mixerCauldronBlockState);
 
         //To force re-rendering of the block tint
         forceChunkUpdate();
-
         itemEntity.remove(Entity.RemovalReason.DISCARDED);
-
         updateListeners();
     }
 

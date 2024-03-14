@@ -19,29 +19,22 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 	private final ItemStack output;
 	private final NonNullList<Ingredient> ingredients;
 
-	private final boolean requireAllIngredient;
+	private final boolean usePotionMeringRules;
 	private final int brewingTime;
 
-	public BrewingCauldronRecipe(ItemStack output, int brewingTime, boolean requireAllIngredient, NonNullList<Ingredient> ingredients) {
+	public BrewingCauldronRecipe(ItemStack output, int brewingTime, boolean usePotionMergingRules, NonNullList<Ingredient> ingredients) {
 		this.output = output;
 		this.ingredients = ingredients;
 		this.brewingTime = brewingTime;
-		this.requireAllIngredient = requireAllIngredient;
+		this.usePotionMeringRules = usePotionMergingRules;
 	}
 
 	@Override
 	public boolean matches(@NotNull Container container, @NotNull Level level) {
 		if(level.isClientSide()) {return false;}
-
-		if(requireAllIngredient) {
-			return ingredients.stream().allMatch(ingredient ->
-					IntStream.range(0, container.getContainerSize())
-							.allMatch(i -> ingredient.test(container.getItem(i))));
-		}else {
 			return ingredients.stream().anyMatch(ingredient ->
 					IntStream.range(0, container.getContainerSize())
 							.anyMatch(i -> ingredient.test(container.getItem(i))));
-		}
 	}
 
 	@Override
@@ -90,11 +83,11 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 				in -> in.group(
 						CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("output").forGetter(x->x.output),
 						Codec.INT.fieldOf("brewingTime").forGetter(x->x.brewingTime),
-						Codec.BOOL.fieldOf("requireAllIngredient").forGetter(x->x.requireAllIngredient),
+						Codec.BOOL.optionalFieldOf("usePotionMergingRules", false).forGetter(x->x.usePotionMeringRules),
 
 						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients")
-								.flatXmap(ingredients -> {
-									Ingredient[] ingredientArr = ingredients.stream().filter(i -> !i.isEmpty()).toArray(Ingredient[]::new);
+								.flatXmap(ingredientList -> {
+									Ingredient[] ingredientArr = ingredientList.stream().filter(i -> !i.isEmpty()).toArray(Ingredient[]::new);
 									if (ingredientArr.length == 0) {
 										return DataResult.error(() -> "No ingredients for brewing cauldron recipe");
 									}
@@ -113,11 +106,11 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 		public @NotNull BrewingCauldronRecipe fromNetwork(FriendlyByteBuf buff) {
 			ItemStack output = buff.readItem();
 			int brewingTime = buff.readInt();
-			boolean requireAllIngredient = buff.readBoolean();
+			boolean usePotionMergingRules = buff.readBoolean();
 			NonNullList<Ingredient> ingredientsNonNullList = NonNullList.withSize(buff.readInt(), Ingredient.EMPTY);
 
 			ingredientsNonNullList.replaceAll(ignored -> Ingredient.fromNetwork(buff));
-			return new BrewingCauldronRecipe(output,brewingTime,requireAllIngredient,ingredientsNonNullList);
+			return new BrewingCauldronRecipe(output,brewingTime,usePotionMergingRules,ingredientsNonNullList);
 		}
 
 		@Override
@@ -125,7 +118,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 			buff.writeItem(brewingCauldronRecipe.output);
 			buff.writeInt(brewingCauldronRecipe.brewingTime);
-			buff.writeBoolean(brewingCauldronRecipe.requireAllIngredient);
+			buff.writeBoolean(brewingCauldronRecipe.usePotionMeringRules);
 
 			NonNullList<Ingredient> recipeIngredients = brewingCauldronRecipe.getIngredients();
 			buff.writeInt(recipeIngredients.size());
