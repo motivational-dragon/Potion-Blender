@@ -15,9 +15,9 @@ public class PotionEffectMerger {
 	/**
 	 * Merge same effects in a potion. For instance poison 30sec and poison 40sec merge both effect into poison 70sec instead
 	 * @param effectInstances the list of potion effects
-	 * @param decayRate the decay rate of same effects
+	 * @param decayRate This is the inversely proportional gain. First added potion has 1/2 the duration, 2nd 1/3, 3rd 1/4
 	 */
-	public static List<MobEffectInstance> mergeCombinableEffects(List<MobEffectInstance> effectInstances, int decayRate) {
+	public static List<MobEffectInstance> mergeCombinableEffects(List<MobEffectInstance> effectInstances, double decayRate) {
 
 	    Collection<MobEffect> mergedStatusEffects = new HashSet<>();
 	    List<MobEffectInstance> finalPotionStatusEffects = new ArrayList<>(effectInstances);
@@ -31,11 +31,9 @@ public class PotionEffectMerger {
 	        List<MobEffectInstance> combinableEffects = new ArrayList<>();
 
 	        int totalDuration = effectInstance1.getDuration();
-	        //Effect are always combinable with themselves
+	        //Effect are always combinable with themselves, so we add the first effect to the list
 	        combinableEffects.add(effectInstance1);
 
-	        //This is the inversely proportional gain. First added potion has 1/2 the duration, 2nd 1/3, 3rd 1/4
-	        //decay = 1/potionDecay
 
 
 	        for(int j=0; j<finalPotionStatusEffects.size(); j++ ){
@@ -81,11 +79,23 @@ public class PotionEffectMerger {
 	    return lingeringEffects;
 	}
 
+	/**
+	 * Check if two potion effects are combinable. Two potion effects are combinable if they have the same effect and amplifier
+	 * @param effectInstance1 the first potion effect
+	 * @param effectInstance2 the second potion effect
+	 * @return true if the two potion effects are combinable
+	 */
 	private static boolean areEffectsDurationsAddable(MobEffectInstance effectInstance1, MobEffectInstance effectInstance2) {
 		return effectInstance1.getEffect() == effectInstance2.getEffect() &&
 				effectInstance1.getAmplifier() == effectInstance2.getAmplifier();
 	}
 
+	/**
+	 * Check if the potion would ignore instant potion effects because instant potion effects do not stack
+	 * @param potion the potion to check
+	 * @param cauldronInventoryEffects the list of effects in the cauldron
+	 * @return true if the potion would ignore instant potion effects
+	 */
 	public static boolean wouldIgnoreInstantPotion(ItemStack potion, List<MobEffectInstance> cauldronInventoryEffects) {
 	    List<MobEffectInstance> effectInstances = PotionUtils.getMobEffects(potion);
 	    effectInstances = effectInstances
