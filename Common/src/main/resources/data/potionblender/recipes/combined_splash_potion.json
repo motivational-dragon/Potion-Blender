@@ -1,0 +1,19 @@
+{
+  "type" : "potionblender:potion_blending",
+  "brewingTime" : 140,
+  "usePotionMergingRules": true,
+  "color": 16711680,
+  "isOrdered": false,
+  "ingredients": [
+    {
+      "item": "minecraft:potion"
+    },
+    {
+      "item": "minecraft:potion"
+    }
+  ],
+  "output" : {
+    "item" : "minecraft:potion",
+    "count" : 1
+  }
+}

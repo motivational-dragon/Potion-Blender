@@ -1,0 +1,19 @@
+{
+  "type" : "potionblender:potion_blending",
+  "brewingTime" : 140,
+  "usePotionMergingRules": false,
+  "color": 16711680,
+  "isOrdered": false,
+  "ingredients": [
+    {
+      "item": "minecraft:melon"
+    },
+    {
+      "item": "minecraft:gold_nugget"
+    }
+  ],
+  "output" : {
+    "item" : "minecraft:glistering_melon_slice",
+    "count" : 1
+  }
+}

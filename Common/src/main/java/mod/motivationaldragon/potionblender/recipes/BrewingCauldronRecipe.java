@@ -50,9 +50,18 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 	@Override
 	public boolean matches(@NotNull Container container, @NotNull Level level) {
 		if(level.isClientSide()) {return false;}
-			return ingredients.stream().anyMatch(ingredient ->
-					IntStream.range(0, container.getContainerSize())
-							.anyMatch(i -> ingredient.test(container.getItem(i))));
+
+		//TODO DEBUG BROKEN CONDITION
+		if(isOrdered) {
+			//For each ingredient in ingredients, there is an item in the container that matches the ingredient at the same index
+			if(container.getContainerSize() != ingredients.size()) {return false;}
+			return IntStream.range(0, ingredients.size()).allMatch(i -> ingredients.get(i).test(container.getItem(i)));
+		} else {
+			//For each ingredients, there is at lease one item in the container that matches the ingredient
+			if(container.getContainerSize() != ingredients.size()) {return false;}
+			return ingredients.stream().allMatch(ingredient -> IntStream.range(0, container.getContainerSize())
+					.anyMatch(i -> ingredient.test(container.getItem(i))));
+		}
 	}
 
 
@@ -107,7 +116,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 						Codec.BOOL.optionalFieldOf("usePotionMergingRules", false).forGetter(x->x.usePotionMergingRules),
 						Codec.INT.fieldOf("color").forGetter(x->x.color),
 						Codec.BOOL.fieldOf("isOrdered").forGetter(x->x.isOrdered),
-						Codec.DOUBLE.fieldOf("decayRate").forGetter(x->x.decayRate),
+						Codec.DOUBLE.optionalFieldOf("decayRate",2.0).forGetter(x->x.decayRate),
 
 						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients")
 								.flatXmap(ingredientList -> {
@@ -118,7 +127,8 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 									return DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredientArr));
 								}, DataResult::success).forGetter(x-> x.ingredients),
 
-						CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("result").forGetter(x->x.output)
+						//TODO: Disallow  using usePotionMergingRules if the output is not a potion
+						CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("output").forGetter(x->x.output)
 				).apply(in, BrewingCauldronRecipe::new)
 		);
 

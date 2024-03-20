@@ -1,0 +1,21 @@
+
+
+{
+  "type" : "potionblender:potion_blending",
+  "brewingTime" : 140,
+  "usePotionMergingRules": false,
+  "color": 16711680,
+  "isOrdered": false,
+  "ingredients": [
+    {
+      "item": "minecraft:apple"
+    },
+    {
+      "item": "minecraft:gold_nugget"
+    }
+  ],
+  "output" : {
+    "item" : "minecraft:golden_apple",
+    "count" : 1
+  }
+}
