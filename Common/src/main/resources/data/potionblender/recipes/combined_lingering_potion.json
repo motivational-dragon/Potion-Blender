@@ -6,17 +6,17 @@
   "isOrdered": true,
   "ingredients": [
     {
-      "item": "minecraft:splash_potion"
+      "item": "minecraft:lingering_potion"
     },
     {
-      "item": "minecraft:splash_potion"
+      "item": "minecraft:lingering_potion"
     },
     {
-      "item": "minecraft:gunpowder"
+      "item": "minecraft:dragon_breath"
     }
   ],
   "output" : {
-    "item" : "minecraft:splash_potion",
+    "item" : "minecraft:lingering_potion",
     "count" : 1
   }
 }

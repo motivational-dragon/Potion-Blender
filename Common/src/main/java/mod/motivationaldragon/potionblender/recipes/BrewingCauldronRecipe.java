@@ -3,11 +3,13 @@ package mod.motivationaldragon.potionblender.recipes;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import mod.motivationaldragon.potionblender.Constants;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -84,7 +86,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 	@Override
 	public @NotNull RecipeSerializer<?> getSerializer() {
-		return PotionBlenderRecipe.POTION_BLENDING;
+		return PotionBlenderRecipes.POTION_BLENDING;
 	}
 
 
@@ -95,7 +97,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 	@Override
 	public @NotNull RecipeType<?> getType() {
-		return PotionBlenderRecipe.POTION_BLENDING_RECIPE_TYPE;
+		return PotionBlenderRecipes.POTION_BLENDING_RECIPE_TYPE;
 	}
 
 	@Override
@@ -114,7 +116,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 				in -> in.group(
 						Codec.INT.fieldOf("brewingTime").forGetter(x->x.brewingTime),
 						Codec.BOOL.optionalFieldOf("usePotionMergingRules", false).forGetter(x->x.usePotionMergingRules),
-						Codec.INT.fieldOf("color").forGetter(x->x.color),
+						Codec.INT.optionalFieldOf("color", Constants.WATER_TINT).forGetter(x->x.color),
 						Codec.BOOL.fieldOf("isOrdered").forGetter(x->x.isOrdered),
 						Codec.DOUBLE.optionalFieldOf("decayRate",2.0).forGetter(x->x.decayRate),
 
@@ -127,8 +129,18 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 									return DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredientArr));
 								}, DataResult::success).forGetter(x-> x.ingredients),
 
-						//TODO: Disallow  using usePotionMergingRules if the output is not a potion
-						CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("output").forGetter(x->x.output)
+
+						CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("output").flatXmap(
+								itemStack -> {
+									if (itemStack.isEmpty()) {
+										return DataResult.error(() -> "Empty output for brewing cauldron recipe");
+									}
+									//Disallow using usePotionMergingRules if the output is not a potion
+									if (itemStack.getItem() instanceof PotionItem) {
+										return DataResult.error(() -> "Output is a potion but has no tag");
+									}
+									return DataResult.success(itemStack);
+								}, DataResult::success).forGetter(x->x.output)
 				).apply(in, BrewingCauldronRecipe::new)
 		);
 

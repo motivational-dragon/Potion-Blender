@@ -4,7 +4,6 @@ import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 
 
 @Environment(EnvType.CLIENT)
@@ -18,7 +17,7 @@ public class ModColorProvider {
         //Cauldron water color
         ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) ->{
             assert view != null;
-                Object data =  ((RenderAttachedBlockView)view).getBlockEntityRenderAttachment(pos);
+                Object data =  view.getBlockEntityRenderData(pos);
 
                 if(data != null){return (int) data;}
             return 3694022; // mc color code for water

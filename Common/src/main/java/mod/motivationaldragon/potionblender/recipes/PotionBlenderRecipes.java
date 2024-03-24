@@ -9,7 +9,7 @@ import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 
 import java.util.function.BiConsumer;
 
-public class PotionBlenderRecipe {
+public class PotionBlenderRecipes {
 
     public static final SimpleCraftingRecipeSerializer<CombinedTippedArrowRecipe> COMBINED_TIPPED_ARROW_RECIPE = new SimpleCraftingRecipeSerializer<>(CombinedTippedArrowRecipe::new);
     public static final BrewingCauldronRecipe.CauldronRecipeSerializer POTION_BLENDING = new BrewingCauldronRecipe.CauldronRecipeSerializer();

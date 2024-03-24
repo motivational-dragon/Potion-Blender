@@ -8,7 +8,7 @@ import mod.motivationaldragon.potionblender.config.ConfigController;
 import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
 import mod.motivationaldragon.potionblender.platform.Service;
 import mod.motivationaldragon.potionblender.recipes.BrewingCauldronRecipe;
-import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipe;
+import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipes;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import mod.motivationaldragon.potionblender.utils.PotionEffectMerger;
@@ -33,6 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -83,23 +84,26 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	private int brewingProgress = 0;
 
 
-
 	/**
 	 * The cauldron inventory. It is mean to only contain potion
 	 */
 	private NonNullList<ItemStack> inventory = NonNullList.withSize(8, ItemStack.EMPTY);
-	;
 	/**
 	 * The current amount of potion in the cauldron. Useful since the inventory size is constant
 	 */
 	private int numberOfItems;
 
+	/**
+	 * Quick check for the main thread
+	 */
 	private final RecipeManager.CachedCheck<Container, BrewingCauldronRecipe> quickCheck;
+
+
 
 	protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
 		super(Service.PLATFORM.getPlatformBrewingCauldron(), pos, state);
 		this.numberOfItems = 0;
-		this.quickCheck = RecipeManager.createCheck(PotionBlenderRecipe.POTION_BLENDING_RECIPE_TYPE);
+		this.quickCheck = RecipeManager.createCheck(PotionBlenderRecipes.POTION_BLENDING_RECIPE_TYPE);
 	}
 
 	public NonNullList<ItemStack> getInventory() {
@@ -178,12 +182,20 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 					PotionEffectMerger.wouldIgnoreInstantPotion(itemStack, this.getInventoryStatusEffectsInstances()))
 				return;
 
+			//Prevent adding more item than the inventory can hold
+			if (numberOfItems >= inventory.size()) {
+				return;
+			}
+
 			addItemToCauldron(itemEntity);
 
 			//Craft the potion if a recipe is found
-			if (getRecipe().isPresent()) {
+			Optional<RecipeHolder<BrewingCauldronRecipe>> recipe = getRecipe();
+			if (recipe.isPresent()) {
 				entity.remove(Entity.RemovalReason.DISCARDED);
+
 				canBrew = true;
+
 
 				getLevel().setBlockAndUpdate(getBlockPos(), getLevel().getBlockState(this.getBlockPos()).setValue(BrewingCauldron.IS_BREWING, true));
 
@@ -192,6 +204,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 			}
 		}
 	}
+
 
 	private Optional<RecipeHolder<BrewingCauldronRecipe>> getRecipe() {
 		if (numberOfItems <= 0) {
@@ -202,7 +215,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 						.filter(itemStack -> !itemStack.is(Items.AIR))
 						.toArray(ItemStack[]::new));
 		return quickCheck.getRecipeFor(container, level);
-
 	}
 
 
@@ -229,9 +241,9 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 			potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION, true);
 		} else {
 			Constants.LOG.error(
-					"Cannot merge potion to an item that is not a potion." +
+					String.format("Cannot merge potion to an item that is not a potion. " +
 							"Valid potion are Potions, Splash Potions, Lingering Potion. Did you try to add an invalid recipe?" +
-							"The item is: " + potionToCraft.getItem());
+							"The item is: %s", potionToCraft.getItem()));
 			return;
 		}
 		List<MobEffectInstance> finalPotionStatusEffects = PotionEffectMerger.mergeCombinableEffects(this.getInventoryStatusEffectsInstances(), recipe.getDecayRate());
@@ -251,18 +263,19 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 		//Drop all old potion bottle minus the one used for the new potion.
 		Containers.dropItemStack(level, pos.getX(), (double) pos.getY() + ITEM_DROP_OFFSET, pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, numberOfItems - 1));
-		level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0f, 1.0f);
+
 		emptyCauldron();
 	}
 
 	private static void outputItem(Level level, @NotNull BlockPos pos, ItemStack potionItemStack) {
-		var potionEntity = new ItemEntity(level, pos.getX() + 0.5, (double) pos.getY() + ITEM_DROP_OFFSET, pos.getZ() + 0.5, potionItemStack);
+		ItemEntity outputItemEntity = new ItemEntity(level, pos.getX() + 0.5, (double) pos.getY() + ITEM_DROP_OFFSET, pos.getZ() + 0.5, potionItemStack);
 
 		//Combined potion need to float, otherwise it's hitting the cauldron and trigger the explosion mechanic
-		potionEntity.setNoGravity(true);
-		potionEntity.setDeltaMovement(Vec3.ZERO);
-		potionEntity.setThrower(null);
-		level.addFreshEntity(potionEntity);
+		outputItemEntity.setNoGravity(true);
+		outputItemEntity.setDeltaMovement(Vec3.ZERO);
+		outputItemEntity.setThrower(null);
+		level.addFreshEntity(outputItemEntity);
+		level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0f, 1.0f);
 	}
 
 
@@ -285,11 +298,12 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		}
 
 		if (brewingCauldron.brewingProgress >= recipe.value().getBrewingTime()) {
-			if ( recipe.value().usePotionMeringRules()) {
-				brewingCauldron.craftCombinedPotion(level, pos,  recipe.value());
+			if (recipe.value().usePotionMeringRules()) {
+				brewingCauldron.craftCombinedPotion(level, pos, recipe.value());
 			} else {
 				//Handle the case where we are not crafting potion
-				outputItem(level, pos,  recipe.value().getResultItem(level.registryAccess()));
+				outputItem(level, pos, recipe.value().getResultItem(level.registryAccess()));
+
 				brewingCauldron.emptyCauldron();
 				brewingCauldron.updateListeners();
 			}
@@ -379,6 +393,12 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		if (numberOfItems > inventory.size()) {
 			countPotion(inventory);
 		}
+
+		//Prevent adding more item than the inventory can hold
+		if (numberOfItems >= inventory.size()) {
+			return;
+		}
+
 		inventory.set(numberOfItems, itemStack);
 		numberOfItems++;
 	}
@@ -421,9 +441,21 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 
 	public int getWaterColor() {
-		//TODO: water always have the same colo
-		if(canBrew){return getRecipe().map(r->r.value().getColor()).orElse(Constants.WATER_TINT);}
-		return PotionUtils.getColor(getInventoryStatusEffectsInstances());
+
+		//Todo: read the color from the recipe
+
+		var effects = getInventoryStatusEffectsInstances();
+		if (effects.isEmpty()) {
+			//return getColorFromInventoryItemsSprite();
+			return Constants.WATER_TINT;
+		} else {
+			return PotionUtils.getColor(effects);
+		}
+	}
+
+	private int getColorFromInventoryItemsSprite() {
+		//TODO: Find a way to average the color of the item sprite
+		return Constants.WATER_TINT;
 	}
 
 	@Override
@@ -441,8 +473,11 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		}
 
 		for (int i = 0; i < this.numberOfItems; i++) {
-			ItemStack potionItemStack = inventory.get(i);
-			effects.addAll(PotionUtils.getMobEffects(potionItemStack));
+			ItemStack itemStack = inventory.get(i);
+			//Since all potion derive from the same class, we only need to check for the potion item
+			if (itemStack.getItem() instanceof PotionItem) {
+				effects.addAll(PotionUtils.getMobEffects(itemStack));
+			}
 		}
 		return effects;
 	}

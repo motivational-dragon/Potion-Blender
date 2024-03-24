@@ -6,17 +6,17 @@
   "isOrdered": true,
   "ingredients": [
     {
-      "item": "minecraft:splash_potion"
+      "item": "minecraft:potion"
     },
     {
-      "item": "minecraft:splash_potion"
+      "item": "minecraft:potion"
     },
     {
-      "item": "minecraft:gunpowder"
+      "item": "minecraft:nether_wart"
     }
   ],
   "output" : {
-    "item" : "minecraft:splash_potion",
+    "item" : "minecraft:potion",
     "count" : 1
   }
 }
