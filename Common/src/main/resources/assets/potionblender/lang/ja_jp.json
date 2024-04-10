@@ -1,0 +1,8 @@
+{
+  "item.potionblender.combined_potion": "混合したポーション",
+  "item.potionblender.splash_combined_potion": "混合したスプラッシュポーション",
+  "item.potionblender.lingering_combined_potion": "混合した残留ポーション",
+
+  "block.potionblender.brewing_cauldron": "醸造用大釜",
+  "item.potionblender.brewing_cauldron": "醸造用大釜"
+}
