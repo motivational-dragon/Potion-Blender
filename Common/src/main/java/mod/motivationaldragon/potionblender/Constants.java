@@ -15,5 +15,4 @@ public class Constants {
 
 	public static final int WATER_TINT = 3694022;
 
-	public static final int CAULDRON_INVENTORY_SIZE = 5;
 }

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import mod.motivationaldragon.potionblender.Constants;
+import mod.motivationaldragon.potionblender.config.ConfigController;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
@@ -151,7 +152,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 									}
 									return DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredientArr));
 								}, DataResult::success).forGetter(x-> {
-									if(x.ingredients.size() > Constants.CAULDRON_INVENTORY_SIZE) {
+									if(x.ingredients.size() > ConfigController.getConfig().getCauldron_inventory_size()) {
 										throw new IllegalArgumentException("Too many ingredients for brewing cauldron recipe");
 									}
 									return x.ingredients;

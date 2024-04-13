@@ -86,7 +86,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	/**
 	 * The cauldron inventory. It is mean to only contain potion
 	 */
-	private NonNullList<ItemStack> inventory = NonNullList.withSize(Constants.CAULDRON_INVENTORY_SIZE, ItemStack.EMPTY);
+	private NonNullList<ItemStack> inventory = NonNullList.withSize(ConfigController.getConfig().getCauldron_inventory_size(), ItemStack.EMPTY);
 	/**
 	 * The current amount of potion in the cauldron. Useful since the inventory size is constant
 	 */
@@ -267,7 +267,8 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		outputItem(level, pos, potionItemStack);
 
 		//Drop all old potion bottle minus the one used for the new potion.
-		Containers.dropItemStack(level, pos.getX(), (double) pos.getY() + ITEM_DROP_OFFSET, pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, numberOfItems - 1));
+		int nbOfPotions = inventory.stream().filter(itemStack -> itemStack.getItem() instanceof PotionItem).mapToInt(ItemStack::getCount).sum();
+		Containers.dropItemStack(level, pos.getX(), (double) pos.getY() + ITEM_DROP_OFFSET, pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, nbOfPotions));
 
 		emptyCauldron();
 	}
@@ -308,7 +309,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 			} else {
 				//Handle the case where we are not crafting potion
 				outputItem(level, pos, recipe.value().getResultItem(level.registryAccess()));
-
 				brewingCauldron.emptyCauldron();
 				brewingCauldron.updateListeners();
 			}
@@ -388,9 +388,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	}
 
 
+
 	/**
 	 * Add an itemStack to the inventory of this cauldron
-	 *
+	 *I
 	 * @param itemStack the item to add
 	 */
 	private void addItem(@NotNull ItemStack itemStack) {
@@ -452,7 +453,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 	private int computeWaterColor() {
 		var recipe =getRecipe();
-		if (recipe.isPresent()) {
+		if (recipe.isPresent() && !recipe.get().value().usePotionMeringRules()) {
 			return recipe.get().value().getColor();
 		} else {
 			return PotionUtils.getColor(getInventoryStatusEffectsInstances());

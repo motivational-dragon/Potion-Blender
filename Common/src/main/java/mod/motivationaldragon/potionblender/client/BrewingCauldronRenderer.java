@@ -72,7 +72,9 @@ public class BrewingCauldronRenderer<T extends BrewingCauldronBlockEntity> imple
 			float minV = (water.getV1() - water.getV0()) * (1 - sizeFactor);
 
 			float cauldronFullness =((float)brewingCauldronBlock.getNumberOfItems() / brewingCauldronBlock.getInventory().size());
-			float height = -0.5F + cauldronFullness * 0.5F;
+			float maxHeight = 0.4F;
+			float minHeight = 0.5F;
+			float height = -minHeight + cauldronFullness * maxHeight;
 
 			consumer.vertex(matrix, sizeFactor, height, 1 - sizeFactor).color(red, green, blue, alpha).uv(water.getU0(), water.getV0() + maxV).uv2(packedLight).overlayCoords(packedOverlay).normal(1, 1, 1).endVertex();
 			consumer.vertex(matrix, 1 - sizeFactor, height, 1 - sizeFactor).color(red, green, blue, alpha).uv(water.getU1(), water.getV0() + maxV).uv2(packedLight).overlayCoords(packedOverlay).normal(1, 1, 1).endVertex();
