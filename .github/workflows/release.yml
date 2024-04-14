@@ -30,7 +30,7 @@ jobs:
 
         changelog-file: CHANGELOG.*
         name: ""
-
+        modrinth-unfeature-mode: version-intersection 
         modrinth-id: xe4saW9d
         modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
