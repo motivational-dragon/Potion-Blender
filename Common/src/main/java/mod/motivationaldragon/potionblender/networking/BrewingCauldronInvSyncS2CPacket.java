@@ -10,13 +10,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-public record BrewingCauldronInvSyncS2CPacket(NonNullList<ItemStack> inv, BlockPos containerLocation) implements PotionBlenderPacket {
+public record BrewingCauldronInvSyncS2CPacket(NonNullList<ItemStack> inv,
+                                              BlockPos containerLocation) implements PotionBlenderPacket {
 
 	public static final ResourceLocation fabricChannel = new ResourceLocation(Constants.MOD_ID, "brewing_cauldron_sync_inv");
 
-	public void encode(FriendlyByteBuf buf){
+	public void encode(FriendlyByteBuf buf) {
 		buf.writeInt(inv.size());
-		for(ItemStack item : inv) {
+		for (ItemStack item : inv) {
 			buf.writeItem(item);
 		}
 		buf.writeBlockPos(containerLocation);
@@ -29,7 +30,7 @@ public record BrewingCauldronInvSyncS2CPacket(NonNullList<ItemStack> inv, BlockP
 
 		if (level == null || level.hasChunkAt(containerLocation)) return;
 
-		if(level.getBlockEntity(containerLocation) instanceof BrewingCauldronBlockEntity blockEntity) {
+		if (level.getBlockEntity(containerLocation) instanceof BrewingCauldronBlockEntity blockEntity) {
 			blockEntity.setInventory(packet.inv);
 		}
 	}
@@ -43,7 +44,7 @@ public record BrewingCauldronInvSyncS2CPacket(NonNullList<ItemStack> inv, BlockP
 
 		int size = buf.readInt();
 		NonNullList<ItemStack> list = NonNullList.withSize(size, ItemStack.EMPTY);
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			list.set(i, buf.readItem());
 		}
 

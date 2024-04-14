@@ -4,5 +4,7 @@
   "item.potionblender.lingering_combined_potion": "Combined Lingering Potion",
 
   "block.potionblender.brewing_cauldron": "Brewing Cauldron",
-  "item.potionblender.brewing_cauldron": "Brewing Cauldron"
+  "item.potionblender.brewing_cauldron": "Brewing Cauldron",
+  "potionblender.recipe.potion_wildcard_names" : "Any potion",
+  "potionblender.recipe.merged_potion_wildcard_names" : "Potion with the effects from the ingredients merged"
 }

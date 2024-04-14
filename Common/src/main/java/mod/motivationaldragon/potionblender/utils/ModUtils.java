@@ -31,6 +31,11 @@ public class ModUtils {
         return false;
     }
 
+    public static float lerp(float min, float max, float f)
+    {
+        return (float) ((min * (1.0 - f)) + (max * f));
+    }
+
     public static boolean isCombinedPotion(ItemStack itemStack) {
         if (itemStack.hasTag()) {
             assert itemStack.getTag() != null;
