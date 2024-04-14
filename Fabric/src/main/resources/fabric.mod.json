@@ -1,39 +1,40 @@
-{"schemaVersion": 1,
-"id": "${mod_id}",
-"version": "${version}",
-
-"name": "${mod_name}",
-"description": "${mod_description}",
-"authors": [
-"${mod_author}"
-],
-"contact": {
-"homepage": "https://github.com/motivational-dragon",
-"sources": "https://github.com/motivational-dragon"
-},
-
-"license": "GPLv3",
-"icon": "assets/potionblender/logo.png",
-
-"environment": "*",
-"entrypoints": {
-"main": [
-  "mod.motivationaldragon.potionblender.FabricPotionBlender"
-],
-"client": ["mod.motivationaldragon.potionblender.ClientPotionMixer"],
-"server": ["mod.motivationaldragon.potionblender.ServerPotionMixer"]
-},
-"mixins": [
-"potionblender.mixins.json"
-],
-
-"depends": {
-"fabricloader": ">=${fabric_loader_version}",
-"fabric-api": "*",
-"minecraft": ">=${minecraft_version}",
-"java": ">=17"
-},
-"suggests": {
-"another-mod": "*"
-}
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contact": {
+    "homepage": "https://github.com/motivational-dragon",
+    "sources": "https://github.com/motivational-dragon"
+  },
+  "license": "GPLv3",
+  "icon": "assets/potionblender/logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "mod.motivationaldragon.potionblender.FabricPotionBlender"
+    ],
+    "client": [
+      "mod.motivationaldragon.potionblender.ClientPotionMixer"
+    ],
+    "server": [
+      "mod.motivationaldragon.potionblender.ServerPotionMixer"
+    ],
+    "jei_mod_plugin": [
+      "mod.motivationaldragon.potionblender.integration.JEIPotionBlender"
+    ]
+  },
+  "mixins": [
+    "potionblender.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "minecraft": ">=${minecraft_version}",
+    "java": ">=17"
+  }
 }

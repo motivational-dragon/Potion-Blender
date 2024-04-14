@@ -20,7 +20,7 @@ public class ConfigController {
 
     private static final String CONFIG_FILE_NAME = "potion_blender_config.json";
 
-    public static final int CONFIG_VERSION = 1;
+    public static final int CONFIG_VERSION = 2;
 
     private static final Path CONFIG_DIR_PATH = Path.of("config",Constants.MOD_ID );
     private static final Path CONFIG_FILE_PATH = Path.of("config",Constants.MOD_ID, CONFIG_FILE_NAME);

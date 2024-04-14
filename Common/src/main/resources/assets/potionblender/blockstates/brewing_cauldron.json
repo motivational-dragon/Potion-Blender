@@ -1,33 +1,20 @@
 {
   "variants": {
-    "facing=east,has_fluid=false": {
+    "facing=east": {
       "model": "potionblender:block/brewing_cauldron_empty",
       "y": 90
     },
-    "facing=east,has_fluid=true": {
-      "model": "potionblender:block/brewing_cauldron_full",
-      "y": 90
-    },
-    "facing=north,has_fluid=false": {
+    "facing=north": {
       "model": "potionblender:block/brewing_cauldron_empty"
     },
-    "facing=north,has_fluid=true": {
-      "model": "potionblender:block/brewing_cauldron_full"
-    },
-    "facing=south,has_fluid=false": {
+
+    "facing=south": {
       "model": "potionblender:block/brewing_cauldron_empty",
       "y": 180
     },
-    "facing=south,has_fluid=true": {
-      "model": "potionblender:block/brewing_cauldron_full",
-      "y": 180
-    },
-    "facing=west,has_fluid=false": {
+
+    "facing=west": {
       "model": "potionblender:block/brewing_cauldron_empty",
-      "y": 270
-    },
-    "facing=west,has_fluid=true": {
-      "model": "potionblender:block/brewing_cauldron_full",
       "y": 270
     }
   }

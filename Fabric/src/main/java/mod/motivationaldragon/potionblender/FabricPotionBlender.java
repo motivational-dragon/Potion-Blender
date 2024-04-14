@@ -4,7 +4,7 @@ import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.blockentity.FabricBlockEntities;
 import mod.motivationaldragon.potionblender.event.OnUseBlockFabric;
 import mod.motivationaldragon.potionblender.item.ModItem;
-import mod.motivationaldragon.potionblender.recipes.PotionBlenderSpecialRecipeSerializer;
+import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipes;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
@@ -23,7 +23,8 @@ public class FabricPotionBlender implements ModInitializer {
 
 		PotionBlenderBlock.registerBlock(bind(BuiltInRegistries.BLOCK));
 		PotionBlenderBlock.registerBlockItem(bind(BuiltInRegistries.ITEM));
-		PotionBlenderSpecialRecipeSerializer.register(bind(BuiltInRegistries.RECIPE_SERIALIZER));
+		PotionBlenderRecipes.registerRecipeSerializer(bind(BuiltInRegistries.RECIPE_SERIALIZER));
+		PotionBlenderRecipes.registerRecipeType(bind(BuiltInRegistries.RECIPE_TYPE));
 
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> ModItem.registerFunctionalBlocksItems(entries::accept));
 
@@ -31,7 +32,7 @@ public class FabricPotionBlender implements ModInitializer {
 		OnUseBlockFabric.registerHandler();
 	}
 
-	private static <T> BiConsumer<T, ResourceLocation> bind(Registry<? super T> registry) {
+	public static <T> BiConsumer<T, ResourceLocation> bind(Registry<? super T> registry) {
 		return (t, id) -> Registry.register(registry, id, t);
 	}
 }

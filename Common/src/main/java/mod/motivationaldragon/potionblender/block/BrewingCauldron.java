@@ -10,6 +10,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -34,6 +35,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 @SuppressWarnings("deprecation")
 public class BrewingCauldron extends BaseEntityBlock {
@@ -70,14 +73,23 @@ public class BrewingCauldron extends BaseEntityBlock {
     }
 
 
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos blockPos, BlockState newState, boolean b) {
+
+        if(!level.isClientSide() &&  state.getBlock() != newState.getBlock()){
+            tryGetBlockEntity(level,blockPos).ifPresent(brewingCauldronBlockEntity ->
+                    Containers.dropContents(level, blockPos, brewingCauldronBlockEntity.getInventory()));
+        }
+        super.onRemove(state, level, blockPos, state, b);
+    }
+
     @Override
     @NotNull
     public InteractionResult use(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
         if (!world.isClientSide()) {
-            BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world,pos);
-            if(brewingCauldronBlockEntity != null) {
-                brewingCauldronBlockEntity.onUseDelegate(state, world, pos, player);
-            }
+            tryGetBlockEntity(world,pos).ifPresent(brewingCauldronBlockEntity->
+                    brewingCauldronBlockEntity.onUseDelegate(state, world, pos, player));
         }
         return InteractionResult.SUCCESS;
     }
@@ -96,10 +108,10 @@ public class BrewingCauldron extends BaseEntityBlock {
         createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(),ParticleTypes.SMOKE);
 
         if (state.getValue(HAS_FLUID)){
-            BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(world, pos);
-            if(brewingCauldronBlockEntity == null) {return;}
+            Optional<BrewingCauldronBlockEntity> brewingCauldronBlockEntity = tryGetBlockEntity(world, pos);
+            if(brewingCauldronBlockEntity.isEmpty()) {return;}
 
-            int color = brewingCauldronBlockEntity.getWaterColor();
+            int color = brewingCauldronBlockEntity.get().getWaterColor();
             ParticleOptions coloredSmoke = new DustParticleOptions(Vec3.fromRGB24(color).toVector3f(),1.0f);
             float x =  pos.getX() + random.nextIntBetweenInclusive(2,8)/10f;
             float z = pos.getZ() + random.nextIntBetweenInclusive(2,8)/10f;
@@ -171,9 +183,9 @@ public class BrewingCauldron extends BaseEntityBlock {
     @Override
     public void fallOn(@NotNull Level world, @NotNull BlockState blockState, @NotNull BlockPos pos, Entity entity, float speed) {
 
-        BrewingCauldronBlockEntity brewingCauldronBlockEntity = tryGetBlockEntity(entity.level(),entity.blockPosition());
-        if(brewingCauldronBlockEntity != null && !entity.level().isClientSide()) {
-                brewingCauldronBlockEntity.onEntityLandDelegate(entity);
+        Optional<BrewingCauldronBlockEntity> brewingCauldronBlockEntity = tryGetBlockEntity(entity.level(),entity.blockPosition());
+        if(brewingCauldronBlockEntity.isPresent() && !entity.level().isClientSide()) {
+                brewingCauldronBlockEntity.get().onEntityLandDelegate(entity);
         }
         super.fallOn(world, blockState, pos, entity, speed);
     }
@@ -185,10 +197,12 @@ public class BrewingCauldron extends BaseEntityBlock {
      * @param pos the pos the {@link BrewingCauldronBlockEntity}. Should be the same as the block
      * @return the {@link BlockEntity} attached to this {@link BrewingCauldron}
      */
-    @Nullable
-    private BrewingCauldronBlockEntity tryGetBlockEntity(Level world, BlockPos pos){
+    private Optional<BrewingCauldronBlockEntity> tryGetBlockEntity(Level world, BlockPos pos){
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        return blockEntity instanceof BrewingCauldronBlockEntity alchemyMixerBlockEntity ? alchemyMixerBlockEntity : null;
+        if(blockEntity instanceof BrewingCauldronBlockEntity alchemyMixerBlockEntity){
+            return Optional.of(alchemyMixerBlockEntity);
+        }
+        return Optional.empty();
 
     }
 
