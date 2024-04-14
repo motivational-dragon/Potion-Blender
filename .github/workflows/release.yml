@@ -31,11 +31,11 @@ jobs:
         changelog-file: CHANGELOG.*
         name: ""
 
-        modrinth-id: 5qWx4yJx
+        modrinth-id: xe4saW9d
         modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
-        #curseforge-id: 697859
-        #curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+        curseforge-id: 697859
+        curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
         files: |
           Fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
           Forge/build/libs/!(*-@(dev|sources|javadoc)).jar
