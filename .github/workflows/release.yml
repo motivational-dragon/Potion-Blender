@@ -27,6 +27,10 @@ jobs:
           Forge/build/libs     
     - uses: Kir-Antipov/mc-publish@v3.3
       with:
+
+        changelog-file: CHANGELOG.*
+        name: ""
+
         modrinth-id: 5qWx4yJx
         modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
@@ -35,3 +39,6 @@ jobs:
         files: |
           Fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
           Forge/build/libs/!(*-@(dev|sources|javadoc)).jar
+
+        dependencies: |
+            jei(optional){modrinth:u6dRKJwZ}{curseforge:238222}
