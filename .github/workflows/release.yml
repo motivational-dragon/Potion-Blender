@@ -1,8 +1,5 @@
 on:
-  push:
-     branches:
-      - 'release/**'
-
+   workflow_dispatch:
 jobs:
   build:
     name: build
@@ -27,4 +24,14 @@ jobs:
       with:
         path: | 
           Fabric/build/libs
-          Forge/build/libs
+          Forge/build/libs     
+    - uses: Kir-Antipov/mc-publish@v3.3
+      with:
+        modrinth-id: 5qWx4yJx
+        modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+        #curseforge-id: 697859
+        #curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+        files: |
+          Fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
+          Forge/build/libs/!(*-@(dev|sources|javadoc)).jar
