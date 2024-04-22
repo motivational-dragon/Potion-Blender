@@ -4,7 +4,7 @@
   "item.potionblender.lingering_combined_potion": "混合した残留ポーション",
 
   "block.potionblender.brewing_cauldron": "醸造用大釜",
-  "item.potionblender.brewing_cauldron": "醸造用大釜"
+  "item.potionblender.brewing_cauldron": "醸造用大釜",
   "potionblender.recipe.potion_wildcard_names" : "任意のポーション",
   "potionblender.recipe.merged_potion_wildcard_names" : "材料の効果が統合されたポーション"
 }

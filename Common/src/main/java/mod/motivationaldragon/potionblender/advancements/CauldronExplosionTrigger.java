@@ -1,35 +1,39 @@
 package mod.motivationaldragon.potionblender.advancements;
 
 import com.google.gson.JsonObject;
-import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.DeserializationContext;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
+import mod.motivationaldragon.potionblender.Constants;
+import net.minecraft.advancements.critereon.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 public class CauldronExplosionTrigger extends SimpleCriterionTrigger<CauldronExplosionTrigger.TriggerInstance> {
 
+	public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "cauldron_explosion");
 
-	public TriggerInstance createInstance(JsonObject json, Optional<ContextAwarePredicate> context, DeserializationContext deserializationContext) {
+	@Override
+	public @NotNull ResourceLocation getId() {return ID;}
+
+	@Override
+	public TriggerInstance createInstance(JsonObject json, ContextAwarePredicate context, DeserializationContext deserializationContext) {
 		return new TriggerInstance(context);
 	}
 
 
-	public void trigger(ServerPlayer player, BlockPos pos, ServerLevel level){
-		this.trigger(player, triggerInstance -> {return true;});
+	public void trigger(ServerPlayer player){
+		this.trigger(player, instance -> true);
 	}
 
-
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance{
-
-		public TriggerInstance(Optional<ContextAwarePredicate> context) {
-			super(context);
+		@NotNull
+		@Override
+		public ResourceLocation getCriterion() {
+			return ID;
 		}
 
+		public TriggerInstance(ContextAwarePredicate context) {
+			super(ID, context);
+		}
 	}
 
 }

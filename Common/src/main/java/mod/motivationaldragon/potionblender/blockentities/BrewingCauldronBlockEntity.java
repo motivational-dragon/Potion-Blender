@@ -17,7 +17,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -34,7 +33,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -193,7 +191,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 			addItemToCauldron(itemEntity);
 
 			//Craft the potion if a recipe is found
-			Optional<RecipeHolder<BrewingCauldronRecipe>> recipe = getRecipe();
+			Optional<BrewingCauldronRecipe> recipe = getRecipe();
 			if (recipe.isPresent()) {
 				entity.remove(Entity.RemovalReason.DISCARDED);
 
@@ -209,7 +207,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	}
 
 
-	private Optional<RecipeHolder<BrewingCauldronRecipe>> getRecipe() {
+	private Optional<BrewingCauldronRecipe> getRecipe() {
 		if (numberOfItems <= 0) {
 			return Optional.empty();
 		}
@@ -297,18 +295,19 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 		brewingCauldron.isBrewing = true;
 		brewingCauldron.brewingProgress++;
-		RecipeHolder<BrewingCauldronRecipe> recipe = brewingCauldron.getRecipe().orElse(null);
-		if (recipe == null) {
+		Optional<BrewingCauldronRecipe> optionalBrewingCauldronRecipe = brewingCauldron.getRecipe();
+		if (optionalBrewingCauldronRecipe.isEmpty()) {
 			brewingCauldron.stopBrewing();
 			return;
 		}
 
-		if (brewingCauldron.brewingProgress >= recipe.value().getBrewingTime()) {
-			if (recipe.value().usePotionMeringRules()) {
-				brewingCauldron.craftCombinedPotion(level, pos, recipe.value());
+		BrewingCauldronRecipe recipe = optionalBrewingCauldronRecipe.get();
+		if (brewingCauldron.brewingProgress >= recipe.getBrewingTime()) {
+			if (recipe.usePotionMeringRules()) {
+				brewingCauldron.craftCombinedPotion(level, pos, recipe);
 			} else {
 				//Handle the case where we are not crafting potion
-				outputItem(level, pos, recipe.value().getResultItem(level.registryAccess()));
+				outputItem(level, pos, recipe.getResultItem(level.registryAccess()));
 				brewingCauldron.emptyCauldron();
 				brewingCauldron.updateListeners();
 			}
@@ -355,7 +354,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 		List<ServerPlayer> nearbyPlayers = this.getLevel().getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(5));
 		for (ServerPlayer player : nearbyPlayers) {
-			PotionBlenderCriterionTrigger.INSTANCE.trigger(player, pos, (ServerLevel) this.getLevel());
+			PotionBlenderCriterionTrigger.INSTANCE.trigger(player);
 		}
 		this.level.explode(entity, pos.getX(), pos.getY(), pos.getZ(), 1.5F, Level.ExplosionInteraction.BLOCK);
 	}
@@ -453,8 +452,8 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 	private int computeWaterColor() {
 		var recipe =getRecipe();
-		if (recipe.isPresent() && !recipe.get().value().usePotionMeringRules()) {
-			return recipe.get().value().getColor();
+		if (recipe.isPresent() && !recipe.get().usePotionMeringRules()) {
+			return recipe.get().getColor();
 		} else {
 			return PotionUtils.getColor(getInventoryStatusEffectsInstances());
 		}

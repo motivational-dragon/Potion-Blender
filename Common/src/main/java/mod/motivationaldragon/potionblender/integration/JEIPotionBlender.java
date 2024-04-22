@@ -8,8 +8,8 @@ import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.recipes.BrewingCauldronRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class JEIPotionBlender implements IModPlugin {
 	}
 
 	@Override
-	public ResourceLocation getPluginUid() {
+	public @NotNull ResourceLocation getPluginUid() {
 		return new ResourceLocation(Constants.MOD_ID, "brewing_cauldron_jei_plugin");
 	}
 	@Override
@@ -31,7 +31,7 @@ public class JEIPotionBlender implements IModPlugin {
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
 		RecipeManager recipeManager = Minecraft.getInstance().level.getRecipeManager();
-		List<BrewingCauldronRecipe> recipes = recipeManager.getAllRecipesFor(BrewingCauldronRecipe.Type.INSTANCE).stream().map(RecipeHolder::value).toList();
+		List<BrewingCauldronRecipe> recipes = recipeManager.getAllRecipesFor(BrewingCauldronRecipe.Type.INSTANCE);
 		registration.addRecipes(BrewingCauldronJeiCategory.brewing_cauldron_recipe_type, recipes);
 	}
 

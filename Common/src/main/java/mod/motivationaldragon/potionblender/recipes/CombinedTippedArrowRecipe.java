@@ -3,6 +3,7 @@ package mod.motivationaldragon.potionblender.recipes;
 import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -19,8 +20,8 @@ import java.util.List;
 
 public class CombinedTippedArrowRecipe extends CustomRecipe {
 
-    public CombinedTippedArrowRecipe(CraftingBookCategory category) {
-        super(category);
+    public CombinedTippedArrowRecipe(ResourceLocation resourceLocation, CraftingBookCategory category) {
+        super(resourceLocation, category);
     }
 
     @Override
