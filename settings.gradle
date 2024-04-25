@@ -27,4 +27,4 @@ pluginManagement {
 }
 
 rootProject.name = 'Potion-Blender'
-include("Common", "Fabric")
+include("Common", "Fabric", "Forge")

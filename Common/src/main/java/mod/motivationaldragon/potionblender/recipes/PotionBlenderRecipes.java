@@ -12,12 +12,11 @@ import java.util.function.BiConsumer;
 public class PotionBlenderRecipes {
 
     public static final SimpleCraftingRecipeSerializer<CombinedTippedArrowRecipe> COMBINED_TIPPED_ARROW_RECIPE = new SimpleCraftingRecipeSerializer<>(CombinedTippedArrowRecipe::new);
-    public static final BrewingCauldronRecipe.CauldronRecipeSerializer POTION_BLENDING = new BrewingCauldronRecipe.CauldronRecipeSerializer();
 
 
     public static void registerRecipeSerializer(BiConsumer<RecipeSerializer<?>, ResourceLocation> r){
         r.accept(COMBINED_TIPPED_ARROW_RECIPE,new ResourceLocation(Constants.MOD_ID,"tipped_combined_arrow"));
-        r.accept(POTION_BLENDING, new ResourceLocation(Constants.MOD_ID,"potion_blending"));
+        r.accept(BrewingCauldronRecipe.CauldronRecipeSerializer.INSTANCE, new ResourceLocation(Constants.MOD_ID,"potion_blending"));
         Constants.LOG.debug("Loaded recipe");
     }
 

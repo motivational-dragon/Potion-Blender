@@ -1,25 +1,17 @@
 package mod.motivationaldragon.potionblender.recipes;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
 import mod.motivationaldragon.potionblender.Constants;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -118,7 +110,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 	@Override
 	public @NotNull RecipeSerializer<?> getSerializer() {
-		return PotionBlenderRecipes.POTION_BLENDING;
+		return CauldronRecipeSerializer.INSTANCE;
 	}
 
 
@@ -149,47 +141,23 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 	public static class CauldronRecipeSerializer implements RecipeSerializer<BrewingCauldronRecipe> {
 
+		public static final CauldronRecipeSerializer INSTANCE = new CauldronRecipeSerializer();
+
 		@Override
 		public BrewingCauldronRecipe fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
 
 			int brewingTime = jsonObject.get("brewingTime").getAsInt();
 			boolean usePotionMergingRules = jsonObject.get("usePotionMergingRules").getAsBoolean();
-			int color = jsonObject.get("color").getAsInt();
-			boolean isOrdered = jsonObject.get("isOrdered").getAsBoolean();
-			NonNullList<Ingredient> ingredients = NonNullList.withSize(jsonObject.getAsJsonArray("ingredients").size(), Ingredient.EMPTY);
+			int color = jsonObject.has("color") ? jsonObject.get("color").getAsInt() : 0;
+			boolean isOrdered = jsonObject.has("isOrdered") && jsonObject.get("isOrdered").getAsBoolean();
+			JsonArray ingredientAsJson = jsonObject.getAsJsonArray("ingredients");
+			NonNullList<Ingredient> ingredients = NonNullList.withSize(ingredientAsJson.size(), Ingredient.EMPTY);
 			for (int i = 0; i < ingredients.size(); i++) {
-				ingredients.set(i, Ingredient.fromJson(jsonObject.getAsJsonArray("ingredients").get(i)));
+				ingredients.set(i, Ingredient.fromJson(ingredientAsJson.get(i)));
 			}
-			ItemStack output = itemStackFromJson(jsonObject.getAsJsonObject("output"));
+			ItemStack output = ShapedRecipe.itemStackFromJson(jsonObject.getAsJsonObject("output"));
 
 			return new BrewingCauldronRecipe(brewingTime, usePotionMergingRules, color, isOrdered, 0, ingredients, output);
-		}
-
-		//Vanilla copy
-		public static ItemStack itemStackFromJson(JsonObject jsonObject) {
-			Item item = itemFromJson(jsonObject);
-			if (jsonObject.has("data")) {
-				throw new JsonParseException("Disallowed data tag found");
-			} else {
-				int i = GsonHelper.getAsInt(jsonObject, "count", 1);
-				if (i < 1) {
-					throw new JsonSyntaxException("Invalid output count: " + i);
-				} else {
-					return new ItemStack(item, i);
-				}
-			}
-		}
-
-		//Vanilla copy
-		public static Item itemFromJson(JsonObject jsonObject) {
-			String string = GsonHelper.getAsString(jsonObject, "item");
-			Item item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.tryParse(string)).orElseThrow(
-					() -> new JsonSyntaxException("Unknown item '" + string + "'"));
-			if (item == Items.AIR) {
-				throw new JsonSyntaxException("Empty ingredient not allowed here");
-			} else {
-				return item;
-			}
 		}
 
 		@Override
