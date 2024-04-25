@@ -1,5 +1,10 @@
 # Potion Blender
-
+<p align="center">
+  <a href="https://www.curseforge.com/minecraft/mc-mods/potion-blender"><img alt="Curseforge" src="https://img.shields.io/badge/Curseforge-%23242424?style=for-the-badge&logo=curseforge&labelColor=%23000000"></a>
+  <a href="https://modrinth.com/mod/potion-blender"><img alt="Curseforge" src="https://img.shields.io/badge/ModRinth-%23242424?style=for-the-badge&logo=modrinth&labelColor=%23000000"></a>
+  <a href="https://github.com/motivational-dragon/Potion-Blender"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-%23242424?style=for-the-badge&logo=github&labelColor=%23000000"></a>
+  <a href="https://github.com/motivational-dragon/Potion-Blender/issues"><img alt="Issues" src="https://img.shields.io/badge/Issues-%23242424?style=for-the-badge&logo=github&labelColor=%23000000"></a>
+</p>
 ## Overview
 Potion Blender is a small mod to merge potion effects into one item, allowing for interesting combinations.
 
