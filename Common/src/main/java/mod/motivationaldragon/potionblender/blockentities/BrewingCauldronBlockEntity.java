@@ -45,6 +45,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static mod.motivationaldragon.potionblender.utils.ModUtils.isACombinedPotion;
@@ -84,7 +85,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	/**
 	 * The cauldron inventory. It is mean to only contain potion
 	 */
-	private NonNullList<ItemStack> inventory = NonNullList.withSize(ConfigController.getConfig().getCauldron_inventory_size(), ItemStack.EMPTY);
+	private NonNullList<ItemStack> inventory = NonNullList.withSize(ConfigController.getConfig().getCauldronInventorySize(), ItemStack.EMPTY);
 	/**
 	 * The current amount of potion in the cauldron. Useful since the inventory size is constant
 	 */
@@ -97,7 +98,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 
 	private int waterColor = Constants.WATER_TINT;
-
 
 
 	protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
@@ -199,7 +199,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 				this.waterColor = computeWaterColor();
 
 				getLevel().setBlockAndUpdate(getBlockPos(), getLevel().getBlockState(this.getBlockPos()).setValue(BrewingCauldron.IS_BREWING, true));
-				this.forceChunkUpdate();
 				this.setChanged();
 				level.playSound(null, this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS);
 			}
@@ -245,7 +244,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 					String.format("Cannot merge potion to an item that is not a potion. " +
 							"Valid potion are Potions, Splash Potions, Lingering Potion. Did you try merge potion into an item that is not a potion?" +
 							"The item is: %s", potionToCraft.getItem()));
-			Containers.dropContents(level,pos,this.inventory);
+			Containers.dropContents(level, pos, this.inventory);
 			emptyCauldron();
 			return;
 		}
@@ -377,20 +376,17 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		waterColor = computeWaterColor();
 
 		//If we add an item, the cauldron must now appear with fluid
-			BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
-			level.setBlockAndUpdate(this.getBlockPos(), mixerCauldronBlockState);
-
-		//To force re-rendering of the block tint
-		forceChunkUpdate();
+		BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
+		level.setBlockAndUpdate(this.getBlockPos(), mixerCauldronBlockState);
 		itemEntity.remove(Entity.RemovalReason.DISCARDED);
 		updateListeners();
 	}
 
 
-
 	/**
 	 * Add an itemStack to the inventory of this cauldron
-	 *I
+	 * I
+	 *
 	 * @param itemStack the item to add
 	 */
 	private void addItem(@NotNull ItemStack itemStack) {
@@ -407,22 +403,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 		inventory.set(numberOfItems, itemStack);
 		numberOfItems++;
-	}
-
-	/**
-	 * Force a chunk rerender by toggling a block state back and forth
-	 * Used when an item is added to force rendering of the block tint
-	 */
-	private void forceChunkUpdate() {
-		if (level == null) {
-			return;
-		}
-		BlockState blockState = level.getBlockState(this.getBlockPos());
-
-		boolean redrawValue = blockState.getValue(BrewingCauldron.REDRAW_DUMMY);
-
-		BlockState newRedraw = blockState.setValue(BrewingCauldron.REDRAW_DUMMY, !redrawValue);
-		level.setBlockAndUpdate(this.getBlockPos(), newRedraw);
 	}
 
 	@Override
@@ -451,7 +431,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	}
 
 	private int computeWaterColor() {
-		var recipe =getRecipe();
+		var recipe = getRecipe();
 		if (recipe.isPresent() && !recipe.get().usePotionMeringRules()) {
 			return recipe.get().getColor();
 		} else {
@@ -497,6 +477,11 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 				numberOfItems++;
 			}
 		}
+	}
+
+	public void markUpdated() {
+		this.setChanged();
+		Objects.requireNonNull(this.getLevel()).sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}
 
 	public int getNumberOfItems() {

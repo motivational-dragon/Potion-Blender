@@ -2,7 +2,6 @@ package mod.motivationaldragon.potionblender;
 
 import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.blockentity.FabricBlockEntities;
-import mod.motivationaldragon.potionblender.event.OnUseBlockFabric;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipes;
 import net.fabricmc.api.ModInitializer;
@@ -29,7 +28,6 @@ public class FabricPotionBlender implements ModInitializer {
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> ModItem.registerFunctionalBlocksItems(entries::accept));
 
 		FabricBlockEntities.init();
-		OnUseBlockFabric.registerHandler();
 	}
 
 	public static <T> BiConsumer<T, ResourceLocation> bind(Registry<? super T> registry) {

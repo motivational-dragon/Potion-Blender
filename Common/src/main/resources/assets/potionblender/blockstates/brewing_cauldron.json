@@ -1,20 +1,48 @@
 {
   "variants": {
-    "facing=east": {
-      "model": "potionblender:block/brewing_cauldron_empty",
+    "facing=east,lit=false": {
+      "model": "potionblender:block/brewing_cauldron_unlit",
       "y": 90
     },
-    "facing=north": {
-      "model": "potionblender:block/brewing_cauldron_empty"
+    "facing=north,lit=false": {
+      "model": "potionblender:block/brewing_cauldron_unlit"
     },
-
-    "facing=south": {
-      "model": "potionblender:block/brewing_cauldron_empty",
+    "facing=south,lit=false": {
+      "model": "potionblender:block/brewing_cauldron_unlit",
       "y": 180
     },
-
-    "facing=west": {
-      "model": "potionblender:block/brewing_cauldron_empty",
+    "facing=west,lit=false": {
+      "model": "potionblender:block/brewing_cauldron_unlit",
+      "y": 270
+    },
+    "facing=east,lit=true,soulfire=false": {
+      "model": "potionblender:block/brewing_cauldron_lit",
+      "y": 90
+    },
+    "facing=north,lit=true,soulfire=false": {
+      "model": "potionblender:block/brewing_cauldron_lit"
+    },
+    "facing=south,lit=true,soulfire=false": {
+      "model": "potionblender:block/brewing_cauldron_lit",
+      "y": 180
+    },
+    "facing=west,lit=true,soulfire=false": {
+      "model": "potionblender:block/brewing_cauldron_lit",
+      "y": 270
+    },
+    "facing=east,lit=true,soulfire=true": {
+      "model": "potionblender:block/brewing_cauldron_soulfire",
+      "y": 90
+    },
+    "facing=north,lit=true,soulfire=true": {
+      "model": "potionblender:block/brewing_cauldron_soulfire"
+    },
+    "facing=south,lit=true,soulfire=true": {
+      "model": "potionblender:block/brewing_cauldron_soulfire",
+      "y": 180
+    },
+    "facing=west,lit=true,soulfire=true": {
+      "model": "potionblender:block/brewing_cauldron_soulfire",
       "y": 270
     }
   }

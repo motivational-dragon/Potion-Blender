@@ -19,7 +19,7 @@ public abstract class PotionItemMixin {
 
 
     /**
-     * Mixin used to override potion vanilla "Uncraftable potion" name with combined potion name
+     * Mixin used to override vanilla potion "Uncraftable potion" name with combined potion name
      * @param stack
      * @param cir
      */

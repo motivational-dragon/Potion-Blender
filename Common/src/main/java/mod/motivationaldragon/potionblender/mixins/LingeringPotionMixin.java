@@ -24,7 +24,6 @@ public abstract class LingeringPotionMixin {
 		if(isCombinedPotion){
 			PotionUtils.addPotionTooltip(itemStack, $$2, 1F);
 			ci.cancel();
-			return;
 		}
 	}
 }

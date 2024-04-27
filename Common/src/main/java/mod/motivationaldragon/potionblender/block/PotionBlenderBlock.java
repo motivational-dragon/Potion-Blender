@@ -13,29 +13,36 @@ import java.util.function.BiConsumer;
 public class PotionBlenderBlock {
 
 
-    PotionBlenderBlock(){throw new IllegalStateException("Utility class");}
-    public static final Block BREWING_CAULDRON_BLOCK = new BrewingCauldron(
-            (BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.STONE)
-                    .requiresCorrectToolForDrops()
-                    .strength(2.0F)
-                    .noOcclusion()
-                    .lightLevel(x->15)
-            ));
+	PotionBlenderBlock() {
+		throw new IllegalStateException("Utility class");
+	}
 
-    public static final BlockItem BREWING_CAULDRON_ITEM = new BlockItem(BREWING_CAULDRON_BLOCK, new Item.Properties());
+	public static final Block BREWING_CAULDRON_BLOCK = new BrewingCauldron(
+			(BlockBehaviour.Properties.of()
+					.mapColor(MapColor.STONE)
+					.requiresCorrectToolForDrops()
+					.strength(2.0F)
+					.noOcclusion()
+					.lightLevel(state -> {
+						if (!state.getValue(BrewingCauldron.LIT)) {
+							return 0;
+						} else {
+							return state.getValue(BrewingCauldron.IS_SOULFIRE) ? 10 : 15;
+						}
+					})));
+
+	public static final BlockItem BREWING_CAULDRON_ITEM = new BlockItem(BREWING_CAULDRON_BLOCK, new Item.Properties());
 
 
-    public static void registerBlock(BiConsumer<Block, ResourceLocation> r){
-        r.accept(BREWING_CAULDRON_BLOCK, new ResourceLocation(Constants.MOD_ID, "brewing_cauldron"));
-    }
+	public static void registerBlock(BiConsumer<Block, ResourceLocation> r) {
+		r.accept(BREWING_CAULDRON_BLOCK, new ResourceLocation(Constants.MOD_ID, "brewing_cauldron"));
+	}
 
-    public static void registerBlockItem(BiConsumer<Item, ResourceLocation> r){
+	public static void registerBlockItem(BiConsumer<Item, ResourceLocation> r) {
 
-        r.accept(BREWING_CAULDRON_ITEM, BuiltInRegistries.BLOCK.getKey(BREWING_CAULDRON_BLOCK));
-        Constants.LOG.debug("Registered all block");
-    }
-
+		r.accept(BREWING_CAULDRON_ITEM, BuiltInRegistries.BLOCK.getKey(BREWING_CAULDRON_BLOCK));
+		Constants.LOG.debug("Registered all block");
+	}
 
 
 }

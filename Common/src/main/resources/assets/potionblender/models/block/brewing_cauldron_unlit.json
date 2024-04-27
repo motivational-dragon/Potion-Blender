@@ -5,7 +5,7 @@
 	"textures": {
 		"8": "block/water_still",
 		"log": "block/campfire_log",
-		"lit_log": "block/campfire_log_lit",
+		"lit_log": "block/campfire_log",
 		"1_fire": "block/campfire_fire",
 		"top": "block/cauldron_top",
 		"bottom": "block/cauldron_bottom",
@@ -70,26 +70,6 @@
 				"south": {"uv": [10, 15, 16, 16], "texture": "#log", "cullface": "south"},
 				"up": {"uv": [0, 8, 16, 14], "rotation": 90, "texture": "#lit_log"},
 				"down": {"uv": [0, 8, 16, 14], "rotation": 90, "texture": "#log", "cullface": "down"}
-			}
-		},
-		{
-			"from": [0.8, 1, 8],
-			"to": [15.2, 5, 8],
-			"shade": false,
-			"rotation": {"angle": 45, "axis": "y", "origin": [8, 8, 8], "rescale": true},
-			"faces": {
-				"north": {"uv": [0, 0, 16, 16], "texture": "#1_fire"},
-				"south": {"uv": [0, 0, 16, 16], "texture": "#1_fire"}
-			}
-		},
-		{
-			"from": [8, 1, 0.8],
-			"to": [8, 5, 15.2],
-			"shade": false,
-			"rotation": {"angle": 45, "axis": "y", "origin": [8, 8, 8], "rescale": true},
-			"faces": {
-				"east": {"uv": [0, 0, 16, 16], "texture": "#1_fire"},
-				"west": {"uv": [0, 0, 16, 16], "texture": "#1_fire"}
 			}
 		},
 		{
@@ -184,18 +164,6 @@
 				"south": {"uv": [15, 13, 16, 16], "texture": "#side"},
 				"west": {"uv": [2, 13, 4, 16], "texture": "#side"},
 				"down": {"uv": [15, 12, 16, 14], "texture": "#bottom", "cullface": "down"}
-			}
-		},
-		{
-			"from": [2, 4, 2],
-			"to": [14, 15, 14],
-			"faces": {
-				"north": {"uv": [0, 0, 0, 0], "texture": "#missing"},
-				"east": {"uv": [0, 0, 0, 0], "texture": "#missing"},
-				"south": {"uv": [0, 0, 0, 0], "texture": "#missing"},
-				"west": {"uv": [0, 0, 0, 0], "texture": "#missing"},
-				"up": {"uv": [2, 2, 14, 14], "texture": "#8", "tintindex": 0},
-				"down": {"uv": [0, 0, 0, 0], "texture": "#missing"}
 			}
 		},
 		{
