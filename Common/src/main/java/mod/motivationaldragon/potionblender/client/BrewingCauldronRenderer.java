@@ -22,7 +22,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 
-public class BrewingCauldronRenderer<T extends BrewingCauldronBlockEntity> implements BlockEntityRenderer<T> {
+public class BrewingCauldronRenderer implements BlockEntityRenderer<BrewingCauldronBlockEntity> {
 
 
 	public BrewingCauldronRenderer(BlockEntityRendererProvider.Context context) {
@@ -34,7 +34,7 @@ public class BrewingCauldronRenderer<T extends BrewingCauldronBlockEntity> imple
 
 
 	@Override
-	public void render(T brewingCauldronBlock, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+	public void render(BrewingCauldronBlockEntity brewingCauldronBlock, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 		ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
 		NonNullList<ItemStack> inventory = brewingCauldronBlock.getInventory();
 		for (int i = 0; i < inventory.size(); i++) {

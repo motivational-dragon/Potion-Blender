@@ -8,8 +8,9 @@ import java.util.function.BiConsumer;
 
 public class PotionBlenderRenderer {
 
-	public static void register(BiConsumer<BlockEntityType, BlockEntityRendererProvider> r) {
-		r.accept(Service.PLATFORM.getPlatformBrewingCauldron(), BrewingCauldronRenderer::new);
+	//TODO: do not use raw types, but for now since there is only one renderer, it is fine
+	public static  void register(BiConsumer<BlockEntityType, BlockEntityRendererProvider> r){
+		r.accept(Service.PLATFORM.getPlatformBrewingCauldron(),BrewingCauldronRenderer::new);
 	}
 
 }

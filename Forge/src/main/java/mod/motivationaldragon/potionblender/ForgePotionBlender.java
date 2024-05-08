@@ -4,7 +4,7 @@ import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.blockentity.ForgeBlockEntities;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.networking.NetworkRegister;
-import mod.motivationaldragon.potionblender.recipes.PotionBlenderSpecialRecipeSerializer;
+import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipes;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -30,7 +30,8 @@ public class ForgePotionBlender {
         NetworkRegister.register();
         bind(Registries.BLOCK, PotionBlenderBlock::registerBlock);
         bind(Registries.ITEM, PotionBlenderBlock::registerBlockItem);
-        bind(Registries.RECIPE_SERIALIZER, PotionBlenderSpecialRecipeSerializer::register);
+        bind(Registries.RECIPE_SERIALIZER, PotionBlenderRecipes::registerRecipeSerializer);
+        bind(Registries.RECIPE_TYPE, PotionBlenderRecipes::registerRecipeType);
         ForgeBlockEntities.register();
 
     }
