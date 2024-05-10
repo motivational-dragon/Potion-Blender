@@ -1,5 +1,3 @@
-
-
 3.1.0
 - Cauldron can now be lit or extinguished. Will be lit when placed on top of lit campfire.
 - Added soulfire cauldron
@@ -7,14 +5,3 @@
 - Added config for item lighting or extinguishing the cauldron
 - Change brewing cauldron outline to full block
 - Fix cauldron dropping 1 extra glass bottle when combining potions
-
-3.0.0
-- Implement cauldron recipe type, enabling new recipe to be added by the user as per https://github.com/motivational-dragon/Potion-Blender/issues/7
-- Added jei support
-- Graphic improvements to the cauldron. Item inside the cauldron now render in 3d. Cauldron Water is now translucent when using fabulous render settings.
-- Cauldron now has water level according to the number of items inside
-- Cauldron can now hold 4 items max. This can be changed in the config file. (but number higher than 5 is not recommended as it will make the JEI GUI look weird)
-- Created wiki at https://github.com/motivational-dragon/Potion-Blender/wiki Thanks to @MetalKnight56 for writing the wiki
-- Added japanese translation thanks to @Abbage230
-- Added ukranian translation thanks to @MeDustyy
-- Fixed cauldron not dropping items when broken
