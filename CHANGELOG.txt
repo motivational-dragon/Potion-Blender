@@ -6,6 +6,7 @@
 - Added recipe parameter allowing crafting only in a soulfire cauldron
 - Added config for item lighting or extinguishing the cauldron
 - Change brewing cauldron outline to full block
+- Fix cauldron dropping 1 extra glass bottle when combining potions
 
 3.0.0
 - Implement cauldron recipe type, enabling new recipe to be added by the user as per https://github.com/motivational-dragon/Potion-Blender/issues/7

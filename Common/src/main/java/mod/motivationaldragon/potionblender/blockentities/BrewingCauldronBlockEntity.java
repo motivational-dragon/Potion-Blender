@@ -191,8 +191,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 			addItemToCauldron(itemEntity);
 
 			//Craft the potion if a recipe is found
-			Optional<BrewingCauldronRecipe> recipe = getRecipe();
-			if (recipe.isPresent()) {
+			if (getBlockState().getValue(BrewingCauldron.LIT) && getRecipe().isPresent()) {
 				entity.remove(Entity.RemovalReason.DISCARDED);
 
 				canBrew = true;
@@ -265,6 +264,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 		//Drop all old potion bottle minus the one used for the new potion.
 		int nbOfPotions = inventory.stream().filter(itemStack -> itemStack.getItem() instanceof PotionItem).mapToInt(ItemStack::getCount).sum();
+		nbOfPotions--;
 		Containers.dropItemStack(level, pos.getX(), (double) pos.getY() + ITEM_DROP_OFFSET, pos.getZ(), new ItemStack(Items.GLASS_BOTTLE, nbOfPotions));
 
 		emptyCauldron();

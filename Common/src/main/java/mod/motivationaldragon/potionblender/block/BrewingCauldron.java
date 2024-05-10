@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -170,8 +171,10 @@ public class BrewingCauldron extends BaseEntityBlock {
 				z = pos.getZ() + random.nextIntBetweenInclusive(2, 8) / 10f;
 				world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, pos.getY() + 1d, z, 0, 0.07, 0);
 
-				createDisplayParticles(world, pos, random, state.getValue(FACING), ParticleTypes.FLAME);
-				createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(), ParticleTypes.FLAME);
+				SimpleParticleType particles = state.getValue(IS_SOULFIRE) ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME;
+
+				createDisplayParticles(world, pos, random, state.getValue(FACING), particles);
+				createDisplayParticles(world, pos, random, state.getValue(FACING).getOpposite(), particles);
 
 				for (int i = 0; i < 10; i++) {
 					x = pos.getX() + random.nextIntBetweenInclusive(2, 8) / 10f;
