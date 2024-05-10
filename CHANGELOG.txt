@@ -2,6 +2,6 @@
 - Cauldron can now be lit or extinguished. Will be lit when placed on top of lit campfire.
 - Added soulfire cauldron
 - Added recipe parameter allowing crafting only in a soulfire cauldron
-- Added config for item lighting or extinguishing the cauldron
+- Added config for items lighting or extinguishing the cauldron
 - Change brewing cauldron outline to full block
 - Fix cauldron dropping 1 extra glass bottle when combining potions
