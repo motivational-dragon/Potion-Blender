@@ -1,2 +1,2 @@
 3.1.1
-- Fix potion blender recipes all having the same id leading to a duplicate recipes error
+- Fix potion blender recipes all having the same ID, leading to a duplicate recipe error
