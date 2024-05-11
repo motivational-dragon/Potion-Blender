@@ -19,6 +19,7 @@ import java.util.stream.IntStream;
 
 public class BrewingCauldronRecipe implements Recipe<Container> {
 
+	private final ResourceLocation id;
 
 	private final boolean usePotionMergingRules;
 
@@ -32,7 +33,8 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 	private final NonNullList<Ingredient> ingredients;
 	private final ItemStack output;
 
-	public BrewingCauldronRecipe(int brewingTime,
+	public BrewingCauldronRecipe(ResourceLocation id,
+	                             int brewingTime,
 	                             boolean usePotionMergingRules,
 	                             int color,
 	                             boolean isOrdered,
@@ -60,6 +62,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 			output.enchant(null, 0);
 		}
 
+		this.id = id;
 		this.ingredients = ingredients;
 		this.brewingTime = brewingTime;
 		this.color = color;
@@ -129,9 +132,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public @NotNull ResourceLocation getId() {
-		return new ResourceLocation(Constants.MOD_ID, Type.ID);
-	}
+	public @NotNull ResourceLocation getId() {return id;}
 
 
 	public static class Type implements RecipeType<BrewingCauldronRecipe> {
@@ -144,7 +145,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 		public static final CauldronRecipeSerializer INSTANCE = new CauldronRecipeSerializer();
 
 		@Override
-		public BrewingCauldronRecipe fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
+		public @NotNull BrewingCauldronRecipe fromJson(@NotNull ResourceLocation resourceLocation, JsonObject jsonObject) {
 
 			int brewingTime = jsonObject.get("brewingTime").getAsInt();
 			boolean usePotionMergingRules = jsonObject.get("usePotionMergingRules").getAsBoolean();
@@ -157,11 +158,11 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 			}
 			ItemStack output = ShapedRecipe.itemStackFromJson(jsonObject.getAsJsonObject("output"));
 
-			return new BrewingCauldronRecipe(brewingTime, usePotionMergingRules, color, isOrdered, 0, ingredients, output);
+			return new BrewingCauldronRecipe(resourceLocation, brewingTime, usePotionMergingRules, color, isOrdered, 0, ingredients, output);
 		}
 
 		@Override
-		public @NotNull BrewingCauldronRecipe fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf buff) {
+		public @NotNull BrewingCauldronRecipe fromNetwork(@NotNull ResourceLocation resourceLocation, FriendlyByteBuf buff) {
 			int brewingTime = buff.readInt();
 			boolean usePotionMergingRules = buff.readBoolean();
 			int color = buff.readInt();
@@ -170,7 +171,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 			NonNullList<Ingredient> ingredients = NonNullList.withSize(buff.readInt(), Ingredient.EMPTY);
 			ingredients.replaceAll(ignored -> Ingredient.fromNetwork(buff));
 			ItemStack output = buff.readItem();
-			return new BrewingCauldronRecipe(brewingTime, usePotionMergingRules, color, isOrdered, decayRate, ingredients, output);
+			return new BrewingCauldronRecipe(resourceLocation,brewingTime, usePotionMergingRules, color, isOrdered, decayRate, ingredients, output);
 		}
 
 		@Override
