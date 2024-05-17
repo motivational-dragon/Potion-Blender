@@ -20,23 +20,23 @@ import java.util.List;
 public class TippedArrowItemMixin {
 
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
-    private void appendHoverText(ItemStack stack, Level $$1, List<Component> $$2, TooltipFlag $$3, CallbackInfo ci){
-        if(isCombinedArrow(stack)){
-            PotionUtils.addPotionTooltip(stack, $$2, 1);
+    private void appendHoverText(ItemStack stack, Level level, List<Component> componentList, TooltipFlag tooltipFlag, CallbackInfo ci){
+        if(potion_Blender$isCombinedArrow(stack)){
+            PotionUtils.addPotionTooltip(stack, componentList, 1f, level == null ? 20.0F : level.tickRateManager().tickrate());
             ci.cancel();
         }
     }
 
     @Inject(method = "getDescriptionId", at = @At("RETURN"), cancellable = true)
     private void getTranslationKey(ItemStack stack, CallbackInfoReturnable<String> cir){
-        if(isCombinedArrow(stack)) {
+        if(potion_Blender$isCombinedArrow(stack)) {
             cir.setReturnValue("Combined Arrow");
         }
     }
 
 
     @Unique
-    private boolean isCombinedArrow(ItemStack stack){
+    private boolean potion_Blender$isCombinedArrow(ItemStack stack){
         if (stack.hasTag()) {
             assert stack.getTag() != null;
             return stack.getTag().contains(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY);

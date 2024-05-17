@@ -19,9 +19,9 @@ public abstract class PotionItemMixin {
 
 
     /**
-     * Mixin used to override vanilla potion "Uncraftable potion" name with combined potion name
-     * @param stack
-     * @param cir
+     * Mixin used to override potion vanilla "Uncraftable potion" name with combined potion name
+     * @param stack the item stack
+     * @param cir callback info
      */
     @Inject(method = "getDescriptionId*", at = @At("RETURN"), cancellable = true)
     private void getDescriptionId(ItemStack stack, CallbackInfoReturnable<String> cir){

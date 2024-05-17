@@ -1,6 +1,6 @@
 on:
   push:
-    branches:
+     branches:
       - 'release/**'
 
 jobs:
@@ -8,23 +8,23 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-      - name: Setup env variables
-        run: echo RELEASE_MODE=PRODUCTION >> $GITHUB_ENV
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
-          cache-dependency-path: | # optional
-            *.gradle*
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
-      - name: Build with Gradle
-        run: ./gradlew build --no-daemon --max-workers 1
-      - uses: actions/upload-artifact@v4
-        with:
-          path: |
-            Fabric/build/libs
-            Forge/build/libs
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup env variables
+      run: echo RELEASE_MODE=PRODUCTION >> $GITHUB_ENV
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+        cache: 'gradle'
+        cache-dependency-path: | # optional
+          *.gradle*
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v3
+    - name: Build with Gradle
+      run: ./gradlew build --no-daemon --max-workers 1
+    - uses: actions/upload-artifact@v4
+      with:
+        path: | 
+          Fabric/build/libs
+          Forge/build/libs

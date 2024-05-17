@@ -14,8 +14,7 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
         cache: 'gradle'
-        cache-dependency-path: | # optional
-          *.gradle*
+        cache-dependency-path: | # optional          *.gradle*
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
     - name: Build with Gradle
@@ -25,12 +24,29 @@ jobs:
         path: | 
           Fabric/build/libs
           Forge/build/libs     
+
+    #Forge upload
+    - uses: Kir-Antipov/mc-publish@v3.3
+      with:
+        changelog-file: CHANGELOG.*
+        name: ""
+        modrinth-id: xe4saW9d
+        modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+        curseforge-id: 697859
+        curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+        files: |
+          Forge/build/libs/!(*-@(dev|sources|javadoc)).jar
+
+        dependencies: |
+            jei(optional){modrinth:u6dRKJwZ}{curseforge:238222}
+
+    #Fabric upload
     - uses: Kir-Antipov/mc-publish@v3.3
       with:
 
         changelog-file: CHANGELOG.*
         name: ""
-
         modrinth-id: xe4saW9d
         modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
@@ -38,7 +54,6 @@ jobs:
         curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
         files: |
           Fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
-          Forge/build/libs/!(*-@(dev|sources|javadoc)).jar
 
         dependencies: |
-            jei(optional){modrinth:u6dRKJwZ}{curseforge:238222}
+          jei(optional){modrinth:u6dRKJwZ}{curseforge:238222}

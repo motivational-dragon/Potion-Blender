@@ -1,5 +1,6 @@
 package mod.motivationaldragon.potionblender.block;
 
+import com.mojang.serialization.MapCodec;
 import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
 import mod.motivationaldragon.potionblender.config.ConfigController;
 import mod.motivationaldragon.potionblender.platform.Service;
@@ -73,17 +74,23 @@ public class BrewingCauldron extends BaseEntityBlock {
 				.setValue(IS_SOULFIRE, false));
 	}
 
+
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
 		builder.add(HAS_FLUID, FACING, IS_BREWING, LIT, IS_SOULFIRE);
 
 	}
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        //TODO: Not used for now but will cause a bug in the future
+        return null;
+    }
 
-	@Nullable
-	@Override
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> type) {
-		return createTickerHelper(type, Service.PLATFORM.getPlatformBrewingCauldron(), BrewingCauldronBlockEntity::tick);
-	}
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull  Level level,  @NotNull BlockState blockState,  @NotNull BlockEntityType<T> type) {
+        return createTickerHelper(type, Service.PLATFORM.getPlatformBrewingCauldron(),BrewingCauldronBlockEntity::tick);
+    }
 
 
 	@Override
@@ -218,15 +225,14 @@ public class BrewingCauldron extends BaseEntityBlock {
 		return RenderShape.MODEL;
 	}
 
-	@Override
-	public @NotNull VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		return SHAPE;
-	}
-
-	@Override
-	public @NotNull VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return INSIDE;
-	}
+    @Override
+    public @NotNull VoxelShape getShape( @NotNull BlockState blockState,  @NotNull BlockGetter blockGetter,  @NotNull BlockPos blockPos,  @NotNull CollisionContext collisionContext) {
+        return SHAPE;
+    }
+    @Override
+    public @NotNull VoxelShape getInteractionShape(@NotNull  BlockState blockState, @NotNull  BlockGetter blockGetter,  @NotNull BlockPos blockPos) {
+        return INSIDE;
+    }
 
 	@Override
 	public void fallOn(@NotNull Level world, @NotNull BlockState blockState, @NotNull BlockPos pos, Entity entity, float speed) {

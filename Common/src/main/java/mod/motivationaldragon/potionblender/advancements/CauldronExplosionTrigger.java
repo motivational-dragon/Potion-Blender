@@ -1,39 +1,38 @@
 package mod.motivationaldragon.potionblender.advancements;
 
-import com.google.gson.JsonObject;
-import mod.motivationaldragon.potionblender.Constants;
-import net.minecraft.advancements.critereon.*;
-import net.minecraft.resources.ResourceLocation;
+import com.mojang.serialization.Codec;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 public class CauldronExplosionTrigger extends SimpleCriterionTrigger<CauldronExplosionTrigger.TriggerInstance> {
-
-	public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "cauldron_explosion");
-
-	@Override
-	public @NotNull ResourceLocation getId() {return ID;}
-
-	@Override
-	public TriggerInstance createInstance(JsonObject json, ContextAwarePredicate context, DeserializationContext deserializationContext) {
-		return new TriggerInstance(context);
-	}
 
 
 	public void trigger(ServerPlayer player){
-		this.trigger(player, instance -> true);
+		this.trigger(player, triggerInstance -> true);
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance{
-		@NotNull
+
+	public @NotNull Codec<TriggerInstance> codec(){return CauldronExplosionTrigger.TriggerInstance.CODEC;}
+
+
+	public record TriggerInstance(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance{
+
+		public static final Codec<CauldronExplosionTrigger.TriggerInstance> CODEC = Codec.unit(new TriggerInstance(Optional.empty()));
+		public static Criterion<TriggerInstance> blewCauldron() {
+			return PotionBlenderCriterionTrigger.BLEW_CAULDRON.createCriterion(new TriggerInstance(Optional.empty()));
+		}
+
+
 		@Override
-		public ResourceLocation getCriterion() {
-			return ID;
-		}
-
-		public TriggerInstance(ContextAwarePredicate context) {
-			super(ID, context);
+		public @NotNull Optional<ContextAwarePredicate> player() {
+			return Optional.empty();
 		}
 	}
+
 
 }
