@@ -33,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -213,7 +214,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 				this.inventory.stream()
 						.filter(itemStack -> !itemStack.is(Items.AIR))
 						.toArray(ItemStack[]::new));
-		return quickCheck.getRecipeFor(container, level);
+		return quickCheck.getRecipeFor(container, level).map(RecipeHolder::value);
 	}
 
 
@@ -276,7 +277,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		//Combined potion need to float, otherwise it's hitting the cauldron and trigger the explosion mechanic
 		outputItemEntity.setNoGravity(true);
 		outputItemEntity.setDeltaMovement(Vec3.ZERO);
-		outputItemEntity.setThrower(null);
 		level.addFreshEntity(outputItemEntity);
 		level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0f, 1.0f);
 	}
@@ -353,7 +353,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 		List<ServerPlayer> nearbyPlayers = this.getLevel().getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(5));
 		for (ServerPlayer player : nearbyPlayers) {
-			PotionBlenderCriterionTrigger.INSTANCE.trigger(player);
+			PotionBlenderCriterionTrigger.BLEW_CAULDRON.trigger(player);
 		}
 		this.level.explode(entity, pos.getX(), pos.getY(), pos.getZ(), 1.5F, Level.ExplosionInteraction.BLOCK);
 	}

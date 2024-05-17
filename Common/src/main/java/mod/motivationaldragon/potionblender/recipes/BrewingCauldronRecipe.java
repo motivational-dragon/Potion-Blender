@@ -1,17 +1,21 @@
 package mod.motivationaldragon.potionblender.recipes;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import mod.motivationaldragon.potionblender.Constants;
+import mod.motivationaldragon.potionblender.config.ConfigController;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +23,6 @@ import java.util.stream.IntStream;
 
 public class BrewingCauldronRecipe implements Recipe<Container> {
 
-	private final ResourceLocation id;
 
 	private final boolean usePotionMergingRules;
 
@@ -33,7 +36,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 	private final NonNullList<Ingredient> ingredients;
 	private final ItemStack output;
 
-	public BrewingCauldronRecipe(ResourceLocation id,
+	public BrewingCauldronRecipe(
 	                             int brewingTime,
 	                             boolean usePotionMergingRules,
 	                             int color,
@@ -62,7 +65,6 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 			output.enchant(null, 0);
 		}
 
-		this.id = id;
 		this.ingredients = ingredients;
 		this.brewingTime = brewingTime;
 		this.color = color;
@@ -131,8 +133,6 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 		return this.ingredients;
 	}
 
-	@Override
-	public @NotNull ResourceLocation getId() {return id;}
 
 
 	public static class Type implements RecipeType<BrewingCauldronRecipe> {
@@ -144,25 +144,44 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 		public static final CauldronRecipeSerializer INSTANCE = new CauldronRecipeSerializer();
 
+		private static final Codec<BrewingCauldronRecipe> CODEC = RecordCodecBuilder.create(
+				in -> in.group(
+						Codec.INT.fieldOf("brewingTime").forGetter(x->x.brewingTime),
+						Codec.BOOL.optionalFieldOf("usePotionMergingRules", false).forGetter(x->x.usePotionMergingRules),
+						Codec.INT.optionalFieldOf("color", Constants.WATER_TINT).forGetter(x->x.color),
+						Codec.BOOL.fieldOf("isOrdered").forGetter(x->x.isOrdered),
+						Codec.DOUBLE.optionalFieldOf("decayRate",2.0).forGetter(x->x.decayRate),
+
+						Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients")
+								.flatXmap(ingredientList -> {
+									Ingredient[] ingredientArr = ingredientList.stream().filter(i -> !i.isEmpty()).toArray(Ingredient[]::new);
+									if (ingredientArr.length == 0) {
+										return DataResult.error(() -> "No ingredients for brewing cauldron recipe");
+									}
+									return DataResult.success(NonNullList.of(Ingredient.EMPTY, ingredientArr));
+								}, DataResult::success).forGetter(x-> {
+									if(x.ingredients.size() > ConfigController.getConfig().getCauldronInventorySize()) {
+										throw new IllegalArgumentException("Too many ingredients for brewing cauldron recipe");
+									}
+									return x.ingredients;
+								}),
+						ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("output").flatXmap(
+								itemStack -> {
+									if (itemStack.isEmpty()) {
+										return DataResult.error(() -> "Empty output for brewing cauldron recipe");
+									}
+									return DataResult.success(itemStack);
+								}, DataResult::success).forGetter(x->x.output)
+				).apply(in, BrewingCauldronRecipe::new)
+		);
+
 		@Override
-		public @NotNull BrewingCauldronRecipe fromJson(@NotNull ResourceLocation resourceLocation, JsonObject jsonObject) {
-
-			int brewingTime = jsonObject.get("brewingTime").getAsInt();
-			boolean usePotionMergingRules = jsonObject.get("usePotionMergingRules").getAsBoolean();
-			int color = jsonObject.has("color") ? jsonObject.get("color").getAsInt() : 0;
-			boolean isOrdered = jsonObject.has("isOrdered") && jsonObject.get("isOrdered").getAsBoolean();
-			JsonArray ingredientAsJson = jsonObject.getAsJsonArray("ingredients");
-			NonNullList<Ingredient> ingredients = NonNullList.withSize(ingredientAsJson.size(), Ingredient.EMPTY);
-			for (int i = 0; i < ingredients.size(); i++) {
-				ingredients.set(i, Ingredient.fromJson(ingredientAsJson.get(i)));
-			}
-			ItemStack output = ShapedRecipe.itemStackFromJson(jsonObject.getAsJsonObject("output"));
-
-			return new BrewingCauldronRecipe(resourceLocation, brewingTime, usePotionMergingRules, color, isOrdered, 0, ingredients, output);
+		public @NotNull Codec<BrewingCauldronRecipe> codec() {
+			return CODEC;
 		}
 
 		@Override
-		public @NotNull BrewingCauldronRecipe fromNetwork(@NotNull ResourceLocation resourceLocation, FriendlyByteBuf buff) {
+		public @NotNull BrewingCauldronRecipe fromNetwork(FriendlyByteBuf buff) {
 			int brewingTime = buff.readInt();
 			boolean usePotionMergingRules = buff.readBoolean();
 			int color = buff.readInt();
@@ -171,7 +190,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 			NonNullList<Ingredient> ingredients = NonNullList.withSize(buff.readInt(), Ingredient.EMPTY);
 			ingredients.replaceAll(ignored -> Ingredient.fromNetwork(buff));
 			ItemStack output = buff.readItem();
-			return new BrewingCauldronRecipe(resourceLocation,brewingTime, usePotionMergingRules, color, isOrdered, decayRate, ingredients, output);
+			return new BrewingCauldronRecipe(brewingTime, usePotionMergingRules, color, isOrdered, decayRate, ingredients, output);
 		}
 
 		@Override
