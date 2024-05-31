@@ -1,6 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.3-SNAPSHOT'
-    id 'maven-publish'
+    id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'idea'
 }
 
@@ -20,9 +19,9 @@ dependencies {
 
     //Jei
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-    modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")
+    //modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")
     // at runtime, use the full JEI jar for Fabric
-    modRuntimeOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}")
+    //modRuntimeOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}")
 
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation project(":Common")
