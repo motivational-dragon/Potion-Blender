@@ -1,15 +1,13 @@
 package mod.motivationaldragon.potionblender.utils;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class PotionEffectMerger {
 	/**
@@ -39,14 +37,14 @@ public class PotionEffectMerger {
 	        for(int j=0; j<finalPotionStatusEffects.size(); j++ ){
 	            MobEffectInstance effectInstance2 = finalPotionStatusEffects.get(j);
 
-	            if(i!=j && !mergedStatusEffects.contains(effectInstance1.getEffect()) && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
+	            if(i!=j && !mergedStatusEffects.contains(effectInstance1.getEffect().value()) && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
 	                totalDuration += (int) ((1.0d / decayRate) * effectInstance2.getDuration());
 		            decayRate++;
 	                combinableEffects.add(effectInstance2);
 	            }
 	        }
 
-	        mergedStatusEffects.add(effectInstance1.getEffect());
+	        mergedStatusEffects.add(effectInstance1.getEffect().value());
 
 	        if(combinableEffects.size() > 1){
 	            MobEffectInstance combinedEffect = ModUtils.copyEffectWithNewDuration(combinableEffects.get(0), totalDuration);
@@ -63,10 +61,10 @@ public class PotionEffectMerger {
 	 "For finalPotionStatusEffects without duration such as healing or harming, the potency of the effect is 1⁄2 that of the corresponding potion"
 	 **/
 	@NotNull
-	public static List<MobEffectInstance> mergeLingeringPotionEffects(List<MobEffectInstance> finalPotionStatusEffects) {
+	public static List<MobEffectInstance> ApplyLingeringPotionDurationAndEffects(List<MobEffectInstance> finalPotionStatusEffects) {
 	    List<MobEffectInstance> lingeringEffects = new ArrayList<>(finalPotionStatusEffects.size());
 	    for (MobEffectInstance effectInstance : finalPotionStatusEffects){
-	        if(effectInstance.getEffect().isInstantenous()){
+	        if(effectInstance.getEffect().value().isInstantenous()){
 	            //We are using the full constructor to copy effect witch is why the call is so long
 	            lingeringEffects.add(new MobEffectInstance(effectInstance.getEffect(), effectInstance.getDuration(),
 	                    Math.round(effectInstance.getAmplifier()*0.5f),
@@ -97,10 +95,13 @@ public class PotionEffectMerger {
 	 * @return true if the potion would ignore instant potion effects
 	 */
 	public static boolean wouldIgnoreInstantPotion(ItemStack potion, List<MobEffectInstance> cauldronInventoryEffects) {
-	    List<MobEffectInstance> effectInstances = PotionUtils.getMobEffects(potion);
+
+		PotionContents potionContents = potion.get(DataComponents.POTION_CONTENTS);
+		if(potionContents == null){return false;}
+		List<MobEffectInstance> effectInstances = potionContents.customEffects();
 	    effectInstances = effectInstances
 	            .stream()
-	            .filter(e->e.getEffect().isInstantenous()).toList();
+	            .filter(e->e.getEffect().value().isInstantenous()).toList();
 	    return cauldronInventoryEffects.stream().anyMatch(effectInstances::contains);
 	}
 }
