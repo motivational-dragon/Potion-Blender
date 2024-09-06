@@ -12,14 +12,15 @@ import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import mod.motivationaldragon.potionblender.utils.PotionEffectMerger;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
@@ -32,7 +33,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
@@ -43,6 +45,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.sounds.SoundSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,37 +232,38 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 			return;
 		}
 		//read recipe
-		Item potionType = recipe.getResultItem(level.registryAccess()).getItem();
-		ItemStack potionToCraft = new ItemStack(potionType);
+		Item potionItem = recipe.getResultItem(level.registryAccess()).getItem();
+		ItemStack potionItemStack = new ItemStack(potionItem);
 
-		//This madness is to give the correct tag to the correct potion type. That way mixin can determinate how to name the potions
-		if (potionToCraft.is(Items.POTION)) {
-			potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_POTION, true);
-		} else if (potionToCraft.is(Items.SPLASH_POTION)) {
-			potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_SPLASH_POTION, true);
-		} else if (potionToCraft.is(Items.LINGERING_POTION)) {
-			potionToCraft.getOrCreateTag().putBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION, true);
+		//ADD tag according to the correct potion type. This way mixins can determinate how to name the potions
+		var potionTypeTag =  new CompoundTag();
+		if (potionItemStack.is(Items.POTION)) {
+			potionTypeTag.putBoolean(ModNBTKey.IS_COMBINED_POTION, true);
+		} else if (potionItemStack.is(Items.SPLASH_POTION)) {
+			potionTypeTag.putBoolean(ModNBTKey.IS_COMBINED_SPLASH_POTION, true);
+		} else if (potionItemStack.is(Items.LINGERING_POTION)) {
+			potionTypeTag.putBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION, true);
 		} else {
 			Constants.LOG.error(
 					String.format("Cannot merge potion to an item that is not a potion. " +
 							"Valid potion are Potions, Splash Potions, Lingering Potion. Did you try merge potion into an item that is not a potion?" +
-							"The item is: %s", potionToCraft.getItem()));
+							"The item is: %s", potionItemStack.getItem()));
 			Containers.dropContents(level, pos, this.inventory);
 			emptyCauldron();
 			return;
 		}
+		potionItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(potionTypeTag));
+
+
 		List<MobEffectInstance> finalPotionStatusEffects = PotionEffectMerger.mergeCombinableEffects(this.getInventoryStatusEffectsInstances(), recipe.getDecayRate());
 
-		if (ModUtils.isCombinedLingeringPotion(potionToCraft)) {
-			finalPotionStatusEffects = PotionEffectMerger.mergeLingeringPotionEffects(finalPotionStatusEffects);
+		if (ModUtils.isCombinedLingeringPotion(potionItemStack)) {
+			finalPotionStatusEffects = PotionEffectMerger.ApplyLingeringPotionDurationAndEffects(finalPotionStatusEffects);
 		}
 
 		//create and drop the potion contained all the effect of the previous potion
-		ItemStack potionItemStack = PotionUtils.setCustomEffects(potionToCraft, finalPotionStatusEffects);
-
-		int color = PotionUtils.getColor(finalPotionStatusEffects);
-		//Used to force potion color rendering with the help of mixins
-		potionItemStack.getOrCreateTag().putInt(PotionUtils.TAG_CUSTOM_POTION_COLOR, color);
+		PotionContents contents = new PotionContents(Optional.empty(),Optional.empty(), finalPotionStatusEffects);
+		potionItemStack.set(DataComponents.POTION_CONTENTS, contents);
 
 		outputItem(level, pos, potionItemStack);
 
@@ -406,24 +410,24 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(@NotNull CompoundTag nbt) {
+	public void loadAdditional(@NotNull CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
 		this.inventory = NonNullList.withSize(this.size(), ItemStack.EMPTY);
-		ContainerHelper.loadAllItems(nbt, this.inventory);
+		ContainerHelper.loadAllItems(nbt, this.inventory,  provider);
 		this.numberOfItems = nbt.getInt(POTION_MIXER_KEY + "_inv_size");
 		this.isBrewing = nbt.getBoolean(POTION_MIXER_KEY + "_isBrewing");
 		this.canBrew = nbt.getBoolean(POTION_MIXER_KEY + "_canBrew");
 		this.waterColor = nbt.getInt(POTION_MIXER_KEY + "_waterColor");
-		super.load(nbt);
+		super.loadAdditional(nbt, provider);
 	}
 
 	@Override
-	protected void saveAdditional(@NotNull CompoundTag nbt) {
-		ContainerHelper.saveAllItems(nbt, inventory);
+	protected void saveAdditional(@NotNull CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
+		ContainerHelper.saveAllItems(nbt, inventory, provider);
 		nbt.putInt(POTION_MIXER_KEY + "_inv_size", numberOfItems);
 		nbt.putBoolean(POTION_MIXER_KEY + "_isBrewing", isBrewing);
 		nbt.putBoolean(POTION_MIXER_KEY + "_canBrew", canBrew);
 		nbt.putInt(POTION_MIXER_KEY + "_waterColor", computeWaterColor());
-		super.saveAdditional(nbt);
+		super.saveAdditional(nbt, provider);
 	}
 
 	public int getWaterColor() {
@@ -435,15 +439,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		if (recipe.isPresent() && !recipe.get().usePotionMeringRules()) {
 			return recipe.get().getColor();
 		} else {
-			return PotionUtils.getColor(getInventoryStatusEffectsInstances());
+			return PotionContents.getColor(getInventoryStatusEffectsInstances());
 		}
 	}
 
-
-	@Override
-	public @NotNull CompoundTag getUpdateTag() {
-		return this.saveWithoutMetadata();
-	}
 
 	@NotNull
 	protected List<MobEffectInstance> getInventoryStatusEffectsInstances() {
@@ -458,7 +457,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 			ItemStack itemStack = inventory.get(i);
 			//Since all potion derive from the same class, we only need to check for the potion item
 			if (itemStack.getItem() instanceof PotionItem) {
-				effects.addAll(PotionUtils.getMobEffects(itemStack));
+				PotionContents contents = itemStack.get(DataComponents.POTION_CONTENTS);
+				if(contents != null) {
+					effects.addAll(contents.customEffects());
+				}
 			}
 		}
 		return effects;
