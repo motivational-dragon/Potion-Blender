@@ -15,10 +15,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -57,6 +58,8 @@ public class BrewingCauldron extends BaseEntityBlock {
 
 	private static final VoxelShape INSIDE = box(2.0, 8.0, 2.0, 14.0, 16.0, 14.0);
 
+	public final MapCodec<BrewingCauldron> CODEC = simpleCodec(BrewingCauldron::new);
+
 	//TODO MINOR: this shape is not 100% accurate
 	protected static final VoxelShape SHAPE = Shapes.join(Shapes.block(), Shapes.or(box(0.0, 0.0, 4.0, 16.0, 3.0, 12.0),
 			box(4.0, 0.0, 0.0, 12.0, 3.0, 16.0), box(2.0, 0.0, 2.0, 14.0, 3.0, 14.0), INSIDE), BooleanOp.ONLY_FIRST);
@@ -81,9 +84,8 @@ public class BrewingCauldron extends BaseEntityBlock {
 
 	}
     @Override
-    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
-        //TODO: Not used for now but will cause a bug in the future
-        return null;
+    protected @NotNull MapCodec<BrewingCauldron> codec() {
+        return  CODEC;
     }
 
     @Nullable
@@ -105,21 +107,21 @@ public class BrewingCauldron extends BaseEntityBlock {
 
 	@Override
 	@NotNull
-	public InteractionResult use(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
+	public ItemInteractionResult useItemOn(@NotNull ItemStack itemStack, @NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
 		if (!world.isClientSide()) {
 			// Shovel check is hardcoded with the shovel class to handle modded shovels
 			if (dowseItems.contains(player.getItemInHand(hand).getItem()) || player.getMainHandItem().getItem() instanceof ShovelItem) {
 				dowse(world, pos);
-				return InteractionResult.CONSUME;
+				return ItemInteractionResult.CONSUME;
 			} else if (litItems.contains(player.getItemInHand(hand).getItem()) && !state.getValue(LIT)) {
 				ignite(state, world, pos);
-				return InteractionResult.CONSUME;
+				return ItemInteractionResult.CONSUME;
 			} else {
 				tryGetBlockEntity(world, pos).ifPresent(brewingCauldronBlockEntity ->
 						brewingCauldronBlockEntity.onUseDelegate(state, world, pos, player));
 			}
 		}
-		return InteractionResult.SUCCESS;
+		return ItemInteractionResult.SUCCESS;
 	}
 
 	private static void ignite(@NotNull BlockState state, Level world, @NotNull BlockPos pos) {

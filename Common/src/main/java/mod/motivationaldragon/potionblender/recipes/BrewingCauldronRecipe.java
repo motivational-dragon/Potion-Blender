@@ -2,13 +2,16 @@ package mod.motivationaldragon.potionblender.recipes;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.config.ConfigController;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PotionItem;
@@ -56,12 +59,12 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 			for (Ingredient ingredient : ingredients) {
 				for (ItemStack stack : ingredient.getItems()) {
 					if ((stack.getItem() instanceof PotionItem)) {
-						stack.setHoverName(Component.translatable(Constants.MOD_ID + ".recipe.potion_wildcard_names"));
+						stack.set(DataComponents.CUSTOM_NAME, Component.translatable(Constants.MOD_ID + ".recipe.potion_wildcard_names"));
 						stack.enchant(null, 0);
 					}
 				}
 			}
-			output.setHoverName(Component.translatable(Constants.MOD_ID + ".recipe.merged_potion_wildcard_names"));
+			output.set(DataComponents.CUSTOM_NAME,Component.translatable(Constants.MOD_ID + ".recipe.merged_potion_wildcard_names"));
 			output.enchant(null, 0);
 		}
 
@@ -97,8 +100,9 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 	}
 
 
+
 	@Override
-	public @NotNull ItemStack assemble(@NotNull Container var1, @NotNull RegistryAccess var2) {
+	public @NotNull ItemStack assemble(@NotNull Container var1, HolderLookup.@NotNull Provider provider) {
 		return output.copy();
 	}
 
@@ -109,7 +113,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public @NotNull ItemStack getResultItem(@NotNull RegistryAccess var1) {
+	public @NotNull ItemStack getResultItem(@NotNull HolderLookup.Provider provider) {
 		return output;
 	}
 
@@ -144,7 +148,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 		public static final CauldronRecipeSerializer INSTANCE = new CauldronRecipeSerializer();
 
-		private static final Codec<BrewingCauldronRecipe> CODEC = RecordCodecBuilder.create(
+		private static final MapCodec<BrewingCauldronRecipe> CODEC = RecordCodecBuilder.mapCodec(
 				in -> in.group(
 						Codec.INT.fieldOf("brewingTime").forGetter(x->x.brewingTime),
 						Codec.BOOL.optionalFieldOf("usePotionMergingRules", false).forGetter(x->x.usePotionMergingRules),
@@ -165,7 +169,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 									}
 									return x.ingredients;
 								}),
-						ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("output").flatXmap(
+						ItemStack.CODEC.fieldOf("output").flatXmap(
 								itemStack -> {
 									if (itemStack.isEmpty()) {
 										return DataResult.error(() -> "Empty output for brewing cauldron recipe");
@@ -175,26 +179,33 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 				).apply(in, BrewingCauldronRecipe::new)
 		);
 
+		public static final StreamCodec<RegistryFriendlyByteBuf, BrewingCauldronRecipe> STREAM_CODEC = StreamCodec.of(CauldronRecipeSerializer::toNetwork, CauldronRecipeSerializer::fromNetwork);
+
+
 		@Override
-		public @NotNull Codec<BrewingCauldronRecipe> codec() {
+		public @NotNull MapCodec<BrewingCauldronRecipe> codec() {
 			return CODEC;
 		}
 
 		@Override
-		public @NotNull BrewingCauldronRecipe fromNetwork(FriendlyByteBuf buff) {
+		public @NotNull StreamCodec<RegistryFriendlyByteBuf, BrewingCauldronRecipe> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		private static @NotNull BrewingCauldronRecipe fromNetwork(RegistryFriendlyByteBuf buff) {
 			int brewingTime = buff.readInt();
 			boolean usePotionMergingRules = buff.readBoolean();
 			int color = buff.readInt();
 			boolean isOrdered = buff.readBoolean();
 			double decayRate = buff.readDouble();
 			NonNullList<Ingredient> ingredients = NonNullList.withSize(buff.readInt(), Ingredient.EMPTY);
-			ingredients.replaceAll(ignored -> Ingredient.fromNetwork(buff));
-			ItemStack output = buff.readItem();
+			ingredients.replaceAll(ignored -> Ingredient.CONTENTS_STREAM_CODEC.decode(buff));
+			ItemStack output = ItemStack.STREAM_CODEC.decode(buff);
 			return new BrewingCauldronRecipe(brewingTime, usePotionMergingRules, color, isOrdered, decayRate, ingredients, output);
 		}
 
-		@Override
-		public void toNetwork(FriendlyByteBuf buff, BrewingCauldronRecipe brewingCauldronRecipe) {
+
+		private static void toNetwork(RegistryFriendlyByteBuf buff, BrewingCauldronRecipe brewingCauldronRecipe) {
 			buff.writeInt(brewingCauldronRecipe.brewingTime);
 			buff.writeBoolean(brewingCauldronRecipe.usePotionMergingRules);
 			buff.writeInt(brewingCauldronRecipe.color);
@@ -203,9 +214,9 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 			NonNullList<Ingredient> recipeIngredients = brewingCauldronRecipe.getIngredients();
 			buff.writeInt(recipeIngredients.size());
 			for (Ingredient ingredient : recipeIngredients) {
-				ingredient.toNetwork(buff);
+				Ingredient.CONTENTS_STREAM_CODEC.encode(buff, ingredient);
 			}
-			buff.writeItem(brewingCauldronRecipe.output);
+			ItemStack.STREAM_CODEC.encode(buff,brewingCauldronRecipe.output);
 		}
 	}
 

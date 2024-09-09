@@ -1,6 +1,7 @@
 package mod.motivationaldragon.potionblender.mixins;
 
-import mod.motivationaldragon.potionblender.utils.ModNBTKey;
+import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
+import mod.motivationaldragon.potionblender.utils.PotionType;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,14 +12,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class PotionEntityMixin {
 
     /**
-     * Make the is lingering method return true for combined lingering potion
+     * Make the is lingering method return true for potion marked as combined lingering potion
      */
     @Inject(method = "isLingering", at = @At("RETURN"), cancellable = true)
     private void isLingering(CallbackInfoReturnable<Boolean> cir){
-        boolean isCombinedPotion = ((ThrownPotion) (Object) this).getItem().getOrCreateTag().getBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION);
-        if(isCombinedPotion) {
-            cir.setReturnValue(true);
+        Integer potionTypeCode = ((ThrownPotion) (Object) this).getItem().get(BrewingCauldronBlockEntity.potionTypeData);
+        if (potionTypeCode != null) {
+                cir.setReturnValue(potionTypeCode == PotionType.LINGERING.code);
+            }
         }
     }
 
-}

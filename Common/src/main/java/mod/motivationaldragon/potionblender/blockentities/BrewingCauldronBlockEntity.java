@@ -1,6 +1,7 @@
 package mod.motivationaldragon.potionblender.blockentities;
 
 
+import com.mojang.serialization.Codec;
 import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.advancements.PotionBlenderCriterionTrigger;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
@@ -8,19 +9,25 @@ import mod.motivationaldragon.potionblender.config.ConfigController;
 import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
 import mod.motivationaldragon.potionblender.platform.Service;
 import mod.motivationaldragon.potionblender.recipes.BrewingCauldronRecipe;
-import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import mod.motivationaldragon.potionblender.utils.PotionEffectMerger;
+import mod.motivationaldragon.potionblender.utils.PotionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
@@ -34,7 +41,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
@@ -45,7 +51,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import net.minecraft.sounds.SoundSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +64,12 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 	private static final String POTION_MIXER_KEY = Constants.MOD_ID + ".ConfigController";
 
+
+	public static final DataComponentType<Integer> potionTypeData = Registry.register(
+			BuiltInRegistries.DATA_COMPONENT_TYPE,
+			new ResourceLocation("a"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build()
+	);
 
 	/**
 	 * How high dropped item spawn relative to the block position.
@@ -236,24 +247,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		ItemStack potionItemStack = new ItemStack(potionItem);
 
 		//ADD tag according to the correct potion type. This way mixins can determinate how to name the potions
-		var potionTypeTag =  new CompoundTag();
-		if (potionItemStack.is(Items.POTION)) {
-			potionTypeTag.putBoolean(ModNBTKey.IS_COMBINED_POTION, true);
-		} else if (potionItemStack.is(Items.SPLASH_POTION)) {
-			potionTypeTag.putBoolean(ModNBTKey.IS_COMBINED_SPLASH_POTION, true);
-		} else if (potionItemStack.is(Items.LINGERING_POTION)) {
-			potionTypeTag.putBoolean(ModNBTKey.IS_COMBINED_LINGERING_POTION, true);
-		} else {
-			Constants.LOG.error(
-					String.format("Cannot merge potion to an item that is not a potion. " +
-							"Valid potion are Potions, Splash Potions, Lingering Potion. Did you try merge potion into an item that is not a potion?" +
-							"The item is: %s", potionItemStack.getItem()));
-			Containers.dropContents(level, pos, this.inventory);
-			emptyCauldron();
-			return;
-		}
-		potionItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(potionTypeTag));
-
+		PotionType.itemToPotion(potionItem).ifPresent(potionType -> potionItemStack.set(potionTypeData, potionType.ordinal()));
 
 		List<MobEffectInstance> finalPotionStatusEffects = PotionEffectMerger.mergeCombinableEffects(this.getInventoryStatusEffectsInstances(), recipe.getDecayRate());
 

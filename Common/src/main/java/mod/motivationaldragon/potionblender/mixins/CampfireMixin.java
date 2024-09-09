@@ -28,8 +28,8 @@ public abstract class CampfireMixin {
 
 	@Shadow @Final public static DirectionProperty FACING;
 
-	@Inject(method = "use", at = @At("HEAD"), cancellable = true)
-	public void use(BlockState campfireBlockstate, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
+	@Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true)
+	public void useItemOn(ItemStack ignored,BlockState campfireBlockstate, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
 
 		if(level.isClientSide() || player.isSpectator()) {return;}
 
