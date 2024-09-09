@@ -1,13 +1,13 @@
 package mod.motivationaldragon.potionblender.recipes;
 
-import mod.motivationaldragon.potionblender.utils.ModNBTKey;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -16,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class CombinedTippedArrowRecipe extends CustomRecipe {
 
@@ -45,28 +47,26 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(CraftingContainer craftingInventory, @NotNull RegistryAccess registryAccess) {
+    public @NotNull ItemStack assemble(CraftingContainer craftingInventory, @NotNull HolderLookup.Provider provider) {
         ItemStack potionItemStack = craftingInventory.getItem(1 + craftingInventory.getWidth());
         if (!ModUtils.isCombinedLingeringPotion(potionItemStack)) {
             return ItemStack.EMPTY;
         }
         ItemStack craftedItemStack = new ItemStack(Items.TIPPED_ARROW, 8);
-        PotionUtils.setPotion(craftedItemStack, PotionUtils.getPotion(potionItemStack));
 
         List<MobEffectInstance> statusEffectInstances = new ArrayList<>(3); //Capacity = max number combined effects
-        for (MobEffectInstance effectInstance : PotionUtils.getCustomEffects(potionItemStack)) {
+        for (MobEffectInstance effectInstance : (Objects.requireNonNull(potionItemStack.get(DataComponents.POTION_CONTENTS)).getAllEffects())) {
                 //The duration of the effect is 1⁄8 that of the corresponding potion.
                 //Since we already divided by 4 when making the lingering potion we only need to divide by 2.
                 statusEffectInstances.add(new MobEffectInstance(effectInstance.getEffect(), effectInstance.getDuration() / 2,
                         effectInstance.getAmplifier()));
         }
 
-        PotionUtils.setCustomEffects(craftedItemStack,statusEffectInstances);
+        craftedItemStack.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(),Optional.empty(),statusEffectInstances));
 
-        assert craftedItemStack.getTag() != null;
-
-        craftedItemStack.getTag().putBoolean(ModNBTKey.FORCE_COLOR_RENDERING_KEY,true);
-        craftedItemStack.getTag().putBoolean(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY,true);
+        //TODO: UPDATE THIS
+      /*  craftedItemStack.getTag().putBoolean(ModNBTKey.FORCE_COLOR_RENDERING_KEY,true);
+        craftedItemStack.getTag().putBoolean(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY,true);*/
 
         return craftedItemStack;
     }

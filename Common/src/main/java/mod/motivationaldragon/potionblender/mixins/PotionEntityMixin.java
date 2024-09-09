@@ -1,6 +1,6 @@
 package mod.motivationaldragon.potionblender.mixins;
 
-import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
+import mod.motivationaldragon.potionblender.PotionBlenderCommon;
 import mod.motivationaldragon.potionblender.utils.PotionType;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +16,7 @@ public abstract class PotionEntityMixin {
      */
     @Inject(method = "isLingering", at = @At("RETURN"), cancellable = true)
     private void isLingering(CallbackInfoReturnable<Boolean> cir){
-        Integer potionTypeCode = ((ThrownPotion) (Object) this).getItem().get(BrewingCauldronBlockEntity.potionTypeData);
+        Integer potionTypeCode = ((ThrownPotion) (Object) this).getItem().get(PotionBlenderCommon.potionTypeData);
         if (potionTypeCode != null) {
                 cir.setReturnValue(potionTypeCode == PotionType.LINGERING.code);
             }

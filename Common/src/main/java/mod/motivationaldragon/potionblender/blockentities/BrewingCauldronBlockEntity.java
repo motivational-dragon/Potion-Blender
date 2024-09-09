@@ -1,8 +1,8 @@
 package mod.motivationaldragon.potionblender.blockentities;
 
 
-import com.mojang.serialization.Codec;
 import mod.motivationaldragon.potionblender.Constants;
+import mod.motivationaldragon.potionblender.PotionBlenderCommon;
 import mod.motivationaldragon.potionblender.advancements.PotionBlenderCriterionTrigger;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
 import mod.motivationaldragon.potionblender.config.ConfigController;
@@ -15,16 +15,11 @@ import mod.motivationaldragon.potionblender.utils.PotionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -64,12 +59,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 	private static final String POTION_MIXER_KEY = Constants.MOD_ID + ".ConfigController";
 
-
-	public static final DataComponentType<Integer> potionTypeData = Registry.register(
-			BuiltInRegistries.DATA_COMPONENT_TYPE,
-			new ResourceLocation("a"),
-			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build()
-	);
 
 	/**
 	 * How high dropped item spawn relative to the block position.
@@ -247,7 +236,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		ItemStack potionItemStack = new ItemStack(potionItem);
 
 		//ADD tag according to the correct potion type. This way mixins can determinate how to name the potions
-		PotionType.itemToPotion(potionItem).ifPresent(potionType -> potionItemStack.set(potionTypeData, potionType.ordinal()));
+		PotionType.itemToPotion(potionItem).ifPresent(potionType -> potionItemStack.set(PotionBlenderCommon.potionTypeData, potionType.code));
 
 		List<MobEffectInstance> finalPotionStatusEffects = PotionEffectMerger.mergeCombinableEffects(this.getInventoryStatusEffectsInstances(), recipe.getDecayRate());
 

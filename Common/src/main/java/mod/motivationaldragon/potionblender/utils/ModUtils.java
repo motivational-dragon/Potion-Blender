@@ -1,11 +1,11 @@
 package mod.motivationaldragon.potionblender.utils;
 
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
+
+import static mod.motivationaldragon.potionblender.PotionBlenderCommon.potionTypeData;
 
 public class ModUtils {
 
@@ -30,19 +30,11 @@ public class ModUtils {
 
 
     public static boolean isCombinedLingeringPotion(ItemStack itemStack) {
-            return  itemStack.get(DataComponents.CUSTOM_DATA).copyTag().contains(ModNBTKey.IS_COMBINED_LINGERING_POTION);
+        PotionType potionType = PotionType.codeToPotionType.get(itemStack.get(potionTypeData));
+        return potionType == PotionType.LINGERING;
     }
 
     public static boolean isACombinedPotion(ItemStack itemStack){
-
-        CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
-        if(customData == null){
-            CompoundTag tag = customData.copyTag();
-            return tag.contains(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY)||
-                    tag.contains(ModNBTKey.IS_COMBINED_POTION)||
-                    tag.contains(ModNBTKey.IS_COMBINED_SPLASH_POTION)||
-                    tag.contains(ModNBTKey.IS_COMBINED_LINGERING_POTION);
-        }
-        return false;
+        return PotionType.codeToPotionType.get(itemStack.get(potionTypeData)) != null;
     }
 }

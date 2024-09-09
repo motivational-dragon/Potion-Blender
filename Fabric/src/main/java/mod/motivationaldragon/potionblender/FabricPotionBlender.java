@@ -3,9 +3,11 @@ package mod.motivationaldragon.potionblender;
 import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.blockentity.FabricBlockEntities;
 import mod.motivationaldragon.potionblender.item.ModItem;
+import mod.motivationaldragon.potionblender.networking.BrewingCauldronInvSyncS2CPacket;
 import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipes;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -24,10 +26,9 @@ public class FabricPotionBlender implements ModInitializer {
 		PotionBlenderBlock.registerBlockItem(bind(BuiltInRegistries.ITEM));
 		PotionBlenderRecipes.registerRecipeSerializer(bind(BuiltInRegistries.RECIPE_SERIALIZER));
 		PotionBlenderRecipes.registerRecipeType(bind(BuiltInRegistries.RECIPE_TYPE));
-
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> ModItem.registerFunctionalBlocksItems(entries::accept));
-
 		FabricBlockEntities.init();
+		PayloadTypeRegistry.playS2C().register(BrewingCauldronInvSyncS2CPacket.packetType,BrewingCauldronInvSyncS2CPacket.STREAM_CODEC);
 	}
 
 	public static <T> BiConsumer<T, ResourceLocation> bind(Registry<? super T> registry) {

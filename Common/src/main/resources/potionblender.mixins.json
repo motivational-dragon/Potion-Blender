@@ -9,7 +9,6 @@
     "LingeringPotionMixin",
     "PotionEntityMixin",
     "PotionItemMixin",
-    "PotionUtilMixin",
     "ThrownPotionMixin",
     "TippedArrowItemMixin"
   ],

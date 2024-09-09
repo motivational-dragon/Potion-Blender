@@ -13,7 +13,8 @@ public enum PotionType {
 
 	NORMAL(0),
 	SPLASH(1),
-	LINGERING(2);
+	LINGERING(2),
+	TIPPEDARROW(3);
 
 	PotionType(int num) {
 		code = num;
@@ -23,13 +24,14 @@ public enum PotionType {
 
 	public static final Map<Integer, PotionType> codeToPotionType;
 	static {
-		codeToPotionType = HashMap.newHashMap(3);
+		codeToPotionType = HashMap.newHashMap(PotionType.values().length);
 		codeToPotionType.put(0, NORMAL);
 		codeToPotionType.put(1, SPLASH);
 		codeToPotionType.put(2, LINGERING);
+		codeToPotionType.put(3, TIPPEDARROW);
 	}
 
-	static Optional<PotionType> itemToPotion(Item item){
+	public static Optional<PotionType> itemToPotion(Item item){
 		if(item == Items.LINGERING_POTION){return Optional.of(LINGERING);}
 		if(item == Items.SPLASH_POTION){return Optional.of(SPLASH);}
 		if(item == Items.POTION){return Optional.of(NORMAL);}
