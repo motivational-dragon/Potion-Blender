@@ -55,7 +55,7 @@ import static mod.motivationaldragon.potionblender.utils.ModUtils.isACombinedPot
 public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 
-	private static final String POTION_MIXER_KEY = Constants.MOD_ID + ".ConfigController";
+	private static final String POTION_BLENDER_NBT_KEY = Constants.MOD_ID + ".ConfigController";
 
 
 	/**
@@ -117,8 +117,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	}
 
 	private void updateListeners() {
-		this.setChanged();
-		syncInventoryWithClient();
+		this.update();
 		assert this.getLevel() != null;
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), Block.UPDATE_NEIGHBORS);
 	}
@@ -327,6 +326,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 				.setValue(BrewingCauldron.HAS_FLUID, false)
 				.setValue(BrewingCauldron.IS_BREWING, false);
 		level.setBlockAndUpdate(this.getBlockPos(), blockState);
+		syncInventoryWithClient();
 		updateListeners();
 	}
 
@@ -364,6 +364,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
 		level.setBlockAndUpdate(this.getBlockPos(), mixerCauldronBlockState);
 		itemEntity.remove(Entity.RemovalReason.DISCARDED);
+		syncInventoryWithClient();
 		updateListeners();
 	}
 
@@ -392,23 +393,24 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 	@Override
 	public void loadAdditional(@NotNull CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
-		this.inventory = NonNullList.withSize(this.size(), ItemStack.EMPTY);
-		ContainerHelper.loadAllItems(nbt, this.inventory,  provider);
-		this.numberOfItems = nbt.getInt(POTION_MIXER_KEY + "_inv_size");
-		this.isBrewing = nbt.getBoolean(POTION_MIXER_KEY + "_isBrewing");
-		this.canBrew = nbt.getBoolean(POTION_MIXER_KEY + "_canBrew");
-		this.waterColor = nbt.getInt(POTION_MIXER_KEY + "_waterColor");
 		super.loadAdditional(nbt, provider);
+		this.inventory.clear();
+		ContainerHelper.loadAllItems(nbt, this.inventory,  provider);
+		this.numberOfItems = nbt.getInt(POTION_BLENDER_NBT_KEY + "_inv_size");
+		this.isBrewing = nbt.getBoolean(POTION_BLENDER_NBT_KEY + "_isBrewing");
+		this.canBrew = nbt.getBoolean(POTION_BLENDER_NBT_KEY + "_canBrew");
+		this.waterColor = nbt.getInt(POTION_BLENDER_NBT_KEY + "_waterColor");
+
 	}
 
 	@Override
 	protected void saveAdditional(@NotNull CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
-		ContainerHelper.saveAllItems(nbt, inventory, provider);
-		nbt.putInt(POTION_MIXER_KEY + "_inv_size", numberOfItems);
-		nbt.putBoolean(POTION_MIXER_KEY + "_isBrewing", isBrewing);
-		nbt.putBoolean(POTION_MIXER_KEY + "_canBrew", canBrew);
-		nbt.putInt(POTION_MIXER_KEY + "_waterColor", computeWaterColor());
 		super.saveAdditional(nbt, provider);
+		ContainerHelper.saveAllItems(nbt, inventory, provider);
+		nbt.putInt(POTION_BLENDER_NBT_KEY + "_inv_size", numberOfItems);
+		nbt.putBoolean(POTION_BLENDER_NBT_KEY + "_isBrewing", isBrewing);
+		nbt.putBoolean(POTION_BLENDER_NBT_KEY + "_canBrew", canBrew);
+		nbt.putInt(POTION_BLENDER_NBT_KEY + "_waterColor", waterColor);
 	}
 
 	public int getWaterColor() {
@@ -449,7 +451,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		this.numberOfItems = 0;
 		this.inventory = newInventory;
 		countPotion(newInventory);
-
+		this.waterColor = computeWaterColor();
 	}
 
 	private void countPotion(NonNullList<ItemStack> newInventory) {
@@ -460,7 +462,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		}
 	}
 
-	public void markUpdated() {
+	public void update() {
 		this.setChanged();
 		Objects.requireNonNull(this.getLevel()).sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}

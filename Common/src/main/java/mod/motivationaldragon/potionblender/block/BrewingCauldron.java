@@ -128,7 +128,7 @@ public class BrewingCauldron extends BaseEntityBlock {
 		world.setBlockAndUpdate(pos, state.setValue(LIT, true));
 		world.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1F, 1F);
 		CampfireBlock.makeParticles(world, pos, false, true);
-		tryGetBlockEntity(world, pos).ifPresent(BrewingCauldronBlockEntity::markUpdated);
+		tryGetBlockEntity(world, pos).ifPresent(BrewingCauldronBlockEntity::update);
 	}
 
 	public static void dowse(Level world, @NotNull BlockPos pos) {
@@ -136,7 +136,7 @@ public class BrewingCauldron extends BaseEntityBlock {
 		if (state.getValue(LIT)) {
 			world.setBlockAndUpdate(pos, state.setValue(LIT, false));
 			world.playSound(null, pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1F, 1F);
-			tryGetBlockEntity(world, pos).ifPresent(BrewingCauldronBlockEntity::markUpdated);
+			tryGetBlockEntity(world, pos).ifPresent(BrewingCauldronBlockEntity::update);
 		}
 	}
 

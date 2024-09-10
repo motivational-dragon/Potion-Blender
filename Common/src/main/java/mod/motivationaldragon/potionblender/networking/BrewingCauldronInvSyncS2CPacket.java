@@ -37,7 +37,7 @@ public record BrewingCauldronInvSyncS2CPacket(NonNullList<ItemStack> inv,
 
 	public static void setCauldronInventory(BrewingCauldronInvSyncS2CPacket payload) {
 		ClientLevel level = Minecraft.getInstance().level;
-		if (level == null || level.hasChunkAt(payload.containerLocation)) return;
+		if (level == null || !level.hasChunkAt(payload.containerLocation)) return;
 		if (level.getBlockEntity(payload.containerLocation) instanceof BrewingCauldronBlockEntity blockEntity) {
 			blockEntity.setInventory(payload.inv);
 		}
