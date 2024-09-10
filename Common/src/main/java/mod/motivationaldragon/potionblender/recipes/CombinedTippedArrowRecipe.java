@@ -1,6 +1,8 @@
 package mod.motivationaldragon.potionblender.recipes;
 
+import mod.motivationaldragon.potionblender.PotionBlenderCommon;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
+import mod.motivationaldragon.potionblender.utils.PotionType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -61,13 +63,8 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
                 statusEffectInstances.add(new MobEffectInstance(effectInstance.getEffect(), effectInstance.getDuration() / 2,
                         effectInstance.getAmplifier()));
         }
-
         craftedItemStack.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(),Optional.empty(),statusEffectInstances));
-
-        //TODO: UPDATE THIS
-      /*  craftedItemStack.getTag().putBoolean(ModNBTKey.FORCE_COLOR_RENDERING_KEY,true);
-        craftedItemStack.getTag().putBoolean(ModNBTKey.IS_TIPPED_ARROW_COMBINED_KEY,true);*/
-
+        craftedItemStack.set(PotionBlenderCommon.potionTypeData, PotionType.TIPPEDARROW.code);
         return craftedItemStack;
     }
 

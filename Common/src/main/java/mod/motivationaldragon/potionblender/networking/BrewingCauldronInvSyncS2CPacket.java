@@ -30,8 +30,8 @@ public record BrewingCauldronInvSyncS2CPacket(NonNullList<ItemStack> inv,
 	public void write(RegistryFriendlyByteBuf buf) {
 		buf.writeInt(inv.size());
 		for (ItemStack item : inv) {
-			ItemStack.STREAM_CODEC.encode(buf, item);
-		}
+			ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, item);
+			}
 		buf.writeBlockPos(containerLocation);
 	}
 
@@ -52,7 +52,7 @@ public record BrewingCauldronInvSyncS2CPacket(NonNullList<ItemStack> inv,
 		int size = buf.readInt();
 		NonNullList<ItemStack> list = NonNullList.withSize(size, ItemStack.EMPTY);
 		for (int i = 0; i < size; i++) {
-			list.set(i, ItemStack.STREAM_CODEC.decode(buf));
+			list.set(i, ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
 		}
 		return list;
 	}

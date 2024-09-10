@@ -1,8 +1,9 @@
 package mod.motivationaldragon.potionblender.mixins;
 
 import mod.motivationaldragon.potionblender.PotionBlenderCommon;
-import mod.motivationaldragon.potionblender.utils.PotionType;
+import mod.motivationaldragon.potionblender.utils.ModUtils;
 import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,9 +17,10 @@ public abstract class PotionEntityMixin {
      */
     @Inject(method = "isLingering", at = @At("RETURN"), cancellable = true)
     private void isLingering(CallbackInfoReturnable<Boolean> cir){
-        Integer potionTypeCode = ((ThrownPotion) (Object) this).getItem().get(PotionBlenderCommon.potionTypeData);
-        if (potionTypeCode != null) {
-                cir.setReturnValue(potionTypeCode == PotionType.LINGERING.code);
+        ItemStack itemStack = ((ThrownPotion) (Object) this).getItem();
+        boolean hasCombinedPotionData = itemStack.has(PotionBlenderCommon.potionTypeData);
+        if (hasCombinedPotionData) {
+                cir.setReturnValue(ModUtils.isCombinedLingeringPotion(itemStack));
             }
         }
     }

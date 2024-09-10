@@ -15,7 +15,7 @@
     }
   ],
   "output" : {
-    "item" : "minecraft:splash_potion",
+    "id" : "minecraft:splash_potion",
     "count" : 1
   }
 }

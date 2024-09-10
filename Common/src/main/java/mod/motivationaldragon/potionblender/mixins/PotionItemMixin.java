@@ -25,11 +25,12 @@ public abstract class PotionItemMixin {
     @Inject(method = "getDescriptionId*", at = @At("RETURN"), cancellable = true)
     private void getDescriptionId(ItemStack stack, CallbackInfoReturnable<String> cir){
         PotionType type = PotionType.codeToPotionType.get(stack.get(potionTypeData));
-        if(type == null){return;}
-        switch (type){
-            case NORMAL -> cir.setReturnValue(COMBINED_POTION_NAME);
-            case SPLASH -> cir.setReturnValue(COMBINED_SPLASH_POTION_NAME);
-            case LINGERING -> cir.setReturnValue(COMBINED_LINGERING_POTION);
+        if(type != null) {
+            switch (type) {
+                case NORMAL -> cir.setReturnValue(COMBINED_POTION_NAME);
+                case SPLASH -> cir.setReturnValue(COMBINED_SPLASH_POTION_NAME);
+                case LINGERING -> cir.setReturnValue(COMBINED_LINGERING_POTION);
+            }
         }
     }
 

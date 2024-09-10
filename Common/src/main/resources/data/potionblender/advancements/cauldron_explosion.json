@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "potionblender:brewing_cauldron"
+      "id": "potionblender:brewing_cauldron"
     },
     "title": "Surprise!",
     "description": "Throw a combined potion back into the cauldron",

@@ -15,7 +15,7 @@
     }
   ],
   "output" : {
-    "item" : "minecraft:potion",
+    "id" : "minecraft:potion",
     "count" : 1
   }
 }

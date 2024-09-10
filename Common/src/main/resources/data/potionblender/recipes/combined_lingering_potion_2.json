@@ -15,7 +15,7 @@
     }
   ],
   "output" : {
-    "item" : "minecraft:lingering_potion",
+    "id" : "minecraft:lingering_potion",
     "count" : 1
   }
 }

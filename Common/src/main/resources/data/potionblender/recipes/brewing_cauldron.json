@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "pattern": [
     "X",
     "Y"
@@ -13,7 +14,7 @@
     }
   },
   "result": {
-    "item": "potionblender:brewing_cauldron",
+    "id": "potionblender:brewing_cauldron",
     "count": 1
   }
 }

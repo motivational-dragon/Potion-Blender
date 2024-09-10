@@ -7,7 +7,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionContents;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 public class PotionEffectMerger {
 	/**
@@ -17,37 +20,34 @@ public class PotionEffectMerger {
 	 */
 	public static List<MobEffectInstance> mergeCombinableEffects(List<MobEffectInstance> effectInstances, double decayRate) {
 
-	    Collection<MobEffect> mergedStatusEffects = new HashSet<>();
+	    Collection<MobEffect> processedEffect = new HashSet<>();
 	    List<MobEffectInstance> finalPotionStatusEffects = new ArrayList<>(effectInstances);
 
-	    // The tricky part here is that a potion type share 1 MobEffectInstance, making it impossible to differentiate them using ==
-	    // Therefore to test if effectInstance1 == effectInstance2 we use a range based for loop and test indices
-	    // This is otherwise a simple double iteration where we remember if we have already seen an effect type
+		//Generate all pair of items from the given mob effects and try to merge them
 	    for(int i=0; i<finalPotionStatusEffects.size(); i++ ){
 	        MobEffectInstance effectInstance1 = finalPotionStatusEffects.get(i);
 
 	        List<MobEffectInstance> combinableEffects = new ArrayList<>();
 
 	        int totalDuration = effectInstance1.getDuration();
-	        //Effect are always combinable with themselves, so we add the first effect to the list
+	        //Effect are always combinable with themselves, so we add the current effect to the list
 	        combinableEffects.add(effectInstance1);
-
-
 
 	        for(int j=0; j<finalPotionStatusEffects.size(); j++ ){
 	            MobEffectInstance effectInstance2 = finalPotionStatusEffects.get(j);
 
-	            if(i!=j && !mergedStatusEffects.contains(effectInstance1.getEffect().value()) && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
+	            if(i!=j && !processedEffect.contains(effectInstance1.getEffect().value()) && areEffectsDurationsAddable(effectInstance1, effectInstance2)){
 	                totalDuration += (int) ((1.0d / decayRate) * effectInstance2.getDuration());
 		            decayRate++;
 	                combinableEffects.add(effectInstance2);
 	            }
 	        }
 
-	        mergedStatusEffects.add(effectInstance1.getEffect().value());
+	        processedEffect.add(effectInstance1.getEffect().value());
 
+			//If there is multiple instance for this effect, merge them into the result
 	        if(combinableEffects.size() > 1){
-	            MobEffectInstance combinedEffect = ModUtils.copyEffectWithNewDuration(combinableEffects.get(0), totalDuration);
+	            MobEffectInstance combinedEffect = ModUtils.copyEffectWithNewDuration(combinableEffects.getFirst(), totalDuration);
 	            finalPotionStatusEffects.removeAll(combinableEffects);
 	            finalPotionStatusEffects.add(combinedEffect);
 	        }

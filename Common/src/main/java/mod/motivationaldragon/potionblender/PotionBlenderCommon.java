@@ -17,7 +17,7 @@ public class PotionBlenderCommon {
     public static void init() {
         ConfigController.init();
         PotionBlenderCriterionTrigger.init();
-        Registry.register(
+        potionTypeData = Registry.register(
                 BuiltInRegistries.DATA_COMPONENT_TYPE,
                 new ResourceLocation(Constants.MOD_ID, "potiontypedata"),
                 DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());

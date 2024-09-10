@@ -1,6 +1,7 @@
 package mod.motivationaldragon.potionblender.blockentities;
 
 
+import com.google.common.collect.Iterators;
 import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.PotionBlenderCommon;
 import mod.motivationaldragon.potionblender.advancements.PotionBlenderCriterionTrigger;
@@ -47,10 +48,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static mod.motivationaldragon.potionblender.utils.ModUtils.isACombinedPotion;
 
@@ -184,7 +182,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 			//Deny adding duplicated instant potion
 			if (itemStack.is(Items.POTION) && numberOfItems < inventory.size() &&
-					PotionEffectMerger.wouldIgnoreInstantPotion(itemStack, this.getInventoryStatusEffectsInstances()))
+					PotionEffectMerger.wouldIgnoreInstantPotion(itemStack, this.getPotionsEffectFromItemInCauldron()))
 				return;
 
 			//Prevent adding more item than the inventory can hold
@@ -238,7 +236,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		//ADD tag according to the correct potion type. This way mixins can determinate how to name the potions
 		PotionType.itemToPotion(potionItem).ifPresent(potionType -> potionItemStack.set(PotionBlenderCommon.potionTypeData, potionType.code));
 
-		List<MobEffectInstance> finalPotionStatusEffects = PotionEffectMerger.mergeCombinableEffects(this.getInventoryStatusEffectsInstances(), recipe.getDecayRate());
+		List<MobEffectInstance> finalPotionStatusEffects = PotionEffectMerger.mergeCombinableEffects(this.getPotionsEffectFromItemInCauldron(), recipe.getDecayRate());
 
 		if (ModUtils.isCombinedLingeringPotion(potionItemStack)) {
 			finalPotionStatusEffects = PotionEffectMerger.ApplyLingeringPotionDurationAndEffects(finalPotionStatusEffects);
@@ -422,13 +420,13 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		if (recipe.isPresent() && !recipe.get().usePotionMeringRules()) {
 			return recipe.get().getColor();
 		} else {
-			return PotionContents.getColor(getInventoryStatusEffectsInstances());
+			return PotionContents.getColor(getPotionsEffectFromItemInCauldron());
 		}
 	}
 
 
 	@NotNull
-	protected List<MobEffectInstance> getInventoryStatusEffectsInstances() {
+	protected List<MobEffectInstance> getPotionsEffectFromItemInCauldron() {
 		List<MobEffectInstance> effects = new ArrayList<>();
 
 		//Check for incoherent state if inventory has changed since last Level load
@@ -438,12 +436,10 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 		for (int i = 0; i < this.numberOfItems; i++) {
 			ItemStack itemStack = inventory.get(i);
-			//Since all potion derive from the same class, we only need to check for the potion item
-			if (itemStack.getItem() instanceof PotionItem) {
-				PotionContents contents = itemStack.get(DataComponents.POTION_CONTENTS);
-				if(contents != null) {
-					effects.addAll(contents.customEffects());
-				}
+			if (itemStack.has(DataComponents.POTION_CONTENTS)) {
+				PotionContents contents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS,
+						new PotionContents(Optional.empty(), Optional.empty(), Collections.emptyList()));
+				Iterators.addAll(effects, contents.getAllEffects().iterator());
 			}
 		}
 		return effects;
