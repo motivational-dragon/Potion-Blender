@@ -12,6 +12,9 @@ logoFile = "logo.png"
 authors="${mod_author}"
 description="${mod_description}"
 
+[[mixins]]
+config="potionblender.mixins.json"
+
 [[dependencies.potionblender]]
     modId="neoforge"
     mandatory=true

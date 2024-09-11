@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 public class FabricBlockEntities {
 
     public static final BlockEntityType<FabricBrewingCauldronBlockEntity> BREWING_CAULDRON_BLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
-            new ResourceLocation(Constants.MOD_ID, "potion_mixer"),
+            new ResourceLocation(Constants.MOD_ID, "brewing_cauldron"),
             BlockEntityType.Builder.of(FabricBrewingCauldronBlockEntity::new,
                     PotionBlenderBlock.BREWING_CAULDRON_BLOCK).build());
 

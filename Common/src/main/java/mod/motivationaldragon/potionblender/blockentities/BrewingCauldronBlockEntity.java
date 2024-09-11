@@ -102,7 +102,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 	private int waterColor = Constants.WATER_TINT;
 
 
-	protected BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
+	public BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
 		super(Service.PLATFORM.getPlatformBrewingCauldron(), pos, state);
 		this.numberOfItems = 0;
 		this.quickCheck = RecipeManager.createCheck(BrewingCauldronRecipe.Type.INSTANCE);

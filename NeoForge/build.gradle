@@ -58,10 +58,6 @@ dependencies {
     runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 }
 
-tasks.withType(JavaCompile).configureEach {
-    source(project(":Common").sourceSets.main.allSource)
-}
-
 processResources {
 
     from project(":Common").sourceSets.main.resources
@@ -78,7 +74,7 @@ processResources {
     )
 
 
-    filesMatching("META-INF/mods.toml") {
+    filesMatching("neoforge.mods.toml") {
         expand(
                 "mod_id": mod_id,
                 "version": project.version,
@@ -109,7 +105,6 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-    finalizedBy('reobfJar')
 }
 
 idea {

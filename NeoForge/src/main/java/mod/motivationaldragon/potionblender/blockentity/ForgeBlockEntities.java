@@ -2,22 +2,23 @@ package mod.motivationaldragon.potionblender.blockentity;
 
 import mod.motivationaldragon.potionblender.Constants;
 import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
+import mod.motivationaldragon.potionblender.blockentities.BrewingCauldronBlockEntity;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ForgeBlockEntities {
 
-	private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
-			DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Constants.MOD_ID);
+	private static final net.neoforged.neoforge.registries.DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+			DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Constants.MOD_ID);
 
-	public static final RegistryObject<BlockEntityType<ForgeBrewingCauldron>> BREWING_CAULDRON_BLOCK_ENTITY =
-			BLOCK_ENTITIES.register("potion_mixer", () ->
-					BlockEntityType.Builder.of(ForgeBrewingCauldron::new, PotionBlenderBlock.BREWING_CAULDRON_BLOCK).build(null));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BrewingCauldronBlockEntity>> BREWING_CAULDRON_BLOCK_ENTITY =
+			BLOCK_ENTITIES.register("brewing_cauldron", () ->
+					BlockEntityType.Builder.of(BrewingCauldronBlockEntity::new, PotionBlenderBlock.BREWING_CAULDRON_BLOCK).build(null));
 
-	public static void register(){
-		BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
+	public static void register(IEventBus modBus){
+		BLOCK_ENTITIES.register(modBus);
 	}
 }
