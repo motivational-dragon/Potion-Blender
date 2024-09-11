@@ -52,7 +52,7 @@ import java.util.*;
 
 import static mod.motivationaldragon.potionblender.utils.ModUtils.isACombinedPotion;
 
-public abstract class BrewingCauldronBlockEntity extends BlockEntity {
+public class BrewingCauldronBlockEntity extends BlockEntity {
 
 
 	private static final String POTION_BLENDER_NBT_KEY = Constants.MOD_ID + ".ConfigController";
@@ -77,7 +77,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	 * Can the cauldron brew a potion?*
 	 * Aka are there potion in the cauldron and was an ingredient thrown into the cauldron?
 	 */
-	private boolean canBrew = false;
+	private boolean brewingTickEnabled = false;
 	/**
 	 * The brewing progress of the cauldron. It is reset when the cauldron is not brewing or cannot craft anymore
 	 */
@@ -128,10 +128,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
-	/**
-	 * Send a packet to sync this block entity inventory with the client
-	 */
-	protected abstract void syncInventoryWithClient();
 
 	/**
 	 * Delegation from the onEntityUse method in the {@link net.minecraft.world.level.block.Block} class with the same signature
@@ -147,7 +143,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	}
 
 	private void stopBrewing() {
-		canBrew = false;
+		brewingTickEnabled = false;
 		isBrewing = false;
 		this.resetProgress();
 		this.getBlockState().setValue(BrewingCauldron.IS_BREWING, false);
@@ -179,7 +175,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 				return;
 			}
 
-			//Deny adding duplicated instant potion
+			//Prevent adding duplicated instant potion
 			if (itemStack.is(Items.POTION) && numberOfItems < inventory.size() &&
 					PotionEffectMerger.wouldIgnoreInstantPotion(itemStack, this.getPotionsEffectFromItemInCauldron()))
 				return;
@@ -191,18 +187,26 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 
 			addItemToCauldron(itemEntity);
 
-			//Craft the potion if a recipe is found
-			if (getBlockState().getValue(BrewingCauldron.LIT) && getRecipe().isPresent()) {
-				entity.remove(Entity.RemovalReason.DISCARDED);
+			//Start brewing if a recipe is present and re
+			brewIfRecipeIsPresent();
+			itemEntity.remove(Entity.RemovalReason.DISCARDED);
 
-				canBrew = true;
-				this.waterColor = computeWaterColor();
-
-				getLevel().setBlockAndUpdate(getBlockPos(), getLevel().getBlockState(this.getBlockPos()).setValue(BrewingCauldron.IS_BREWING, true));
-				this.setChanged();
-				level.playSound(null, this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS);
-			}
 		}
+	}
+
+
+	private void brewIfRecipeIsPresent() {
+		if (!canBrew()) {return;}
+			brewingTickEnabled = true;
+			this.waterColor = computeWaterColor();
+
+			getLevel().setBlockAndUpdate(getBlockPos(), getLevel().getBlockState(this.getBlockPos()).setValue(BrewingCauldron.IS_BREWING, true));
+			this.setChanged();
+			level.playSound(null, this.getBlockPos(), SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS);
+	}
+
+	private boolean canBrew() {
+		return getBlockState().getValue(BrewingCauldron.LIT) && getRecipe().isPresent();
 	}
 
 
@@ -271,7 +275,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 			return;
 		}
 
-		if (!brewingCauldron.canBrew) {
+		if (!brewingCauldron.brewingTickEnabled) {
 			brewingCauldron.resetProgress();
 			return;
 		}
@@ -326,7 +330,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 				.setValue(BrewingCauldron.HAS_FLUID, false)
 				.setValue(BrewingCauldron.IS_BREWING, false);
 		level.setBlockAndUpdate(this.getBlockPos(), blockState);
-		syncInventoryWithClient();
 		updateListeners();
 	}
 
@@ -364,7 +367,6 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
 		level.setBlockAndUpdate(this.getBlockPos(), mixerCauldronBlockState);
 		itemEntity.remove(Entity.RemovalReason.DISCARDED);
-		syncInventoryWithClient();
 		updateListeners();
 	}
 
@@ -398,7 +400,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		ContainerHelper.loadAllItems(nbt, this.inventory,  provider);
 		this.numberOfItems = nbt.getInt(POTION_BLENDER_NBT_KEY + "_inv_size");
 		this.isBrewing = nbt.getBoolean(POTION_BLENDER_NBT_KEY + "_isBrewing");
-		this.canBrew = nbt.getBoolean(POTION_BLENDER_NBT_KEY + "_canBrew");
+		this.brewingTickEnabled = nbt.getBoolean(POTION_BLENDER_NBT_KEY + "_canBrew");
 		this.waterColor = nbt.getInt(POTION_BLENDER_NBT_KEY + "_waterColor");
 
 	}
@@ -409,7 +411,7 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 		ContainerHelper.saveAllItems(nbt, inventory, provider);
 		nbt.putInt(POTION_BLENDER_NBT_KEY + "_inv_size", numberOfItems);
 		nbt.putBoolean(POTION_BLENDER_NBT_KEY + "_isBrewing", isBrewing);
-		nbt.putBoolean(POTION_BLENDER_NBT_KEY + "_canBrew", canBrew);
+		nbt.putBoolean(POTION_BLENDER_NBT_KEY + "_canBrew", brewingTickEnabled);
 		nbt.putInt(POTION_BLENDER_NBT_KEY + "_waterColor", waterColor);
 	}
 
@@ -465,9 +467,17 @@ public abstract class BrewingCauldronBlockEntity extends BlockEntity {
 	public void update() {
 		this.setChanged();
 		Objects.requireNonNull(this.getLevel()).sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+		this.brewIfRecipeIsPresent();
 	}
 
 	public int getNumberOfItems() {
 		return numberOfItems;
+	}
+
+	@Override
+	public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider holderProvider) {
+		var tag = super.getUpdateTag(holderProvider);
+		saveAdditional(tag, holderProvider);
+		return tag;
 	}
 }

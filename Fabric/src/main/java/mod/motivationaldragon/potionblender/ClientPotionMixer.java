@@ -1,7 +1,6 @@
 package mod.motivationaldragon.potionblender;
 
 import mod.motivationaldragon.potionblender.client.PotionBlenderRenderer;
-import mod.motivationaldragon.potionblender.networking.ModNetworkRegisterer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,7 +11,6 @@ public class ClientPotionMixer implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ModNetworkRegisterer.registerS2CPackets();
         PotionBlenderRenderer.register(BlockEntityRenderers::register);
     }
 }
