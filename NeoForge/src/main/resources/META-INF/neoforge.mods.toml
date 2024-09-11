@@ -13,7 +13,7 @@ authors="${mod_author}"
 description="${mod_description}"
 
 [[dependencies.potionblender]]
-    modId="forge"
+    modId="neoforge"
     mandatory=true
     versionRange="[${minimum_forge_version},)"
     ordering="NONE"
