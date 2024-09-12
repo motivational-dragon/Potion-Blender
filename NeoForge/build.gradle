@@ -19,8 +19,6 @@ archivesBaseName = "${mod_name}-${minecraft_version}-NEOFORGE"
 if (System.getenv().RELEASE_MODE == null) {
     archivesBaseName += '-SNAPSHOT'
 }
-
-
     runs {
         configureEach {
             modSource project.sourceSets.main
@@ -41,12 +39,6 @@ if (System.getenv().RELEASE_MODE == null) {
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
-
-
-
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
 dependencies {
 
     implementation "net.neoforged:neoforge:${neo_version}"
@@ -58,13 +50,14 @@ dependencies {
     runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 }
 
+
+//sourceSets.main.resources { srcDir 'src/main/resources' }
 processResources {
-
     from project(":Common").sourceSets.main.resources
-
     inputs.properties(
             "mod_id": mod_id,
             "version": project.version,
+            "loader_version":loader_version,
             "mod_name": mod_name,
             "mod_description": mod_description,
             "forge_version": neo_version,
@@ -72,26 +65,24 @@ processResources {
             "mod_author": mod_author,
             "minecraft_version": minecraft_version
     )
-
-
-    filesMatching("neoforge.mods.toml") {
+    filesMatching('**/neoforge.mods.toml') {
+        project.logger.error("Processing file: ${it}")
         expand(
                 "mod_id": mod_id,
                 "version": project.version,
+                "loader_version":loader_version,
                 "mod_name": mod_name,
                 "mod_description": mod_description,
                 "mod_author": mod_author,
-                "neogorge_version": neo_version,
+                "neoforge_version": neo_version,
                 minimum_neoforge_version: minimum_neoforge_version,
                 "minecraft_version": minecraft_version
         )
     }
-
     filesMatching('pack.mcmeta') {
         expand("mod_name": mod_name)
     }
 }
-
 
 jar {
     manifest {
@@ -105,6 +96,10 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    source(project(":Common").sourceSets.main.allSource)
 }
 
 idea {

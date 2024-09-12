@@ -1,6 +1,6 @@
 
 modLoader="javafml"
-loaderVersion="[${minimum_forge_version},)"
+loaderVersion="[${loader_version},)"
 license="GPLv3"
 issueTrackerURL="https://github.com/motivational-dragon/Potion-Blender/issues"
 [[mods]]
@@ -18,7 +18,7 @@ config="potionblender.mixins.json"
 [[dependencies.potionblender]]
     modId="neoforge"
     mandatory=true
-    versionRange="[${minimum_forge_version},)"
+    versionRange="[${version},)"
     ordering="NONE"
     side="BOTH"
 

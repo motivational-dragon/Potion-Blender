@@ -12,8 +12,6 @@
     "ThrownPotionMixin",
     "TippedArrowItemMixin"
   ],
-  "client": [
-  ],
   "injectors": {
     "defaultRequire": 1
   },
