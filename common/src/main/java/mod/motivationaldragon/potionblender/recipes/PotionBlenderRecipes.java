@@ -6,7 +6,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 
-
 import java.util.function.BiConsumer;
 
 public class PotionBlenderRecipes {

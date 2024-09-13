@@ -1,6 +1,6 @@
 
 modLoader="javafml"
-loaderVersion="[${loader_version},)"
+loaderVersion="[${neoforge_loader_version_range},)"
 license="GPLv3"
 issueTrackerURL="https://github.com/motivational-dragon/Potion-Blender/issues"
 [[mods]]
@@ -10,7 +10,7 @@ displayName="${mod_name}"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/potion-blender"
 logoFile = "logo.png"
 authors="${mod_author}"
-description="${mod_description}"
+description="${description}"
 
 [[mixins]]
 config="potionblender.mixins.json"

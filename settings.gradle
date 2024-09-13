@@ -38,6 +38,13 @@ pluginManagement {
                 includeGroup("net.minecraftforge")
             }
         }
+        maven {
+            name = "Parchment"
+            url = uri("https://maven.parchmentmc.org")
+            content {
+                includeGroupAndSubgroups("org.parchmentmc")
+            }
+        }
     }
 }
 
@@ -46,5 +53,5 @@ plugins {
 }
 
 rootProject.name = 'Potion-Blender'
-include("Common", "Fabric", "NeoForge")
+include("common", "Fabric", "NeoForge")
 
