@@ -15,11 +15,12 @@ import mod.motivationaldragon.potionblender.recipes.BrewingCauldronRecipe;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
 public class BrewingCauldronJeiCategory implements IRecipeCategory<BrewingCauldronRecipe> {
 
-	//TODO make potion display properly and not ass uncraftable potion
+	//TODO make potion display properly and not as uncraftable potion
 
 
 	public static final ResourceLocation UID = new ResourceLocation(Constants.MOD_ID, "brewing_cauldron");
@@ -92,8 +93,9 @@ public class BrewingCauldronJeiCategory implements IRecipeCategory<BrewingCauldr
 		}
 
 		for (int i = 0; i < recipe.getIngredients().size(); i++) {
+			Ingredient ingredient = recipe.getIngredients().get(i);
 			builder.addSlot(RecipeIngredientRole.INPUT, 38 + i * 18, 4)
-					.addIngredients(recipe.getIngredients().get(i));
+					.addIngredients(ingredient);
 		}
 		builder.addSlot(RecipeIngredientRole.OUTPUT, 74, 52).addItemStack(recipe.getOutput());
 	}

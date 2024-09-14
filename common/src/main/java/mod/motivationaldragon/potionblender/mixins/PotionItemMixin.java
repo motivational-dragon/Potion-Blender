@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static mod.motivationaldragon.potionblender.Constants.*;
-import static mod.motivationaldragon.potionblender.PotionBlenderCommon.potionTypeData;
+import static mod.motivationaldragon.potionblender.datatype.PotionBlender.potionTypeData;
 
 @Mixin(PotionItem.class)
 public abstract class PotionItemMixin {

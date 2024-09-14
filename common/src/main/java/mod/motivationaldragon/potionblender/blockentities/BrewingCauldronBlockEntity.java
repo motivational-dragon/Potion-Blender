@@ -3,11 +3,11 @@ package mod.motivationaldragon.potionblender.blockentities;
 
 import com.google.common.collect.Iterators;
 import mod.motivationaldragon.potionblender.Constants;
-import mod.motivationaldragon.potionblender.PotionBlenderCommon;
 import mod.motivationaldragon.potionblender.advancements.PotionBlenderCriterionTrigger;
 import mod.motivationaldragon.potionblender.block.BrewingCauldron;
 import mod.motivationaldragon.potionblender.config.ConfigController;
 import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
+import mod.motivationaldragon.potionblender.datatype.PotionBlender;
 import mod.motivationaldragon.potionblender.platform.Service;
 import mod.motivationaldragon.potionblender.recipes.BrewingCauldronRecipe;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
@@ -237,7 +237,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 		ItemStack potionItemStack = new ItemStack(potionItem);
 
 		//ADD tag according to the correct potion type. This way mixins can determinate how to name the potions
-		PotionType.itemToPotion(potionItem).ifPresent(potionType -> potionItemStack.set(PotionBlenderCommon.potionTypeData, potionType.code));
+		PotionType.itemToPotion(potionItem).ifPresent(potionType -> potionItemStack.set(PotionBlender.potionTypeData, potionType.code));
 
 		List<MobEffectInstance> finalPotionStatusEffects = PotionEffectMerger.mergeCombinableEffects(this.getPotionsEffectFromItemInCauldron(), recipe.getDecayRate());
 

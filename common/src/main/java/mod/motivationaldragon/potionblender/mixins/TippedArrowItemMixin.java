@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
-import static mod.motivationaldragon.potionblender.PotionBlenderCommon.potionTypeData;
+import static mod.motivationaldragon.potionblender.datatype.PotionBlender.potionTypeData;
 
 @Mixin(TippedArrowItem.class)
 public class TippedArrowItemMixin {

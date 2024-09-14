@@ -48,46 +48,8 @@ tasks.withType(JavaExec).configureEach {
         enableAssertions = true
     }
 }
-processResources {
-    from project(":common").sourceSets.main.resources
 
-    inputs.properties(
-            "mod_id" : mod_id,
-            "version": project.version,
-            minecraft_version: minecraft_version,
-            "mod_name": mod_name,
-            description: description,
-            "fabric_loader_version": fabric_loader_version,
-            credits: credits
-    )
-    filesMatching("fabric.mod.json") {
-        expand (
-                "mod_id": mod_id,
-                "version": project.version,
-                minecraft_version: minecraft_version,
-                "mod_name" : mod_name,
-                description: description,
-                credits: credits,
-                "fabric_loader_version": fabric_loader_version,
-        )
-    }
-    filesMatching('pack.mcmeta') {
-        expand("mod_name": mod_name)
-    }
-}
 
-jar{
-    manifest {
-        attributes([
-                "Specification-Title": mod_name,
-                "Specification-Vendor": credits,
-                "Specification-Version": "1",
-                "Implementation-Title": mod_name,
-                "Implementation-Version": version,
-                "Implementation-Vendor" : credits,
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-}
+
 
 

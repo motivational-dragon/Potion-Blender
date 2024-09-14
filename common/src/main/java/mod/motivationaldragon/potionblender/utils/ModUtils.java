@@ -5,7 +5,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import static mod.motivationaldragon.potionblender.PotionBlenderCommon.potionTypeData;
+import static mod.motivationaldragon.potionblender.datatype.PotionBlender.potionTypeData;
 
 public class ModUtils {
 

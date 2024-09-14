@@ -50,31 +50,6 @@ dependencies {
 }
 
 
-//processResources {
-//    var replaceProperties = [
-//            "mod_id"                     : mod_id,
-//            "version"                    : project.version,
-//            neoforge_loader_version_range:neoforge_loader_version_range,
-//            "mod_name"                   : mod_name,
-//            description                  : description,
-//            "forge_version"              : neoforge_version,
-//            minimum_neoforge_version     : minimum_neoforge_version,
-//            credits                      : credits,
-//            minecraft_version            : minecraft_version
-//    ]
-//
-//    inputs.properties replaceProperties
-//
-//    filesMatching('**/neoforge.mods.toml') {
-//        expand replaceProperties
-//    }
-//    filesMatching('pack.mcmeta') {
-//        expand("mod_name": mod_name)
-//    }
-//}
-
-
-
 idea {
     module {
         downloadSources = true

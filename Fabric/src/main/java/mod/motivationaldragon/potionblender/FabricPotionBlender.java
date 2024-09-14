@@ -1,7 +1,9 @@
 package mod.motivationaldragon.potionblender;
 
+import mod.motivationaldragon.potionblender.advancements.PotionBlenderCriterionTrigger;
 import mod.motivationaldragon.potionblender.block.PotionBlenderBlock;
 import mod.motivationaldragon.potionblender.blockentity.FabricBlockEntities;
+import mod.motivationaldragon.potionblender.datatype.PotionBlender;
 import mod.motivationaldragon.potionblender.item.ModItem;
 import mod.motivationaldragon.potionblender.recipes.PotionBlenderRecipes;
 import net.fabricmc.api.ModInitializer;
@@ -25,6 +27,8 @@ public class FabricPotionBlender implements ModInitializer {
 		PotionBlenderRecipes.registerRecipeSerializer(bind(BuiltInRegistries.RECIPE_SERIALIZER));
 		PotionBlenderRecipes.registerRecipeType(bind(BuiltInRegistries.RECIPE_TYPE));
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> ModItem.registerFunctionalBlocksItems(entries::accept));
+		PotionBlenderCriterionTrigger.register(bind(BuiltInRegistries.TRIGGER_TYPES));
+		PotionBlender.registerDataComponentType(bind(BuiltInRegistries.DATA_COMPONENT_TYPE));
 		FabricBlockEntities.init();
 	}
 
