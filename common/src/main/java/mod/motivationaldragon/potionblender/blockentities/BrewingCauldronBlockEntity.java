@@ -18,6 +18,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -100,6 +101,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 
 
 	private int waterColor = Constants.WATER_TINT;
+	private boolean discoMode;
 
 
 	public BrewingCauldronBlockEntity(BlockPos pos, BlockState state) {
@@ -325,6 +327,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 	private void emptyCauldron() {
 		inventory.clear();
 		numberOfItems = 0;
+		discoMode = false;
 
 		BlockState blockState = level.getBlockState(this.getBlockPos())
 				.setValue(BrewingCauldron.HAS_FLUID, false)
@@ -362,6 +365,13 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 		//add potion to cauldron inventory
 		addItem(itemEntity.getItem());
 		waterColor = computeWaterColor();
+
+		if(itemEntity.getItem().getOrDefault(DataComponents.CUSTOM_NAME, "") instanceof Component component) {
+			String customName = component.getString();
+			discoMode = customName.equals("jeb_");
+		}
+
+
 
 		//If we add an item, the cauldron must now appear with fluid
 		BlockState mixerCauldronBlockState = level.getBlockState(this.getBlockPos()).setValue(BrewingCauldron.HAS_FLUID, true);
@@ -402,6 +412,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 		this.isBrewing = nbt.getBoolean(POTION_BLENDER_NBT_KEY + "_isBrewing");
 		this.brewingTickEnabled = nbt.getBoolean(POTION_BLENDER_NBT_KEY + "_canBrew");
 		this.waterColor = nbt.getInt(POTION_BLENDER_NBT_KEY + "_waterColor");
+		this.discoMode = nbt.getBoolean(POTION_BLENDER_NBT_KEY + "_discoMode");
 
 	}
 
@@ -413,9 +424,19 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 		nbt.putBoolean(POTION_BLENDER_NBT_KEY + "_isBrewing", isBrewing);
 		nbt.putBoolean(POTION_BLENDER_NBT_KEY + "_canBrew", brewingTickEnabled);
 		nbt.putInt(POTION_BLENDER_NBT_KEY + "_waterColor", waterColor);
+		nbt.putBoolean(POTION_BLENDER_NBT_KEY + "_discoMode", discoMode);
 	}
 
 	public int getWaterColor() {
+
+		if(this.discoMode){
+
+			float hue = (System.currentTimeMillis() % 10000) / 10000f;
+			float saturation = 1;
+			float brightness = 0.5f;
+			return ModUtils.HSBtoRGB(hue, saturation, brightness);
+		}
+
 		return waterColor;
 	}
 

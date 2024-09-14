@@ -37,9 +37,12 @@ public class BrewingCauldronRenderer implements BlockEntityRenderer<BrewingCauld
 	public void render(BrewingCauldronBlockEntity brewingCauldronBlock, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 		ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
 		NonNullList<ItemStack> inventory = brewingCauldronBlock.getInventory();
+
 		for (int i = 0; i < inventory.size(); i++) {
 			ItemStack stack = inventory.get(i);
-			if (!stack.isEmpty()) {
+			if (!
+					stack.isEmpty()) {
+
 				poseStack.pushPose();
 				float percentageOfInventoryIterated = ((float) i / inventory.size());
 				poseStack.translate(0.5, ModUtils.lerp(0.5f, 0.8f, percentageOfInventoryIterated), 0.5);
@@ -54,7 +57,11 @@ public class BrewingCauldronRenderer implements BlockEntityRenderer<BrewingCauld
 
 			// Code for rendering the transparent water in the cauldron
 			//Copied and adapted from https://github.com/maxoduke/Potion-Cauldron/tree/1.20.4/stable/common/src/main/java/dev/maxoduke/mods/potioncauldron/block under the MIT License
-			int waterColor = brewingCauldronBlock.getWaterColor();
+
+
+
+			int waterColor =  brewingCauldronBlock.getWaterColor();
+
 			int red = waterColor >> 16 & 255;
 			int green = waterColor >> 8 & 255;
 			int blue = waterColor & 255;

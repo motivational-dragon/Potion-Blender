@@ -60,12 +60,10 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 				for (ItemStack stack : ingredient.getItems()) {
 					if ((stack.getItem() instanceof PotionItem)) {
 						stack.set(DataComponents.CUSTOM_NAME, Component.translatable(Constants.MOD_ID + ".recipe.potion_wildcard_names"));
-						stack.enchant(null, 0);
 					}
 				}
 			}
 			output.set(DataComponents.CUSTOM_NAME,Component.translatable(Constants.MOD_ID + ".recipe.merged_potion_wildcard_names"));
-			output.enchant(null, 0);
 		}
 
 		this.ingredients = ingredients;
