@@ -73,7 +73,7 @@ public class BrewingCauldron extends BaseEntityBlock {
 				.setValue(HAS_FLUID, false)
 				.setValue(FACING, Direction.NORTH)
 				.setValue(IS_BREWING, false)
-				.setValue(LIT, false)
+				.setValue(LIT, true)
 				.setValue(IS_SOULFIRE, false));
 	}
 
