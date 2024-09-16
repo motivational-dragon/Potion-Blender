@@ -4,6 +4,9 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
+    permissions:
+     id-token: write
+     attestations: write
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
