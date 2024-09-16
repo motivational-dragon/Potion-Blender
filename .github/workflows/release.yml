@@ -27,7 +27,7 @@ jobs:
           Fabric/build/libs
           NeoForge/build/libs
     - name: Attest build provenance
-    - uses: actions/attest-build-provenance@v1
+      uses: actions/attest-build-provenance@v1
       with:
           subject-path: | 
             NeoForge/build/libs/!(*-@(dev|sources|javadoc)).jar
