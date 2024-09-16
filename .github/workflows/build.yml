@@ -27,4 +27,4 @@ jobs:
       with:
         path: | 
           Fabric/build/libs
-          Forge/build/libs
+          NeoForge/build/libs

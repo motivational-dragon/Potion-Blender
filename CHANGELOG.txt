@@ -1,2 +1,7 @@
-3.1.1
-- Fix potion blender recipes all having the same ID, leading to a duplicate recipe error
+3.1.2
+===Bugfixes update===
+- Fix a registering bug preventing the game from starting
+- Fix graphical glitche when the cauldron would appear 1 frame when placed on a campfire
+- Added the disco mode when an item named jeb_ is thrown in the cauldron
+- Creative tab cauldron are now lit by default
+- And many more code optimizations
