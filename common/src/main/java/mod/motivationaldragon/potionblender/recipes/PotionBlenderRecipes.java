@@ -14,12 +14,12 @@ public class PotionBlenderRecipes {
 
 
     public static void registerRecipeSerializer(BiConsumer<RecipeSerializer<?>, ResourceLocation> r){
-        r.accept(COMBINED_TIPPED_ARROW_SERIALIZER,new ResourceLocation(Constants.MOD_ID,"tipped_combined_arrow"));
-        r.accept(BrewingCauldronRecipe.CauldronRecipeSerializer.INSTANCE, new ResourceLocation(Constants.MOD_ID,"potion_blending"));
+        r.accept(COMBINED_TIPPED_ARROW_SERIALIZER, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"tipped_combined_arrow"));
+        r.accept(BrewingCauldronRecipe.CauldronRecipeSerializer.INSTANCE,  ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,"potion_blending"));
         Constants.LOG.debug("Loaded recipe");
     }
 
     public static void registerRecipeType(BiConsumer<RecipeType<?>, ResourceLocation> r){
-        r.accept(BrewingCauldronRecipe.Type.INSTANCE, new ResourceLocation(Constants.MOD_ID,BrewingCauldronRecipe.Type.ID));
+        r.accept(BrewingCauldronRecipe.Type.INSTANCE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,BrewingCauldronRecipe.Type.ID));
     }
 }

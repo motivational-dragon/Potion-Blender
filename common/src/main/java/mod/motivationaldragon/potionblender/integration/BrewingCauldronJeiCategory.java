@@ -23,8 +23,8 @@ public class BrewingCauldronJeiCategory implements IRecipeCategory<BrewingCauldr
 	//TODO make potion display properly and not as uncraftable potion
 
 
-	public static final ResourceLocation UID = new ResourceLocation(Constants.MOD_ID, "brewing_cauldron");
-	public static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(Constants.MOD_ID, "textures/gui/jei/brewing_cauldron_gui.png");
+	public static final ResourceLocation UID =  ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "brewing_cauldron");
+	public static final ResourceLocation BACKGROUND_TEXTURE =  ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/jei/brewing_cauldron_gui.png");
 
 	public static final RecipeType<BrewingCauldronRecipe> brewing_cauldron_recipe_type = new RecipeType<>(UID, BrewingCauldronRecipe.class);
 

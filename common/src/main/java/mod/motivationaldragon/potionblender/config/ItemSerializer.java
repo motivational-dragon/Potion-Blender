@@ -18,7 +18,7 @@ public class ItemSerializer implements JsonSerializer<Item>, JsonDeserializer<It
 		@Override
 		public Item deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			String itemName = jsonElement.getAsString();
-			Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemName));
+			Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemName));
 			if(item == Items.AIR){
 				Constants.LOG.warn(String.format("Item %s was parsed as minecraft air! Are you sure the item name is valid?", itemName));
 			}

@@ -12,6 +12,6 @@ public class PotionBlender {
 	public static DataComponentType<Integer> potionTypeData = DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build();
 
 	public static void registerDataComponentType(BiConsumer<DataComponentType<?>, ResourceLocation> r) {
-	    r.accept(potionTypeData, new ResourceLocation(Constants.MOD_ID, "potiontypedata"));
+	    r.accept(potionTypeData,  ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "potiontypedata"));
 	}
 }

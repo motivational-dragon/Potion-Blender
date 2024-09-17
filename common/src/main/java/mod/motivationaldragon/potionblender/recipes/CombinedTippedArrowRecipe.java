@@ -6,11 +6,11 @@ import mod.motivationaldragon.potionblender.utils.PotionType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
@@ -27,14 +27,15 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
         super(category);
     }
 
+
     @Override
-    public boolean matches(CraftingContainer craftingInventory, @NotNull Level world) {
-        if (craftingInventory.getWidth() != 3 || craftingInventory.getHeight() != 3) {
+    public boolean matches(CraftingInput craftingInput, @NotNull Level world) {
+        if (craftingInput.width() != 3 || craftingInput.height() != 3) {
             return false;
         }
-        for (int i = 0; i < craftingInventory.getWidth(); ++i) {
-            for (int j = 0; j < craftingInventory.getHeight(); ++j) {
-                ItemStack itemStack = craftingInventory.getItem(i + j * craftingInventory.getWidth());
+        for (int i = 0; i < craftingInput.width(); ++i) {
+            for (int j = 0; j < craftingInput.width(); ++j) {
+                ItemStack itemStack = craftingInput.getItem(i + j * craftingInput.width());
 
                 if (i == 1 && j == 1) {
                     if(!ModUtils.isCombinedLingeringPotion(itemStack)){
@@ -49,8 +50,8 @@ public class CombinedTippedArrowRecipe extends CustomRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(CraftingContainer craftingInventory, @NotNull HolderLookup.Provider provider) {
-        ItemStack potionItemStack = craftingInventory.getItem(1 + craftingInventory.getWidth());
+    public @NotNull ItemStack assemble(CraftingInput craftingInput, @NotNull HolderLookup.Provider provider) {
+        ItemStack potionItemStack = craftingInput.getItem(1 + craftingInput.width());
         if (!ModUtils.isCombinedLingeringPotion(potionItemStack)) {
             return ItemStack.EMPTY;
         }

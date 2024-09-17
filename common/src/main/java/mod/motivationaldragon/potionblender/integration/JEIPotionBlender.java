@@ -23,7 +23,7 @@ public class JEIPotionBlender implements IModPlugin {
 
 	@Override
 	public @NotNull ResourceLocation getPluginUid() {
-		return new ResourceLocation(Constants.MOD_ID, "brewing_cauldron_jei_plugin");
+		return  ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "brewing_cauldron_jei_plugin");
 	}
 	@Override
 	public void registerCategories(IRecipeCategoryRegistration registration) {

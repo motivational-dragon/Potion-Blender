@@ -29,7 +29,7 @@ public class BrewingCauldronRenderer implements BlockEntityRenderer<BrewingCauld
 		super();
 	}
 
-	private static final Material WATER_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, new ResourceLocation("block/water_still"));
+	private static final Material WATER_MATERIAL = new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.withDefaultNamespace("block/water_still"));
 
 
 
@@ -83,10 +83,10 @@ public class BrewingCauldronRenderer implements BlockEntityRenderer<BrewingCauld
 			float minHeight = 0.5F;
 			float height = -minHeight + cauldronFullness * maxHeight;
 
-			consumer.vertex(matrix, sizeFactor, height, 1 - sizeFactor).color(red, green, blue, alpha).uv(water.getU0(), water.getV0() + maxV).uv2(packedLight).overlayCoords(packedOverlay).normal(1, 1, 1).endVertex();
-			consumer.vertex(matrix, 1 - sizeFactor, height, 1 - sizeFactor).color(red, green, blue, alpha).uv(water.getU1(), water.getV0() + maxV).uv2(packedLight).overlayCoords(packedOverlay).normal(1, 1, 1).endVertex();
-			consumer.vertex(matrix, 1 - sizeFactor, height, sizeFactor).color(red, green, blue, alpha).uv(water.getU1(), water.getV0() + minV).uv2(packedLight).overlayCoords(packedOverlay).normal(1, 1, 1).endVertex();
-			consumer.vertex(matrix, sizeFactor, height, sizeFactor).color(red, green, blue, alpha).uv(water.getU0(), water.getV0() + minV).uv2(packedLight).overlayCoords(packedOverlay).normal(1, 1, 1).endVertex();
+			consumer.addVertex(matrix, sizeFactor, height, 1 - sizeFactor).setColor(red, green, blue, alpha).setUv(water.getU0(), water.getV0() + maxV).setLight(packedLight).setOverlay(packedOverlay).setNormal(1, 1, 1);
+			consumer.addVertex(matrix, 1 - sizeFactor, height, 1 - sizeFactor).setColor(red, green, blue, alpha).setUv(water.getU1(), water.getV0() + maxV).setLight(packedLight).setOverlay(packedOverlay).setNormal(1, 1, 1);
+			consumer.addVertex(matrix, 1 - sizeFactor, height, sizeFactor).setColor(red, green, blue, alpha).setUv(water.getU1(), water.getV0() + minV).setLight(packedLight).setOverlay(packedOverlay).setNormal(1, 1, 1);
+			consumer.addVertex(matrix, sizeFactor, height, sizeFactor).setColor(red, green, blue, alpha).setUv(water.getU0(), water.getV0() + minV).setLight(packedLight).setOverlay(packedOverlay).setNormal(1, 1, 1);
 
 			poseStack.popPose();
 		}

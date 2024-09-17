@@ -12,19 +12,15 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.IntStream;
 
-public class BrewingCauldronRecipe implements Recipe<Container> {
+public class BrewingCauldronRecipe implements Recipe<RecipeInput> {
 
 
 	private final boolean usePotionMergingRules;
@@ -76,31 +72,31 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public boolean matches(@NotNull Container container, @NotNull Level level) {
+	public boolean matches(@NotNull RecipeInput recipeInput, @NotNull Level level) {
 		if (level.isClientSide()) {
 			return false;
 		}
 
 		if (isOrdered) {
-			//For each ingredient in ingredients, there is an item in the container that matches the ingredient at the same index
-			if (container.getContainerSize() != ingredients.size()) {
+			//For each ingredient in ingredients, there is an item in the recipeInput that matches the ingredient at the same index
+			if (recipeInput.size() != ingredients.size()) {
 				return false;
 			}
-			return IntStream.range(0, ingredients.size()).allMatch(i -> ingredients.get(i).test(container.getItem(i)));
+			return IntStream.range(0, ingredients.size()).allMatch(i -> ingredients.get(i).test(recipeInput.getItem(i)));
 		} else {
-			//For each ingredient, there is at lease one item in the container that matches the ingredient
-			if (container.getContainerSize() != ingredients.size()) {
+			//For each ingredient, there is at lease one item in the recipeInput that matches the ingredient
+			if (recipeInput.size() != ingredients.size()) {
 				return false;
 			}
-			return ingredients.stream().allMatch(ingredient -> IntStream.range(0, container.getContainerSize())
-					.anyMatch(i -> ingredient.test(container.getItem(i))));
+			return ingredients.stream().allMatch(ingredient -> IntStream.range(0, recipeInput.size())
+					.anyMatch(i -> ingredient.test(recipeInput.getItem(i))));
 		}
 	}
 
 
 
 	@Override
-	public @NotNull ItemStack assemble(@NotNull Container var1, HolderLookup.@NotNull Provider provider) {
+	public @NotNull ItemStack assemble(@NotNull RecipeInput var1, HolderLookup.@NotNull Provider provider) {
 		return output.copy();
 	}
 

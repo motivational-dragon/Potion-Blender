@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.function.BiConsumer;
 
 public class PotionBlenderCriterionTrigger {
-	public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "cauldron_explosion");
+	public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "cauldron_explosion");
 	public static final CauldronExplosionTrigger BLEW_CAULDRON = new CauldronExplosionTrigger();
 
 	public static void register(BiConsumer<CriterionTrigger<?>, ResourceLocation> r){

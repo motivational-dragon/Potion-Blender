@@ -36,7 +36,7 @@ public class PotionBlenderBlock {
 
 
 	public static void registerBlock(BiConsumer<Block, ResourceLocation> r) {
-		r.accept(BREWING_CAULDRON_BLOCK, new ResourceLocation(Constants.MOD_ID, "brewing_cauldron"));
+		r.accept(BREWING_CAULDRON_BLOCK,  ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "brewing_cauldron"));
 	}
 
 	public static void registerBlockItem(BiConsumer<Item, ResourceLocation> r) {

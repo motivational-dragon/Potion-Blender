@@ -10,6 +10,7 @@ import mod.motivationaldragon.potionblender.config.PotionBlenderConfig;
 import mod.motivationaldragon.potionblender.datatype.PotionBlender;
 import mod.motivationaldragon.potionblender.platform.Service;
 import mod.motivationaldragon.potionblender.recipes.BrewingCauldronRecipe;
+import mod.motivationaldragon.potionblender.recipes.MultipleInputRecipe;
 import mod.motivationaldragon.potionblender.utils.ModUtils;
 import mod.motivationaldragon.potionblender.utils.PotionEffectMerger;
 import mod.motivationaldragon.potionblender.utils.PotionType;
@@ -39,6 +40,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -97,7 +99,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 	/**
 	 * Quick check for the main thread
 	 */
-	private final RecipeManager.CachedCheck<Container, BrewingCauldronRecipe> quickCheck;
+	private final RecipeManager.CachedCheck<RecipeInput, BrewingCauldronRecipe> quickCheck;
 
 
 	private int waterColor = Constants.WATER_TINT;
@@ -220,7 +222,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 				this.inventory.stream()
 						.filter(itemStack -> !itemStack.is(Items.AIR))
 						.toArray(ItemStack[]::new));
-		return quickCheck.getRecipeFor(container, level).map(RecipeHolder::value);
+		return quickCheck.getRecipeFor(new MultipleInputRecipe(container),level).map(RecipeHolder::value);
 	}
 
 
