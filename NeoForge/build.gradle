@@ -1,48 +1,47 @@
-
 plugins {
-    id 'java-library'
-    id 'idea'
-    id 'net.neoforged.gradle.userdev' version '7.0.142'
     id 'multiloader-loader'
+    id 'net.neoforged.moddev'
 }
+
 
 
 tasks.withType(JavaExec) {
     enableAssertions = true
 }
 
-def at = file('src/main/resources/META-INF/accesstransformer.cfg')
-if (at.exists()) {
-    minecraft.accessTransformers.file at
-}
-
-archivesBaseName = "${mod_name}-${minecraft_version}-NEOFORGE"
-if (System.getenv().RELEASE_MODE == null) {
-    archivesBaseName += '-SNAPSHOT'
-}
-
+neoForge {
+    version = neoforge_version
+    // Automatically enable neoforge AccessTransformers if the file exists
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.add(at.absolutePath)
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
     runs {
         configureEach {
-            modSource project.sourceSets.main
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
         }
         client {
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            client()
+        }
+        data {
+            data()
         }
         server {
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-            programArgument '--nogui'
-        }
-
-        gameTestServer {
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        data {
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            server()
         }
     }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
 dependencies {
-    implementation "net.neoforged:neoforge:${neoforge_version}"
     //Jei
     compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}")
     // at runtime, use the full JEI jar for NeoForge
