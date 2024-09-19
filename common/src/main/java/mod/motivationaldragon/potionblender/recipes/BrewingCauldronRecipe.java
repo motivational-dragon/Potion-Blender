@@ -14,13 +14,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.IntStream;
 
-public class BrewingCauldronRecipe implements Recipe<RecipeInput> {
+public class BrewingCauldronRecipe implements Recipe<MultipleInputRecipe> {
 
 
 	private final boolean usePotionMergingRules;
@@ -72,7 +75,7 @@ public class BrewingCauldronRecipe implements Recipe<RecipeInput> {
 	}
 
 	@Override
-	public boolean matches(@NotNull RecipeInput recipeInput, @NotNull Level level) {
+	public boolean matches(@NotNull MultipleInputRecipe recipeInput, @NotNull Level level) {
 		if (level.isClientSide()) {
 			return false;
 		}
@@ -96,7 +99,7 @@ public class BrewingCauldronRecipe implements Recipe<RecipeInput> {
 
 
 	@Override
-	public @NotNull ItemStack assemble(@NotNull RecipeInput var1, HolderLookup.@NotNull Provider provider) {
+	public @NotNull ItemStack assemble(@NotNull MultipleInputRecipe var1, HolderLookup.@NotNull Provider provider) {
 		return output.copy();
 	}
 

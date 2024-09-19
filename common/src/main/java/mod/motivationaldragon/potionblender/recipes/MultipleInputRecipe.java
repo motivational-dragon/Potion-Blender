@@ -21,4 +21,6 @@ public record MultipleInputRecipe(Container inv) implements RecipeInput {
 	public boolean isEmpty() {
 		return inv.isEmpty();
 	}
+
+
 }

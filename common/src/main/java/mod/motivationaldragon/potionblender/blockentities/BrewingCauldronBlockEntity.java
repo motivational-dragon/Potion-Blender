@@ -40,7 +40,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -99,7 +98,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 	/**
 	 * Quick check for the main thread
 	 */
-	private final RecipeManager.CachedCheck<RecipeInput, BrewingCauldronRecipe> quickCheck;
+	private final RecipeManager.CachedCheck<MultipleInputRecipe, BrewingCauldronRecipe> quickCheck;
 
 
 	private int waterColor = Constants.WATER_TINT;
@@ -191,7 +190,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity {
 
 			addItemToCauldron(itemEntity);
 
-			//Start brewing if a recipe is present and re
+			//Start brewing if a recipe is present
 			brewIfRecipeIsPresent();
 			itemEntity.remove(Entity.RemovalReason.DISCARDED);
 
