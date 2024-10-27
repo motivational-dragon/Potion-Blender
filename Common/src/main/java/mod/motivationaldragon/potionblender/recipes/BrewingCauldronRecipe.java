@@ -158,7 +158,7 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 			}
 			ItemStack output = ShapedRecipe.itemStackFromJson(jsonObject.getAsJsonObject("output"));
 
-			return new BrewingCauldronRecipe(resourceLocation, brewingTime, usePotionMergingRules, color, isOrdered, 0, ingredients, output);
+			return new BrewingCauldronRecipe(resourceLocation, brewingTime, usePotionMergingRules, color, isOrdered, 1, ingredients, output);
 		}
 
 		@Override

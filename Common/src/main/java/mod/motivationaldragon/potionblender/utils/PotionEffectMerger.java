@@ -1,5 +1,6 @@
 package mod.motivationaldragon.potionblender.utils;
 
+import mod.motivationaldragon.potionblender.Constants;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
@@ -18,6 +19,11 @@ public class PotionEffectMerger {
 	 * @param decayRate This is the inversely proportional gain. First added potion has 1/2 the duration, 2nd 1/3, 3rd 1/4
 	 */
 	public static List<MobEffectInstance> mergeCombinableEffects(List<MobEffectInstance> effectInstances, double decayRate) {
+
+		if(decayRate == 0){
+			decayRate = 1;
+			Constants.LOG.error("Decay rate was set to 0, using default value of 1 to avoid division by 0");
+		}
 
 	    Collection<MobEffect> mergedStatusEffects = new HashSet<>();
 	    List<MobEffectInstance> finalPotionStatusEffects = new ArrayList<>(effectInstances);
