@@ -74,21 +74,16 @@ public class BrewingCauldronRecipe implements Recipe<Container> {
 
 	@Override
 	public boolean matches(@NotNull Container container, @NotNull Level level) {
-		if (level.isClientSide()) {
-			return false;
-		}
+		if (level.isClientSide()) return false;
+		if (container.getContainerSize() != ingredients.size()) return false;
+
+
 
 		if (isOrdered) {
-			//For each ingredient in ingredients, there is an item in the container that matches the ingredient at the same index
-			if (container.getContainerSize() != ingredients.size()) {
-				return false;
-			}
+			//For each ingredient in ingredients, there is an item in the container that matches the ingredient at the same position
 			return IntStream.range(0, ingredients.size()).allMatch(i -> ingredients.get(i).test(container.getItem(i)));
 		} else {
-			//For each ingredient, there is at lease one item in the container that matches the ingredient
-			if (container.getContainerSize() != ingredients.size()) {
-				return false;
-			}
+			//For each ingredient, there is at lease one item in the recipe that matches the ingredient
 			return ingredients.stream().allMatch(ingredient -> IntStream.range(0, container.getContainerSize())
 					.anyMatch(i -> ingredient.test(container.getItem(i))));
 		}
